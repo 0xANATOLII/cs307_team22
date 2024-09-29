@@ -6,7 +6,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
-    padding: 20,
+    padding: 40,
   },
   logo: {
     width: 150,
@@ -19,6 +19,7 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
     marginBottom: 30,
+    zIndex: -1,
   },
   input: {
     width: '80%',
@@ -38,6 +39,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     borderRadius: 5,
     marginVertical: 10,
+    zIndex: 1,
   },
   buttonText: {
     color: 'white',
