@@ -21,6 +21,12 @@ export default StyleSheet.create({
     marginBottom: 30,
     zIndex: -1,
   },
+  text: {
+    fontSize: 14,
+    color: 'black',
+    marginBottom: 30,
+    zIndex: -1,
+  },
   input: {
     width: '80%',
     height: 50,
