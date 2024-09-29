@@ -1,6 +1,7 @@
 // screens/RegistrationScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable } from 'react-native';
+import styles from '../styles'; 
 
 export default function RegistrationScreen() {
   const [username, setUsername] = useState('');
@@ -40,27 +41,16 @@ export default function RegistrationScreen() {
         onChangeText={setConfirmPassword}
         secureTextEntry
       />
-      <Button title="Register" onPress={handleRegister} />
+      <Pressable 
+        onPress={handleRegister}
+        style={({ pressed }) => [
+          styles.button,
+          pressed && { backgroundColor: '#555' } // Change background color when pressed
+        ]}
+      >
+        <Text style={styles.buttonText}>Register</Text>
+      </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-  },
-});

@@ -1,31 +1,34 @@
 // screens/HomePage.js
 import React from 'react';
-import { View, Button, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
+import styles from '../styles'; 
 
 export default function HomePage({ navigation }) {
   return (
     <View style={styles.container}>
-      <Button 
-        title="Login" 
-        onPress={() => navigation.navigate('Login')}
-      />
-      <Button 
-        title="Register" 
-        onPress={() => navigation.navigate('Registration')}
-        style={styles.button}
-      />
+      <View style={styles.button}>
+        <Pressable 
+          title="Login" 
+          onPress={() => navigation.navigate('Login')}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && { backgroundColor: '#555' } // Change background color when pressed
+          ]}
+        >
+          <Text style={styles.buttonText}>Login</Text>
+        </Pressable>
+      </View>
+      <View style={styles.button}>
+      <Pressable
+          onPress={() => navigation.navigate('Registration')}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && { backgroundColor: '#555' }
+          ]}
+        >
+          <Text style={styles.buttonText}>Register</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  button: {
-    marginVertical: 10,
-  },
-});
