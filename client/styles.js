@@ -19,6 +19,13 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
     marginBottom: 30,
+    zIndex: -1,
+  },
+  text: {
+    fontSize: 14,
+    color: 'black',
+    marginBottom: 30,
+    zIndex: -1,
   },
   input: {
     width: '80%',
@@ -38,6 +45,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     borderRadius: 5,
     marginVertical: 10,
+    zIndex: 1,
   },
   buttonText: {
     color: 'white',

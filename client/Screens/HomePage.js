@@ -1,22 +1,47 @@
 // screens/HomePage.js
-import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Pressable, Image, ScrollView } from 'react-native';
 import styles from '../styles'; 
 
 export default function HomePage({ navigation }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = () => {
+    // Basic form validation can go here
+    console.log("Logging in with:", username, password);
+  };
+
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>BeBoiler</Text>
+      <Image 
+        source={require('../assets/purduepete.png')}
+        style={styles.logo}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
       <View style={styles.button}>
-        <Pressable 
-          title="Login" 
-          onPress={() => navigation.navigate('Login')}
-          style={({ pressed }) => [
-            styles.button,
-            pressed && { backgroundColor: '#555' } // Change background color when pressed
-          ]}
-        >
-          <Text style={styles.buttonText}>Login</Text>
-        </Pressable>
+      <Pressable 
+        onPress={handleLogin}
+        style={({ pressed }) => [
+          styles.button,
+          pressed && { backgroundColor: '#555' }
+        ]}
+      >
+        <Text style={styles.buttonText}>Login</Text>
+      </Pressable>
       </View>
       <View style={styles.button}>
       <Pressable
@@ -27,6 +52,17 @@ export default function HomePage({ navigation }) {
           ]}
         >
           <Text style={styles.buttonText}>Register</Text>
+        </Pressable>
+      </View>
+      <View style={styles.button}>
+        <Pressable
+          onPress={() => navigation.navigate('Forgot Password')}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && { backgroundColor: '#555' }
+          ]}
+        >
+          <Text style={styles.buttonText}>Forgot Password?</Text>
         </Pressable>
       </View>
     </View>
