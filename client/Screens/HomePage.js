@@ -6,10 +6,39 @@ import styles from '../styles';
 export default function HomePage({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Basic form validation can go here
     console.log("Logging in with:", username, password);
+    try {
+      const response = await fetch('http://localhost:4000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log(data)
+        if (data.status === 'error') {
+          setErrorMessage(data.message);
+        } else {
+          setErrorMessage('');
+          //nav to dash board
+        }
+        
+      }
+    } catch (error) {
+      console.error('error logging in', error);
+      setErrorMessage('Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -32,6 +61,7 @@ export default function HomePage({ navigation }) {
         onChangeText={setPassword}
         secureTextEntry
       />
+      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
       <View style={styles.button}>
       <Pressable 
         onPress={handleLogin}
