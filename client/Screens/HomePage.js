@@ -10,6 +10,8 @@ export default function HomePage({ navigation }) {
   const handleLogin = () => {
     // Basic form validation can go here
     console.log("Logging in with:", username, password);
+    //Temporary navigation to profile screen (used to view UI)
+    navigation.navigate('Profile')
   };
 
   return (
@@ -44,7 +46,7 @@ export default function HomePage({ navigation }) {
       </Pressable>
       </View>
       <View style={styles.button}>
-      <Pressable
+        <Pressable
           onPress={() => navigation.navigate('Registration')}
           style={({ pressed }) => [
             styles.button,
