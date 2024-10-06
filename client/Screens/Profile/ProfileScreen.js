@@ -1,25 +1,33 @@
 //screens/ProfileScreen.js
-import React from 'react';
-import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { Modal, View, Text, Image, TextInput, ScrollView, StyleSheet, Button } from 'react-native';
+import ModalPopup from './Popup';
 
 export default function ProfileScreen({ navigation }) {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  //const [username, setUsername] = useState('');
+  let profileInfo = new Object();
+  profileInfo.username = "JohnDoe123"
+  profileInfo.pfp = require('./purduepete.png');
+  profileInfo.desc = "Hi there! I'm John, a passionate developer and tech enthusiast. I love creating apps and exploring new technologies. When I'm not coding, you can find me hiking or reading sci-fi novels.";
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Image
-          source={require('../assets/purduepete.png')}
+          source={profileInfo.pfp}
           style={styles.profilePhoto}
         />
-        <Text style={styles.username}>JohnDoe123</Text>
+        <Text style={styles.username}>{profileInfo.username}</Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Description</Text>
         <Text style={styles.sectionContent}>
-          Hi there! I'm John, a passionate developer and tech enthusiast. 
-          I love creating apps and exploring new technologies. 
-          When I'm not coding, you can find me hiking or reading sci-fi novels.
+          {profileInfo.desc}
         </Text>
+        <Button title="Edit Description" onPress={() => setIsModalVisible(true)} />
+        <ModalPopup editable={profileInfo.desc} visible={isModalVisible} onClose={() => setIsModalVisible(false)}></ModalPopup>
       </View>
 
       <View style={styles.section}>
