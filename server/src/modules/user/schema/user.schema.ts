@@ -26,7 +26,9 @@ country?:string
 @Prop()
 pfp?:string
 
-
+// Add the privacy field here
+@Prop({ default: false }) // Default value can be set to false
+privacy?: boolean; // Optional field
 
 }
 
