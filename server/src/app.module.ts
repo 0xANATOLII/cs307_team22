@@ -12,7 +12,8 @@ import { BadgeModule } from './modules/badge/badge.module';
 @Module({
   imports: [
     ConfigModule.forRoot({isGlobal: true, envFilePath: '.env'}),
-    MongooseModule.forRoot(process.env.MONGO_CONNECT),
+   // MongooseModule.forRoot(process.env.MONGO_CONNECT), what does this mean??
+    MongooseModule.forRoot('mongodb://localhost:27017/testing-db'),
     UserModule,
     BadgeModule,
     MonumentModule,
