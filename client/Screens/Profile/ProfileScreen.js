@@ -1,22 +1,22 @@
 //screens/ProfileScreen.js
 import React, { useState } from 'react';
-import { Modal, View, Text, Image, TextInput, ScrollView, StyleSheet, Button, Switch } from 'react-native';
+import { Modal, View, Text, Image, ScrollView, StyleSheet, Button, Switch } from 'react-native';
 import ModalPopup from './Popup';
 
 export default function ProfileScreen({ navigation }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isPrivate, setIsPrivate] = useState(false);  // Added state for privacy
+  const [isPrivate, setIsPrivate] = useState(false);  // State for privacy toggle
 
-  //const [username, setUsername] = useState('');
-  let profileInfo = new Object();
-  profileInfo.username = "JohnDoe123"
-  profileInfo.pfp = require('./purduepete.png');
-  profileInfo.desc = "Hi there! I'm John, a passionate developer and tech enthusiast. I love creating apps and exploring new technologies. When I'm not coding, you can find me hiking or reading sci-fi novels.";
+  let profileInfo = {
+    username: "JohnDoe123",
+    pfp: require('./purduepete.png'),
+    desc: "Hi there! I'm John, a passionate developer and tech enthusiast. I love creating apps and exploring new technologies. When I'm not coding, you can find me hiking or reading sci-fi novels.",
+  };
 
   const togglePrivacy = () => {
-    setIsPrivate(!isPrivate);
-    console.log('Profile is now', isPrivate ? 'Private' : 'Public');
-    // add API call to save the privacy setting later *todo*
+    setIsPrivate(previousState => !previousState);
+    console.log('Profile is now', !isPrivate ? 'Private' : 'Public');
+    // *todo* add API call to save the privacy setting later
   };
 
   return (
@@ -35,10 +35,9 @@ export default function ProfileScreen({ navigation }) {
           {profileInfo.desc}
         </Text>
         <Button title="Edit Description" onPress={() => setIsModalVisible(true)} />
-        <ModalPopup editable={profileInfo.desc} visible={isModalVisible} onClose={() => setIsModalVisible(false)}></ModalPopup>
+        <ModalPopup editable={profileInfo.desc} visible={isModalVisible} onClose={() => setIsModalVisible(false)} />
       </View>
 
-      {/* Privacy todo*/}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Privacy Settings</Text>
         <View style={styles.privacyToggle}>
@@ -52,7 +51,6 @@ export default function ProfileScreen({ navigation }) {
           />
         </View>
       </View>
-
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Achievements</Text>
@@ -125,7 +123,8 @@ const styles = StyleSheet.create({
   },
   privacyToggle: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
   },
 });
