@@ -27,6 +27,12 @@ export default StyleSheet.create({
     marginBottom: 30,
     zIndex: -1,
   },
+  errorText: {
+    color: 'red',          
+    fontSize: 16,          
+    marginVertical: 10,    
+    textAlign: 'center',
+  },
   input: {
     width: '80%',
     height: 50,
