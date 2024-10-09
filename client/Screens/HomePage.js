@@ -26,7 +26,7 @@ export default function HomePage({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        console.log(data)
+        console.log(data.status)
         if (data.status === 'error') {
           setErrorMessage(data.message);
         } else {
