@@ -32,7 +32,7 @@ export default function RegistrationScreen() {
         email: email,
         password: password,
       };
-    const response = await fetch('https://0fc9-128-210-106-68.ngrok-free.app/user/signup', {
+    const response = await fetch('https://0fc9-128-210-106-68.ngrok-free.app/user/signup', { // this http may not be valid for you, run ngrok http 3000 to get new url
       method: 'POST',  
       headers: {
         'Content-Type': 'application/json',  
