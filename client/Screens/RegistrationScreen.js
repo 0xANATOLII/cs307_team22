@@ -25,8 +25,39 @@ export default function RegistrationScreen() {
       alert("Invalid email format!");
       return;
     }
+    try {
+      // send payload to backend
+      const payload = {
+        username: username,
+        email: email,
+        password: password,
+      };
+    const response = await fetch('https://0fc9-128-210-106-68.ngrok-free.app/user/signup', { // this http may not be valid for you, run ngrok http 3000 to get new url
+      method: 'POST',  
+      headers: {
+        'Content-Type': 'application/json',  
+      },
+      body: JSON.stringify(payload),  // Convert the payload object to a JSON string
+    });
+
+    const data = await response.json();  // Parse the response as JSON
+
+    // Check if the registration was successful
+    if (response.ok) {
+      alert('Registration Successful');
+      // Redirect or navigate to another screen (e.g., Login screen)
+      // navigation.navigate('Login');
+    } else {
+      // Handle the error (data may contain error messages from the server)
+      alert('Registration Failed: ' + data.message || 'Unknown error');
+    }
+  } catch (error) {
+    // Handle any network or other errors
+    alert('Registration Failed: ' + error.message);
+  }
+    
     // Basic form validation can go here
-    console.log("Registering with:", username, password, email);
+    // console.log("Registering with:", username, password, email);
     //try {
     //  const response = await registerUser(username, email, password);
     //  if (response.success) {
