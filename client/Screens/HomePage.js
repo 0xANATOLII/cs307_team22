@@ -31,7 +31,7 @@ export default function HomePage({ navigation }) {
           setErrorMessage(data.message);
         } else {
           setErrorMessage('');
-          //nav to dash board
+          navigation.navigate('Profile')
         }
         
       }
@@ -74,7 +74,7 @@ export default function HomePage({ navigation }) {
       </Pressable>
       </View>
       <View style={styles.button}>
-      <Pressable
+        <Pressable
           onPress={() => navigation.navigate('Registration')}
           style={({ pressed }) => [
             styles.button,
