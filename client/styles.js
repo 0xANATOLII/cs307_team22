@@ -108,4 +108,65 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
   },
+  SignoutButton: {
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  SignoutButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  SignoutCenteredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  SignoutModalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  SignoutModalTitle: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  SignoutModalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  SignoutModalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '70%',
+  },
+  SignoutButtonOutline: {
+    backgroundColor: 'white',
+    borderColor: '#2196F3',
+    borderWidth: 1,
+  },
+  SignoutButtonOutlineText: {
+    color: '#2196F3',
+  },
+  SignoutButtonFilled: {
+    backgroundColor: '#2196F3',
+  },
+  SignoutButtonFilledText: {
+    color: 'white',
+  },
 });
