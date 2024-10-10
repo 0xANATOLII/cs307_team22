@@ -80,7 +80,7 @@ export default function HomePage({ navigation }) {
       </View>
       <View style={styles.button}>
         <Pressable
-          onPress={() => navigation.navigate('Forgot Password')}
+          onPress={() => navigation.navigate('ForgotPassword')}
           style={({ pressed }) => [
             styles.button,
             pressed && { backgroundColor: '#555' }
