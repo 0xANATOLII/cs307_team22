@@ -99,15 +99,15 @@ export default function ProfileScreen({ route, navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
+      <View style={{ alignItems: 'center', marginVertical: 20 }}>
         <Image source={profileInfo.pfp} style={styles.profilePhoto} />
-        <Text style={styles.username}>{profileInfo.username}</Text>
-      </View>
-
-      <View style={styles.section}>
+        <Text style={styles.title}>{profileInfo.username}</Text>
         <Text style={styles.sectionTitle}>Description</Text>
-        <Text style={styles.sectionContent}>{profileInfo.desc}</Text>
-        <Pressable style={styles.button} onPress={() => setIsModalVisible(true)}>
+        <Text style={styles.sectionText}>{profileInfo.desc}</Text>
+        <Pressable
+          style={[styles.button, { marginTop: 10, alignSelf: 'center' }]}
+          onPress={() => setIsModalVisible(true)}
+        >
           <Text style={styles.buttonText}>Edit Description</Text>
         </Pressable>
         <ModalPopup
@@ -116,11 +116,8 @@ export default function ProfileScreen({ route, navigation }) {
           onClose={() => setIsModalVisible(false)}
           onSave={handleSaveDescription}
         />
-      </View>
-
-      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Privacy Settings</Text>
-        <View style={styles.privacyToggle}>
+        <View style={[styles.privacyToggle, { flexDirection: 'row', justifyContent: 'space-between', width: '80%' }]}>
           <Text style={styles.sectionContent}>{isPrivate ? 'Private Mode' : 'Public Mode'}</Text>
           <Switch
             trackColor={{ false: '#767577', true: '#81b0ff' }}
@@ -130,9 +127,6 @@ export default function ProfileScreen({ route, navigation }) {
             value={isPrivate}
           />
         </View>
-      </View>
-
-      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Achievements</Text>
         <View style={styles.achievementList}>
           <View style={styles.achievement}>

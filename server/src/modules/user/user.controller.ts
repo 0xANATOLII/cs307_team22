@@ -78,6 +78,11 @@ export class UserController {
       throw new BadRequestException('Email is required');
     }
 
+    const userExists = await this.userService.findByEmail(email); // Implement findByEmail in your service
+    if (!userExists) {
+      throw new NotFoundException('Email not registered');
+    }
+
     await this.userService.sendPasswordResetEmail(email);
     return { message: 'Password reset email sent if the email is registered' };
   }

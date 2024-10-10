@@ -6,11 +6,15 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
+import { MailService } from '../mail/mail.service';
+
 
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
+  private mailService: MailService,
+) {}
 
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     try {
@@ -74,6 +78,10 @@ export class UserService {
     return user;
   }
 
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.userModel.findOne({ email }).exec();
+  }
+
   async sendPasswordResetEmail(email: string): Promise<void> {
     const user = await this.userModel.findOne({ email });
     if (!user) {
@@ -94,6 +102,12 @@ export class UserService {
     // Example: Use a real email service in production
     const resetUrl = `http://localhost:8081/reset-password/${resetToken}`;
     console.log(`Reset token for ${email}: ${resetUrl}`);
+    await this.mailService.sendMail(
+      email,
+      'Password Reset Request',
+      `Please use this link to reset your password: ${resetUrl}`,
+      `<p>Please use this link to reset your password: <a href="${resetUrl}">${resetUrl}</a></p>`
+    );
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
