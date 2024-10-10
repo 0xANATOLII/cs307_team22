@@ -23,6 +23,11 @@ dob?:Date
 country?:string
 @Prop()
 description?:string
+@Prop()
+resetPasswordExpires?:Date
+@Prop()
+resetPasswordToken?:string
+
 
 //profile picture
 @Prop()

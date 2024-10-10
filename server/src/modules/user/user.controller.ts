@@ -71,6 +71,33 @@ export class UserController {
     };
   }
 
+  @Post('requestPasswordReset')
+  async requestPasswordReset(@Body() body: { email: string }) {
+    const { email } = body;
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+
+    const userExists = await this.userService.findByEmail(email); // Implement findByEmail in your service
+    if (!userExists) {
+      throw new NotFoundException('Email not registered');
+    }
+
+    await this.userService.sendPasswordResetEmail(email);
+    return { message: 'Password reset email sent if the email is registered' };
+  }
+
+  @Patch('resetPassword')
+  async resetPassword(@Body() body: { token: string; newPassword: string }) {
+    const { token, newPassword } = body;
+    if (!token || !newPassword) {
+      throw new BadRequestException('Token and new password are required');
+    }
+
+    await this.userService.resetPassword(token, newPassword);
+    return { message: 'Password has been reset successfully' };
+  }
+
   @Get()
   findAll() {
     return this.userService.findAll();

@@ -1,6 +1,6 @@
 // screens/LoginScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable } from 'react-native';
+import { View, Text, TextInput, Pressable, Alert } from 'react-native';
 import styles from '../styles'; 
 
 export default function ForgotPasswordScreen() {
@@ -18,6 +18,29 @@ export default function ForgotPasswordScreen() {
             return;
           }
         console.log("Email Recieved", email);
+        try {
+          const response = await fetch('http://localhost:3000/user/requestPasswordReset', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }),
+          });
+    
+          const data = await response.json();
+    
+          if (response.ok) {
+            console.log(response.ok);
+            console.log("Email sent", email);
+            setTimeout(() => {
+              alert("Check your email for password reset instructions.");
+          }, 0);
+          } else {
+            alert(data.message || "Failed to send reset email.");
+          }
+        } catch (error) {
+            alert("An error occurred while requesting a password reset.");
+        }
       };
   return (
     <View style={styles.container}>

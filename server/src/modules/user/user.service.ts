@@ -1,15 +1,20 @@
 import * as bcrypt from 'bcrypt';
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import * as crypto from 'crypto';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
+import { MailService } from '../mail/mail.service';
+
 
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
+  private mailService: MailService,
+) {}
 
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     try {
@@ -71,6 +76,55 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.userModel.findOne({ email }).exec();
+  }
+
+  async sendPasswordResetEmail(email: string): Promise<void> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      // Optional: Log this to avoid giving hints about user existence
+      return;
+    }
+    
+    // Generate a unique reset token and its expiration
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpires = new Date();
+    tokenExpires.setHours(tokenExpires.getHours() + 1); // Token valid for 1 hour
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = tokenExpires;
+    await user.save();
+
+    // Send email (configure your email service here)
+    // Example: Use a real email service in production
+    const resetUrl = `http://localhost:8081/reset-password/${resetToken}`;
+    console.log(`Reset token for ${email}: ${resetUrl}`);
+    await this.mailService.sendMail(
+      email,
+      'Password Reset Request',
+      `Please use this link to reset your password: ${resetUrl}`,
+      `<p>Please use this link to reset your password: <a href="${resetUrl}">${resetUrl}</a></p>`
+    );
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const user = await this.userModel.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+
+    // Hash the new password and save it
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetPasswordToken = undefined; // Clear the reset token
+    user.resetPasswordExpires = undefined;
+    await user.save();
   }
 
   async findAll(): Promise<Omit<User, 'password'>[]> {

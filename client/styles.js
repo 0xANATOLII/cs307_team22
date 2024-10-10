@@ -3,10 +3,9 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    
     alignItems: 'center',
     backgroundColor: 'white',
-    padding: 20,
   },
   logo: {
     width: 150,
@@ -18,14 +17,31 @@ export default StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: 'black',
-    marginBottom: 30,
+    marginBottom: 5,
     zIndex: -1,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'black',
+    marginTop: 20,
+    marginBottom: 5,
+    zIndex: -1,
+    textAlign: 'center',
   },
   text: {
     fontSize: 14,
     color: 'black',
     marginBottom: 30,
     zIndex: -1,
+    textAlign: 'center',
+  },
+  sectionText: {
+    fontSize: 18,
+    color: 'black',
+    marginBottom: 30,
+    zIndex: -1,
+    textAlign: 'center',
   },
   errorText: {
     color: 'red',          
@@ -70,23 +86,12 @@ export default StyleSheet.create({
     borderRadius: 75,
     marginBottom: 10,
   },
-  username: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
   section: {
     backgroundColor: '#ffffff',
     marginTop: 20,
     padding: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  sectionContent: {
-    fontSize: 16,
-    lineHeight: 24,
+    alignItems: 'center',
+    
   },
   achievementList: {
     marginTop: 10,
@@ -105,7 +110,5 @@ export default StyleSheet.create({
   privacyToggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
   },
 });
