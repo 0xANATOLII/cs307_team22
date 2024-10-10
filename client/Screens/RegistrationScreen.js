@@ -32,7 +32,7 @@ export default function RegistrationScreen() {
         email: email,
         password: password,
       };
-    const response = await fetch('https://0fc9-128-210-106-68.ngrok-free.app/user/signup', { // this http may not be valid for you, run ngrok http 3000 to get new url
+    const response = await fetch('http://localhost:3000/user/register', { // this http may not be valid for you, run ngrok http 3000 to get new url
       method: 'POST',  
       headers: {
         'Content-Type': 'application/json',  
@@ -46,7 +46,7 @@ export default function RegistrationScreen() {
     if (response.ok) {
       alert('Registration Successful');
       // Redirect or navigate to another screen (e.g., Login screen)
-      // navigation.navigate('Login');
+      navigation.navigate('Login');
     } else {
       // Handle the error (data may contain error messages from the server)
       alert('Registration Failed: ' + data.message || 'Unknown error');

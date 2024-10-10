@@ -1,41 +1,121 @@
-//screens/ProfileScreen.js
-import React, { useState } from 'react';
-import { Modal, View, Text, Image, ScrollView, StyleSheet, Button, Switch } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert } from 'react-native';
 import ModalPopup from './Popup';
+import styles from '../../styles';
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen({ route, navigation }) {
+  const { username } = route.params;
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isPrivate, setIsPrivate] = useState(false);  // State for privacy toggle
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [profileInfo, setProfileInfo] = useState({
+    username: username,
+    pfp: null,
+    desc: '',
+  });
 
-  let profileInfo = {
-    username: "JohnDoe123",
-    pfp: require('./purduepete.png'),
-    desc: "Hi there! I'm John, a passionate developer and tech enthusiast. I love creating apps and exploring new technologies. When I'm not coding, you can find me hiking or reading sci-fi novels.",
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/user/profile/${username}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setProfileInfo({
+            username: data.username,
+            pfp: data.pfp ? { uri: data.pfp } : require('./purduepete.png'),
+            desc: data.desc || '',
+          });
+          setIsPrivate(data.privacy);
+        } else {
+          Alert.alert('Error', 'Failed to load profile data.');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Unable to fetch profile data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  const handleSaveDescription = async (newDescription) => {
+    try {
+      const response = await fetch(`http://localhost:3000/user/updateDescription`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, description: newDescription }),
+      });
+
+      if (response.ok) {
+        setProfileInfo((prev) => ({ ...prev, desc: newDescription }));
+        Alert.alert('Success', 'Description updated successfully!');
+      } else {
+        Alert.alert('Error', 'Failed to update description');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while updating the description.');
+    }
   };
 
-  const togglePrivacy = () => {
-    setIsPrivate(previousState => !previousState);
-    console.log('Profile is now', !isPrivate ? 'Private' : 'Public');
-    // *todo* add API call to save the privacy setting later
+  const togglePrivacy = async () => {
+    const newPrivacySetting = !isPrivate;
+    setIsPrivate(newPrivacySetting);
+
+    try {
+      const response = await fetch('http://localhost:3000/user/updatePrivacy', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, privacy: newPrivacySetting }),
+      });
+
+      if (!response.ok) {
+        Alert.alert('Error', 'Failed to update privacy setting.');
+        setIsPrivate(!newPrivacySetting);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Could not update privacy setting.');
+      setIsPrivate(!newPrivacySetting);
+    }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <Image
-          source={profileInfo.pfp}
-          style={styles.profilePhoto}
-        />
+        <Image source={profileInfo.pfp} style={styles.profilePhoto} />
         <Text style={styles.username}>{profileInfo.username}</Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Description</Text>
-        <Text style={styles.sectionContent}>
-          {profileInfo.desc}
-        </Text>
-        <Button title="Edit Description" onPress={() => setIsModalVisible(true)} />
-        <ModalPopup editable={profileInfo.desc} visible={isModalVisible} onClose={() => setIsModalVisible(false)} />
+        <Text style={styles.sectionContent}>{profileInfo.desc}</Text>
+        <Pressable style={styles.button} onPress={() => setIsModalVisible(true)}>
+          <Text style={styles.buttonText}>Edit Description</Text>
+        </Pressable>
+        <ModalPopup
+          editable={profileInfo.desc}
+          visible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+          onSave={handleSaveDescription}
+        />
       </View>
 
       <View style={styles.section}>
@@ -72,59 +152,3 @@ export default function ProfileScreen({ navigation }) {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#ffffff',
-  },
-  profilePhoto: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 10,
-  },
-  username: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  section: {
-    backgroundColor: '#ffffff',
-    marginTop: 20,
-    padding: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  sectionContent: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  achievementList: {
-    marginTop: 10,
-  },
-  achievement: {
-    marginBottom: 15,
-  },
-  achievementTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  achievementDesc: {
-    fontSize: 14,
-    color: '#666',
-  },
-  privacyToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-  },
-});

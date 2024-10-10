@@ -64,4 +64,48 @@ export default StyleSheet.create({
     marginTop: 10,
     textDecorationLine: 'underline',
   },
+  profilePhoto: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    marginBottom: 10,
+  },
+  username: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  section: {
+    backgroundColor: '#ffffff',
+    marginTop: 20,
+    padding: 15,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  sectionContent: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  achievementList: {
+    marginTop: 10,
+  },
+  achievement: {
+    marginBottom: 15,
+  },
+  achievementTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  achievementDesc: {
+    fontSize: 14,
+    color: '#666',
+  },
+  privacyToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+  },
 });

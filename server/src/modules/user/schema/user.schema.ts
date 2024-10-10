@@ -6,11 +6,11 @@ export type UserDocument = User & Document
 
 @Schema()
 export class User {
-@Prop()
+@Prop({ required: true, unique: true }) // Ensure unique usernames
 username:string
-@Prop()
+@Prop({ required: true, unique: true }) // Ensure unique emails
 email:string
-@Prop()
+@Prop({ required: true })
 password:string
 
 @Prop()
@@ -21,8 +21,10 @@ surname?:string
 dob?:Date
 @Prop()
 country?:string
+@Prop()
+description?:string
 
-//profile picute
+//profile picture
 @Prop()
 pfp?:string
 

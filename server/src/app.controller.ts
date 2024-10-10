@@ -9,10 +9,4 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-
-  @Post('login')
-  login(@Body() body: { username: string; password: string }) {
-    const { username, password } = body;
-    return this.appService.validateUser(username, password);
-  }
 }

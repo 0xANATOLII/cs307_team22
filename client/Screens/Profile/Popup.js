@@ -1,54 +1,60 @@
 import React, { useState } from 'react';
-import {View,Text,TextInput,Modal,TouchableOpacity,StyleSheet,Dimensions,Pressable,} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Pressable,
+} from 'react-native';
 
 const { height, width } = Dimensions.get('window');
 
-export default function ModalPopup({editable, visible, onClose})  {
-  const [text, setText] = useState('');
+export default function ModalPopup({ editable, visible, onClose, onSave }) {
+  const [text, setText] = useState(editable || '');
 
   const handleSave = () => {
-    editable = text; //Check if this changes properly
-    console.log('Saved text:', text);
+    onSave(text); // Send the updated text back to ProfileScreen
+    onClose(); // Close the modal
   };
 
   return (
-      <Modal
+    <Modal
       animationType="fade"
       transparent={true}
       visible={visible}
       onRequestClose={onClose}
-      >
-        <View style={styles.centeredView}>
-            <Pressable
-            style={styles.blurredBackground}
-            onPress={onClose}
-            />
-            <View style={styles.modalView}>
-            <Text style={styles.modalText}>This is the popup content!</Text>
-            <TextInput
-                style={styles.input}
-                onChangeText={newText => setText(newText)}
-                value={text}
-                placeholder={editable}
-                placeholderTextColor="#999"
-            />
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                style={[styles.button, styles.closeButton]}
-                onPress={onClose}
-                >
-                <Text style={styles.buttonText}>Close</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                style={[styles.button, styles.saveButton]}
-                onPress={handleSave}
-                >
-                <Text style={styles.buttonText}>Save Changes</Text>
-                </TouchableOpacity>
-            </View>
-            </View>
+    >
+      <View style={styles.centeredView}>
+        <Pressable style={styles.blurredBackground} onPress={onClose} />
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>Edit Description</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setText}
+            value={text}
+            placeholder="Enter new description"
+            placeholderTextColor="#999"
+          />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.closeButton]}
+              onPress={onClose}
+            >
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.saveButton]}
+              onPress={handleSave}
+            >
+              <Text style={styles.buttonText}>Save Changes</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </Modal>
+      </View>
+    </Modal>
   );
 }
 
