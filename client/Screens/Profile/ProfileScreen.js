@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert } from 'react-native';
+import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert } from 'react-native';
 import ModalPopup from './Popup';
 import styles from '../../styles';
 
@@ -8,6 +8,7 @@ export default function ProfileScreen({ route, navigation }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
   const [profileInfo, setProfileInfo] = useState({
     username: username,
     pfp: null,
@@ -89,6 +90,29 @@ export default function ProfileScreen({ route, navigation }) {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/user/signout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username }),
+      });
+
+      if (response.ok) {
+        navigation.navigate('Home');
+      } else {
+        const errorData = await response.json();
+        Alert.alert('Error', errorData.message || 'Failed to sign out. Please try again.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while signing out. Please check your connection and try again.');
+    } finally {
+      setIsSignOutDialogOpen(false);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -143,6 +167,41 @@ export default function ProfileScreen({ route, navigation }) {
           </View>
         </View>
       </View>
+
+      <Pressable
+        style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]}
+        onPress={() => setIsSignOutDialogOpen(true)}
+      >
+        <Text style={[styles.buttonText, { color: 'white' }]}>Sign Out</Text>
+      </Pressable>
+
+      <Modal
+        animationType="none"
+        transparent={true}
+        visible={isSignOutDialogOpen}
+        onRequestClose={() => setIsSignOutDialogOpen(false)}
+      >
+        <View style={styles.SignoutCenteredView}>
+          <View style={styles.SignoutModalView}>
+            <Text style={styles.SignoutModalTitle}>Are you sure you want to sign out?</Text>
+            <Text style={styles.SignoutModalText}>This action will log you out of your account.</Text>
+            <View style={styles.SignoutModalButtonContainer}>
+              <Pressable
+                style={[styles.SignoutButton, styles.SignoutButtonOutline]}
+                onPress={() => setIsSignOutDialogOpen(false)}
+              >
+                <Text style={styles.SignoutButtonOutlineText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.SignoutButton, styles.SignoutButtonFilled]}
+                onPress={handleSignOut}
+              >
+                <Text style={styles.SignoutButtonFilledText}>Sign Out</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
