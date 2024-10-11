@@ -385,8 +385,65 @@ export default function ProfileScreen({ route, navigation }) {
             </View>
           </View>
         </Modal>
+  
+        {/* Delete Account Button */}
+        <Pressable
+          style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]} // Red background
+          onPress={handleDeleteAccount} // Call the delete function
+        >
+          <Text style={[styles.buttonText, { color: 'white' }]}>Delete Account</Text> {/* White text */}
+        </Pressable>
       </ScrollView>
     );
   }
+  
+  
+
+  // Function to handle account deletion
+  const handleDeleteAccount = async () => {
+    const confirmDelete = () => {
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Confirm Deletion",
+          "Are you sure you want to delete your account? This action cannot be undone.",
+          [
+            {
+              text: "Cancel",
+              onPress: () => resolve(false),
+              style: "cancel",
+            },
+            {
+              text: "Delete",
+              onPress: () => resolve(true),
+            },
+          ],
+          { cancelable: false }
+        );
+      });
+    };
+
+    const shouldDelete = await confirmDelete();
+    if (shouldDelete) {
+      try {
+        const response = await fetch('http://localhost:3000/user/delete', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            // Include any necessary authentication headers here
+          },
+        });
+
+        if (response.ok) {
+          Alert.alert('Success', 'Account deleted successfully');
+          navigation.navigate('Login'); // Navigate to the login page
+        } else {
+          const data = await response.json();
+          Alert.alert('Error', 'Failed to delete account: ' + (data.message || 'Unknown error'));
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Error deleting account: ' + error.message);
+      }
+    }
+  };
   
   
