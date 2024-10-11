@@ -172,4 +172,76 @@ export default StyleSheet.create({
   SignoutButtonFilledText: {
     color: 'white',
   },
+
+  // Style for the modal's semi-transparent background
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent black background
+  },
+  
+  // Style for the modal container
+  modalContainer: {
+    width: '80%',
+    backgroundColor: 'white', // Modal content background
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000', // Add shadow for a more prominent appearance
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5, // Android shadow effect
+  },
+  
+  // Style for the modal title
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+
+  // Style for the image preview
+  modalImagePreview: {
+    width: 150,
+    height: 150,
+    borderRadius: 75, // Circular image preview
+    marginBottom: 20,
+  },
+  
+  // Style for the buttons container
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  
+  // General button style
+  modalButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  
+  // Cancel button specific style
+  modalCancelButton: {
+    backgroundColor: '#d9534f', // Red for cancel button
+  },
+  
+  // Confirm button specific style
+  modalConfirmButton: {
+    backgroundColor: '#5cb85c', // Green for confirm button
+  },
+  
+  // Text style for the buttons
+  modalButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  
 });
