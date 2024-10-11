@@ -2,6 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedExceptio
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { TogglePrivacyDto } from './dto/toggle-privacy.dto'; // Updated import path
+// Remove Multer imports
+// import { FileInterceptor } from '@nestjs/platform-express';
+// import { File } from 'multer'; // Remove this import
 
 @Controller('user')
 export class UserController {
@@ -59,15 +63,15 @@ export class UserController {
     return { message: 'Description updated successfully', description: updatedUser.description };
   }
 
-   @Patch('updatePrivacy/:username')
+  @Patch('updatePrivacy/:username')
   async updatePrivacy(
     @Param('username') username: string,
-    @Body() body: { privacy: boolean },
+    @Body() body: TogglePrivacyDto, // Ensure body is of type TogglePrivacyDto
   ) {
-    const updatedUser = await this.userService.updatePrivacy(username, body.privacy);
+    const updatedUser = await this.userService.updatePrivacy(username, body.isPrivate); // Change body.privacy to body.isPrivate
     return {
       message: 'Privacy setting updated',
-      privacy: updatedUser.privacy,
+      updatedPrivacy: body.isPrivate, // Change to body.isPrivate
     };
   }
 
@@ -78,7 +82,7 @@ export class UserController {
       throw new BadRequestException('Email is required');
     }
 
-    const userExists = await this.userService.findByEmail(email); // Implement findByEmail in your service
+    const userExists = await this.userService.findByEmail(email); // Implement findByEmail service
     if (!userExists) {
       throw new NotFoundException('Email not registered');
     }
