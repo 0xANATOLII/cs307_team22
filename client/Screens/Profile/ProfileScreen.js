@@ -97,7 +97,7 @@ export default function ProfileScreen({ route, navigation }) {
 
     try {
       const response = await fetch(`http://localhost:3000/user/updateUsername`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
