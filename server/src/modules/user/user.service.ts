@@ -7,8 +7,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
 import { MailService } from '../mail/mail.service';
-
-
+// Remove Multer import
+// import { Multer } from 'multer'; 
 
 @Injectable()
 export class UserService {
@@ -53,14 +53,17 @@ export class UserService {
   }
 
   async updatePrivacy(username: string, privacy: boolean): Promise<Omit<User, 'password'>> {
+    console.log(`Updating privacy for user: ${username} to ${privacy}`); // Debugging line
     const user = await this.userModel.findOneAndUpdate(
       { username },
       { privacy },
-      { new: true },
+      { new: true }, // Return the updated document
     ).exec();
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
+    console.log(`Updated user: ${user}`); // Debugging line
     return this._getUserDataWithoutPassword(user);
   }
 
@@ -154,6 +157,13 @@ export class UserService {
     const result = await this.userModel.findByIdAndDelete(id).exec();
     if (!result) {
       throw new NotFoundException(`User with ID ${id} not found`);
+    }
+  }
+
+  async deleteAccount(userId: string): Promise<void> {
+    const result = await this.userModel.findByIdAndDelete(userId).exec();
+    if (!result) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
   }
 

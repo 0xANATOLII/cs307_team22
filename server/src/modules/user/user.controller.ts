@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException, BadRequestException, NotFoundException, Request } from '@nestjs/common'; // Import Request from @nestjs/common
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Request as ExpressRequest } from 'express'; // Import Express Request
+
+// Extend the Request interface
+interface CustomRequest extends ExpressRequest {
+  user: {
+    id: string; // Adjust the type as necessary
+  };
+}
 
 @Controller('user')
 export class UserController {
@@ -116,5 +124,12 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
+  }
+
+  @Delete('delete')
+  async deleteAccount(@Request() req: CustomRequest) { // Use the extended type
+    const userId = req.user.id; // Now this will work
+    await this.userService.deleteAccount(userId);
+    return { message: 'Account deleted successfully' };
   }
 }
