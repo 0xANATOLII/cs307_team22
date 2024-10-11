@@ -5,7 +5,7 @@ import styles from '../../styles';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // Import the image picker
 
 export default function ProfileScreen({ route, navigation }) {
-  const { username } = "Example"//route.params;
+  const { username } = route.params;
   const [isUsernameModalVisible, setIsUsernameModalVisible] = useState(false);
   const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
