@@ -8,6 +8,8 @@ export default function HomePage({ navigation }) {
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
+    navigation.navigate('Profile');
+    /*
     if (!username || !password) {
       alert('Please enter both username and password');
       return;
@@ -34,6 +36,7 @@ export default function HomePage({ navigation }) {
     } catch (error) {
       alert('Login Failed: ' + error.message);
     }
+    */
   };
 
   return (

@@ -5,8 +5,9 @@ import styles from '../../styles';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // Import the image picker
 
 export default function ProfileScreen({ route, navigation }) {
-  const { username } = route.params;
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const { username } = "Example"//route.params;
+  const [isUsernameModalVisible, setIsUsernameModalVisible] = useState(false);
+  const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
@@ -67,6 +68,49 @@ export default function ProfileScreen({ route, navigation }) {
       }
     } catch (error) {
       Alert.alert('Error', 'An error occurred while updating the description.');
+    }
+  };
+
+  const handleSaveUsername = async (newUsername) => {
+    const confirmChange = () => {
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Confirm Change",
+          "You can only change your username thrice, are you sure you want to proceed?",
+          [
+            {
+              text: "Cancel",
+              onPress: () => resolve(false), // Resolve the promise with false
+              style: "cancel",
+            },
+            {
+              text: "OK",
+              onPress: () => resolve(true), // Resolve the promise with true
+            },
+          ],
+          { cancelable: false }
+        );
+      });
+    };
+  
+    await confirmChange();
+
+    try {
+      const response = await fetch(`http://localhost:3000/user/updateUsername`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, username: newUsername}),
+      });
+      if (response.ok) {
+        setProfileInfo((prev) => ({ ...prev, username: newUsername }));
+        Alert.alert('Success', 'Username updated successfully!');
+      } else {
+        Alert.alert('Error', 'Failed to update username');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while updating the username.');
     }
   };
 
@@ -221,21 +265,35 @@ export default function ProfileScreen({ route, navigation }) {
   
           {/* Username */}
           <Text style={styles.title}>{profileInfo.username}</Text>
+          <Pressable
+            style={[styles.button, { marginTop: 10, alignSelf: 'center' }]}
+            onPress={() => setIsUsernameModalVisible(true)}
+          >
+            <Text style={styles.buttonText}>Edit Username</Text>
+          </Pressable>
+          <ModalPopup
+            editable={profileInfo.username}
+            visible={isUsernameModalVisible}
+            onClose={() => setIsUsernameModalVisible(false)}
+            onSave={handleSaveUsername}
+            modifyField={"Username"}
+          />
   
           {/* Description Section */}
           <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.sectionText}>{profileInfo.desc}</Text>
           <Pressable
             style={[styles.button, { marginTop: 10, alignSelf: 'center' }]}
-            onPress={() => setIsModalVisible(true)}
+            onPress={() => setIsDescriptionModalVisible(true)}
           >
             <Text style={styles.buttonText}>Edit Description</Text>
           </Pressable>
           <ModalPopup
             editable={profileInfo.desc}
-            visible={isModalVisible}
-            onClose={() => setIsModalVisible(false)}
+            visible={isDescriptionModalVisible}
+            onClose={() => setIsDescriptionModalVisible(false)}
             onSave={handleSaveDescription}
+            modifyField={"Description"}
           />
   
           {/* Privacy Section */}

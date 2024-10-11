@@ -12,7 +12,7 @@ import {
 
 const { height, width } = Dimensions.get('window');
 
-export default function ModalPopup({ editable, visible, onClose, onSave }) {
+export default function ModalPopup({ editable, visible, onClose, onSave, modifyField }) {
   const [text, setText] = useState(editable || '');
 
   const handleSave = () => {
@@ -30,12 +30,12 @@ export default function ModalPopup({ editable, visible, onClose, onSave }) {
       <View style={styles.centeredView}>
         <Pressable style={styles.blurredBackground} onPress={onClose} />
         <View style={styles.modalView}>
-          <Text style={styles.modalText}>Edit Description</Text>
+          <Text style={styles.modalText}>{`Edit ${modifyField}`}</Text>
           <TextInput
             style={styles.input}
             onChangeText={setText}
             value={text}
-            placeholder="Enter new description"
+            placeholder= {`Enter new ${modifyField}`}
             placeholderTextColor="#999"
           />
           <View style={styles.buttonContainer}>
