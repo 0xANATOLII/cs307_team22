@@ -18,6 +18,7 @@ export default function ProfileScreen({ route, navigation }) {
     pfp: null,
     desc: '',
   });
+  const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -157,6 +158,30 @@ export default function ProfileScreen({ route, navigation }) {
       Alert.alert('Error', 'An error occurred while signing out. Please check your connection and try again.');
     } finally {
       setIsSignOutDialogOpen(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/user/deleteAccount', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: profileInfo.username }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Your account has been deleted.');
+        navigation.navigate('Home');
+      } else {
+        const errorData = await response.json();
+        Alert.alert('Error', errorData.message || 'Failed to delete account. Please try again.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while deleting the account. Please check your connection and try again.');
+    } finally {
+      setIsDeleteAccountModalVisible(false);
     }
   };
 
@@ -380,6 +405,43 @@ export default function ProfileScreen({ route, navigation }) {
                 </Pressable>
                 <Pressable onPress={handleUploadImage}>
                   <Text style={styles.modalConfirmButton}>Confirm</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+  
+        {/* Delete Account Button */}
+        <Pressable
+          style={[styles.button, { backgroundColor: '#ff0000', marginTop: 20 }]}
+          onPress={() => setIsDeleteAccountModalVisible(true)}
+        >
+          <Text style={[styles.buttonText, { color: 'white' }]}>Delete Account</Text>
+        </Pressable>
+  
+        {/* Delete Account Confirmation Modal */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={isDeleteAccountModalVisible}
+          onRequestClose={() => setIsDeleteAccountModalVisible(false)}
+        >
+          <View style={styles.SignoutCenteredView}>
+            <View style={styles.SignoutModalView}>
+              <Text style={styles.SignoutModalTitle}>Are you sure you want to delete your account?</Text>
+              <Text style={styles.SignoutModalText}>This action cannot be undone.</Text>
+              <View style={styles.SignoutModalButtonContainer}>
+                <Pressable
+                  style={[styles.SignoutButton, styles.SignoutButtonOutline]}
+                  onPress={() => setIsDeleteAccountModalVisible(false)}
+                >
+                  <Text style={styles.SignoutButtonOutlineText}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.SignoutButton, styles.SignoutButtonFilled, { backgroundColor: '#ff0000' }]}
+                  onPress={handleDeleteAccount}
+                >
+                  <Text style={styles.SignoutButtonFilledText}>Delete Account</Text>
                 </Pressable>
               </View>
             </View>
