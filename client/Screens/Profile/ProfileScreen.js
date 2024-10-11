@@ -38,6 +38,8 @@ export default function ProfileScreen({ route, navigation }) {
             username: data.username,
             pfp: data.pfp ? { uri: data.pfp } : require('./default.png'),
             desc: data.desc || '',
+            achievementList: [['Achivement 1','Description of Achievment'],['Achivement 2','Description of Achievment']],
+            profileHistory: ['Change 1','Change 2'],
           });
           setIsPrivate(data.privacy);
         } else {
