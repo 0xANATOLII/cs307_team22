@@ -17,6 +17,8 @@ export default function ProfileScreen({ route, navigation }) {
     username: username,
     pfp: null,
     desc: '',
+    achievementList: [['Achivement 1','Description of Achievment'],['Achivement 2','Description of Achievment']],
+    profileHistory: ['Change 1','Change 2'],
   });
 
   useEffect(() => {
@@ -255,9 +257,11 @@ export default function ProfileScreen({ route, navigation }) {
       );
     }
 
-    return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={{ alignItems: 'center', marginVertical: 20 }}>
+
+
+  return (
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.profileContainer}>
           {/* Profile Picture Upload */}
           <Pressable onPress={handleProfileImagePress}>
             <Image source={profileInfo.pfp || require('./default.png')} style={styles.profilePhoto} />
@@ -266,75 +270,89 @@ export default function ProfileScreen({ route, navigation }) {
           {/* Username */}
           <Text style={styles.title}>{profileInfo.username}</Text>
           <Pressable
-            style={[styles.button, { marginTop: 10, alignSelf: 'center' }]}
+            style={[styles.button, { marginTop: 10 }]}
             onPress={() => setIsUsernameModalVisible(true)}
           >
             <Text style={styles.buttonText}>Edit Username</Text>
           </Pressable>
-          <ModalPopup
+  
+          {/* Description Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Description</Text>
+            <Text style={styles.sectionText}>{profileInfo.desc}</Text>
+            <Pressable
+              style={[styles.button, { marginTop: 10 }]}
+              onPress={() => setIsDescriptionModalVisible(true)}
+            >
+              <Text style={styles.buttonText}>Edit Description</Text>
+            </Pressable>
+          </View>
+  
+          {/* Privacy Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Privacy Settings</Text>
+            <View style={styles.privacyToggle}>
+              <Text style={styles.sectionContent}>{isPrivate ? 'Private Mode' : 'Public Mode'}</Text>
+              <Switch
+                trackColor={{ false: '#767577', true: '#81b0ff' }}
+                thumbColor={isPrivate ? '#f5dd4b' : '#f4f3f4'}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={togglePrivacy}
+                value={isPrivate}
+              />
+            </View>
+          </View>
+  
+          {/* Achievements Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Achievements</Text>
+            <View style={styles.achievementList}>
+              {profileInfo.achievementList.map((achievement, index) => (
+                <View key={index} style={styles.achievement}>
+                  <Text style={styles.achievementTitle}>{achievement[0]}</Text>
+                  <Text style={styles.sectionText}>{achievement[1]}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+  
+          {/* Profile History Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Profile History</Text>
+            <View style={styles.achievementList}>
+              {profileInfo.profileHistory.map((historyItem, index) => (
+                <View key={index} style={styles.achievement}>
+                  <Text style={styles.achievementTitle}>{historyItem}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+  
+          {/* Sign Out Button */}
+          <Pressable
+            style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]}
+            onPress={() => setIsSignOutDialogOpen(true)}
+          >
+            <Text style={[styles.buttonText, { color: 'white' }]}>Sign Out</Text>
+          </Pressable>
+        </View>
+  
+        {/* Keep all Modal components here */}
+        <ModalPopup
             editable={profileInfo.username}
             visible={isUsernameModalVisible}
             onClose={() => setIsUsernameModalVisible(false)}
             onSave={handleSaveUsername}
             modifyField={"Username"}
-          />
-  
-          {/* Description Section */}
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.sectionText}>{profileInfo.desc}</Text>
-          <Pressable
-            style={[styles.button, { marginTop: 10, alignSelf: 'center' }]}
-            onPress={() => setIsDescriptionModalVisible(true)}
-          >
-            <Text style={styles.buttonText}>Edit Description</Text>
-          </Pressable>
-          <ModalPopup
+        />
+        <ModalPopup
             editable={profileInfo.desc}
             visible={isDescriptionModalVisible}
             onClose={() => setIsDescriptionModalVisible(false)}
             onSave={handleSaveDescription}
             modifyField={"Description"}
           />
-  
-          {/* Privacy Section */}
-          <Text style={styles.sectionTitle}>Privacy Settings</Text>
-          <View style={[styles.privacyToggle, { flexDirection: 'row', justifyContent: 'space-between', width: '80%' }]}>
-            <Text style={styles.sectionContent}>{isPrivate ? 'Private Mode' : 'Public Mode'}</Text>
-            <Switch
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={isPrivate ? '#f5dd4b' : '#f4f3f4'}
-              ios_backgroundColor="#3e3e3e"
-              onValueChange={togglePrivacy}
-              value={isPrivate}
-            />
-          </View>
-  
-          {/* Achievements Section */}
-          <Text style={styles.sectionTitle}>Achievements</Text>
-          <View style={styles.achievementList}>
-            <View style={styles.achievement}>
-              <Text style={styles.achievementTitle}>Master Coder</Text>
-              <Text style={styles.achievementDesc}>Completed 100 coding challenges</Text>
-            </View>
-            <View style={styles.achievement}>
-              <Text style={styles.achievementTitle}>Bug Squasher</Text>
-              <Text style={styles.achievementDesc}>Fixed 50 critical bugs</Text>
-            </View>
-            <View style={styles.achievement}>
-              <Text style={styles.achievementTitle}>Team Player</Text>
-              <Text style={styles.achievementDesc}>Contributed to 10 open-source projects</Text>
-            </View>
-          </View>
-        </View>
-  
-        {/* Sign Out Button */}
-        <Pressable
-          style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]}
-          onPress={() => setIsSignOutDialogOpen(true)}
-        >
-          <Text style={[styles.buttonText, { color: 'white' }]}>Sign Out</Text>
-        </Pressable>
-  
+
         {/* Signout Modal */}
         <Modal
           animationType="none"
