@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
   container: {
     flex: 1,
-    
     alignItems: 'center',
     backgroundColor: 'white',
   },
@@ -24,7 +23,7 @@ export default StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'black',
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 5,
     zIndex: -1,
     textAlign: 'center',
@@ -91,7 +90,7 @@ export default StyleSheet.create({
     marginTop: 20,
     padding: 15,
     alignItems: 'center',
-    
+    width: '100%',
   },
   achievementList: {
     marginTop: 10,
@@ -108,7 +107,9 @@ export default StyleSheet.create({
     color: '#666',
   },
   privacyToggle: {
+    width: 200,
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   SignoutButton: {
@@ -171,6 +172,13 @@ export default StyleSheet.create({
   },
   SignoutButtonFilledText: {
     color: 'white',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
+  profileContainer: {
+    alignItems: 'center',
   },
 
   // Style for the modal's semi-transparent background
