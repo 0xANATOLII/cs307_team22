@@ -8,6 +8,7 @@ export default function RegistrationScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for delete confirmation dialog
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // Simple email regex pattern
@@ -19,7 +20,6 @@ export default function RegistrationScreen() {
     return passwordRegex.test(password);
   };
 
-  
   const handleRegister = async () => {
     // Check if password is strong enough
     if (!validatePasswordStrength(password)) {
@@ -44,45 +44,62 @@ export default function RegistrationScreen() {
         email: email,
         password: password,
       };
-    const response = await fetch('http://localhost:3000/user/register', { // this http may not be valid for you, run ngrok http 3000 to get new url
-      method: 'POST',  
-      headers: {
-        'Content-Type': 'application/json',  
-      },
-      body: JSON.stringify(payload),  // Convert the payload object to a JSON string
-    });
+      const response = await fetch('http://localhost:3000/user/register', { // this http may not be valid for you, run ngrok http 3000 to get new url
+        method: 'POST',  
+        headers: {
+          'Content-Type': 'application/json',  
+        },
+        body: JSON.stringify(payload),  // Convert the payload object to a JSON string
+      });
 
-    const data = await response.json();  // Parse the response as JSON
+      const data = await response.json();  // Parse the response as JSON
 
-    // Check if the registration was successful
-    if (response.ok) {
-      alert('Registration Successful');
-      // Redirect or navigate to another screen (e.g., Login screen)
-      navigation.navigate('Login');
-    } else {
-      // If the backend returns an error (e.g., email already exists), display it
-      if (data.message === 'Email already in use') {
-        alert('Registration Failed: Email already in use.');
+      // Check if the registration was successful
+      if (response.ok) {
+        alert('Registration Successful');
+        // Redirect or navigate to another screen (e.g., Login screen)
+        navigation.navigate('Login');
       } else {
-        alert('Registration Failed: ' + (data.message || 'Unknown error'));
+        // If the backend returns an error (e.g., email already exists), display it
+        if (data.message === 'Email already in use') {
+          alert('Registration Failed: Email already in use.');
+        } else {
+          alert('Registration Failed: ' + (data.message || 'Unknown error'));
+        }
       }
+    } catch (error) {
+      // Handle any network or other errors
+      alert('Registration Failed: ' + error.message);
     }
-  } catch (error) {
-    // Handle any network or other errors
-    alert('Registration Failed: ' + error.message);
-  }
-    
-    // Basic form validation can go here
-    // console.log("Registering with:", username, password, email);
-    //try {
-    //  const response = await registerUser(username, email, password);
-    //  if (response.success) {
-    //    alert('Registration Successful');
-    //    navigation.navigate('Login'); // Redirect to login screen
-    //  }
-    //}  catch (error) {
-    //  alert('Registration Failed', error.message);
-    //}
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmDelete = () => {
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Confirm Deletion",
+          "Are you sure you want to delete your account? This action cannot be undone.",
+          [
+            {
+              text: "Cancel",
+              onPress: () => resolve(false),
+              style: "cancel",
+            },
+            {
+              text: "Delete",
+              onPress: () => resolve(true),
+            },
+          ],
+          { cancelable: false }
+        );
+      });
+    };
+
+    const shouldDelete = await confirmDelete();
+    if (shouldDelete) {
+      // Proceed with account deletion logic
+      // ... existing deletion logic ...
+    }
   };
 
   return (
@@ -123,6 +140,39 @@ export default function RegistrationScreen() {
       >
         <Text style={styles.buttonText}>Register</Text>
       </Pressable>
+      <Pressable
+        style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]} // Red background
+        onPress={() => setIsDeleteDialogOpen(true)} // Open delete confirmation dialog
+      >
+        <Text style={[styles.buttonText, { color: 'white' }]}>Delete Account</Text>
+      </Pressable>
+      <Modal
+        animationType="none"
+        transparent={true}
+        visible={isDeleteDialogOpen}
+        onRequestClose={() => setIsDeleteDialogOpen(false)}
+      >
+        <View style={styles.SignoutCenteredView}>
+          <View style={styles.SignoutModalView}>
+            <Text style={styles.SignoutModalTitle}>Are you sure you want to delete your account?</Text>
+            <Text style={styles.SignoutModalText}>This action cannot be undone.</Text>
+            <View style={styles.SignoutModalButtonContainer}>
+              <Pressable
+                style={[styles.SignoutButton, styles.SignoutButtonOutline]}
+                onPress={() => setIsDeleteDialogOpen(false)}
+              >
+                <Text style={styles.SignoutButtonOutlineText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.SignoutButton, styles.SignoutButtonFilled]}
+                onPress={handleDeleteAccount}
+              >
+                <Text style={styles.SignoutButtonFilledText}>Delete</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

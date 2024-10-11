@@ -6,7 +6,8 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; //
 
 export default function ProfileScreen({ route, navigation }) {
   const { username } = route.params;
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isUsernameModalVisible, setIsUsernameModalVisible] = useState(false);
+  const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
@@ -67,6 +68,49 @@ export default function ProfileScreen({ route, navigation }) {
       }
     } catch (error) {
       Alert.alert('Error', 'An error occurred while updating the description.');
+    }
+  };
+
+  const handleSaveUsername = async (newUsername) => {
+    const confirmChange = () => {
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Confirm Change",
+          "You can only change your username thrice, are you sure you want to proceed?",
+          [
+            {
+              text: "Cancel",
+              onPress: () => resolve(false), // Resolve the promise with false
+              style: "cancel",
+            },
+            {
+              text: "OK",
+              onPress: () => resolve(true), // Resolve the promise with true
+            },
+          ],
+          { cancelable: false }
+        );
+      });
+    };
+  
+    await confirmChange();
+
+    try {
+      const response = await fetch(`http://localhost:3000/user/updateUsername`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, username: newUsername}),
+      });
+      if (response.ok) {
+        setProfileInfo((prev) => ({ ...prev, username: newUsername }));
+        Alert.alert('Success', 'Username updated successfully!');
+      } else {
+        Alert.alert('Error', 'Failed to update username');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while updating the username.');
     }
   };
 
@@ -230,6 +274,44 @@ export default function ProfileScreen({ route, navigation }) {
             accept="image/*"
             style={{ display: 'none' }} // Hidden file input
             onChange={handleFileChange}
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={{ alignItems: 'center', marginVertical: 20 }}>
+          {/* Profile Picture Upload */}
+          <Pressable onPress={handleProfileImagePress}>
+            <Image source={profileInfo.pfp || require('./default.png')} style={styles.profilePhoto} />
+          </Pressable>
+  
+          {/* Username */}
+          <Text style={styles.title}>{profileInfo.username}</Text>
+          <Pressable
+            style={[styles.button, { marginTop: 10, alignSelf: 'center' }]}
+            onPress={() => setIsUsernameModalVisible(true)}
+          >
+            <Text style={styles.buttonText}>Edit Username</Text>
+          </Pressable>
+          <ModalPopup
+            editable={profileInfo.username}
+            visible={isUsernameModalVisible}
+            onClose={() => setIsUsernameModalVisible(false)}
+            onSave={handleSaveUsername}
+            modifyField={"Username"}
+          />
+  
+          {/* Description Section */}
+          <Text style={styles.sectionTitle}>Description</Text>
+          <Text style={styles.sectionText}>{profileInfo.desc}</Text>
+          <Pressable
+            style={[styles.button, { marginTop: 10, alignSelf: 'center' }]}
+            onPress={() => setIsDescriptionModalVisible(true)}
+          >
+            <Text style={styles.buttonText}>Edit Description</Text>
+          </Pressable>
+          <ModalPopup
+            editable={profileInfo.desc}
+            visible={isDescriptionModalVisible}
+            onClose={() => setIsDescriptionModalVisible(false)}
+            onSave={handleSaveDescription}
+            modifyField={"Description"}
           />
         )}
 
@@ -317,6 +399,7 @@ export default function ProfileScreen({ route, navigation }) {
               </Pressable>
             </View>
           </View>
+
         </View>
       </Modal>
 
@@ -352,3 +435,67 @@ export default function ProfileScreen({ route, navigation }) {
 }
 
 
+=======
+        </Modal>
+  
+        {/* Delete Account Button */}
+        <Pressable
+          style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]} // Red background
+          onPress={handleDeleteAccount} // Call the delete function
+        >
+          <Text style={[styles.buttonText, { color: 'white' }]}>Delete Account</Text> {/* White text */}
+        </Pressable>
+      </ScrollView>
+    );
+  }
+  
+  
+
+  // Function to handle account deletion
+  const handleDeleteAccount = async () => {
+    const confirmDelete = () => {
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Confirm Deletion",
+          "Are you sure you want to delete your account? This action cannot be undone.",
+          [
+            {
+              text: "Cancel",
+              onPress: () => resolve(false),
+              style: "cancel",
+            },
+            {
+              text: "Delete",
+              onPress: () => resolve(true),
+            },
+          ],
+          { cancelable: false }
+        );
+      });
+    };
+
+    const shouldDelete = await confirmDelete();
+    if (shouldDelete) {
+      try {
+        const response = await fetch('http://localhost:3000/user/delete', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            // Include any necessary authentication headers here
+          },
+        });
+
+        if (response.ok) {
+          Alert.alert('Success', 'Account deleted successfully');
+          navigation.navigate('Login'); // Navigate to the login page
+        } else {
+          const data = await response.json();
+          Alert.alert('Error', 'Failed to delete account: ' + (data.message || 'Unknown error'));
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Error deleting account: ' + error.message);
+      }
+    }
+  };
+  
+  

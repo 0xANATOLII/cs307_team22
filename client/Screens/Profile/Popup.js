@@ -9,10 +9,11 @@ import {
   Dimensions,
   Pressable,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const { height, width } = Dimensions.get('window');
 
-export default function ModalPopup({ editable, visible, onClose, onSave }) {
+export default function ModalPopup({ editable, visible, onClose, onSave, modifyField }) {
   const [text, setText] = useState(editable || '');
 
   const handleSave = () => {
@@ -30,26 +31,19 @@ export default function ModalPopup({ editable, visible, onClose, onSave }) {
       <View style={styles.centeredView}>
         <Pressable style={styles.blurredBackground} onPress={onClose} />
         <View style={styles.modalView}>
-          <Text style={styles.modalText}>Edit Description</Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={setText}
-            value={text}
-            placeholder="Enter new description"
-            placeholderTextColor="#999"
-          />
+          <Text style={styles.modalText}>{`Are you sure you want to delete your ${modifyField}?`}</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.closeButton]}
               onPress={onClose}
             >
-              <Text style={styles.buttonText}>Close</Text>
+              <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.saveButton]}
-              onPress={handleSave}
+              onPress={handleSave} // Call the delete function here
             >
-              <Text style={styles.buttonText}>Save Changes</Text>
+              <Text style={styles.buttonText}>Delete</Text>
             </TouchableOpacity>
           </View>
         </View>
