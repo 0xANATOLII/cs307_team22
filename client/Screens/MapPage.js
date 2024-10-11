@@ -6,7 +6,36 @@ import * as Location from 'expo-location';
 const MapPage = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-
+    const [min,setMin] = useState(-1);
+    const [closestMarker, setClosestMarker] = useState(null);
+    const markers = [
+        {
+          coordinate: { latitude: 40.427281343904106, longitude: -86.9140668660199 },
+          icon: require('../assets/belltower.jpg'),  
+          title: 'Bell Tower',
+        },
+        {
+          coordinate: { latitude: 40.4273728685978, longitude: -86.91316931431314 },
+          icon: require('../assets/walk.png'),  // Another local image
+          title: 'WALC',
+        },
+        {
+          coordinate: { latitude: 40.4286566476374, longitude:-86.91356232247014 },
+          icon: require('../assets/efountain.jpg'),  // Another local image
+          title: 'Engineering fountain',
+        },
+        {
+          coordinate: { latitude: 40.4312239799775, longitude: -86.91588249175554 },
+          icon: require('../assets/neil.png'),  
+          title: 'Neil statue',
+        },
+        {
+          coordinate: { latitude: 40.4250502093892, longitude: -86.91111546181843 },
+          icon: require('../assets/pmu.png'),  // Another local image
+          title: 'PMU',
+        }
+      ];
+    
   useEffect(() => {
     (async () => {
       // Ask for location permissions
@@ -19,35 +48,50 @@ const MapPage = () => {
       // Get the current location
       let currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation);
+
+
     })();
   }, []);
-  const markers = [
-    {
-      coordinate: { latitude: 40.427281343904106, longitude: -86.9140668660199 },
-      icon: require('../assets/belltower.jpg'),  
-      title: 'Bell Tower',
-    },
-    {
-      coordinate: { latitude: 40.4273728685978, longitude: -86.91316931431314 },
-      icon: require('../assets/walk.png'),  // Another local image
-      title: 'WALC',
-    },
-    {
-      coordinate: { latitude: 40.4286566476374, longitude:-86.91356232247014 },
-      icon: require('../assets/efountain.jpg'),  // Another local image
-      title: 'Engineering fountain',
-    },
-    {
-      coordinate: { latitude: 40.4312239799775, longitude: -86.91588249175554 },
-      icon: require('../assets/neil.png'),  
-      title: 'Neil statue',
-    },
-    {
-      coordinate: { latitude: 40.4250502093892, longitude: -86.91111546181843 },
-      icon: require('../assets/pmu.png'),  // Another local image
-      title: 'PMU',
+
+  useEffect(() => {
+    if (location) {
+
+
+            let dist = 0.0
+        const closest = markers.reduce((prev, curr) => {
+            const prevDistance = getDistance(location.coords, prev.coordinate);
+            const currDistance = getDistance(location.coords, curr.coordinate);
+           
+            return prevDistance < currDistance ? prev : curr;
+          }, markers[0]);
+
+      // Find the closest marker
+      setClosestMarker(closest);
     }
-  ];
+  }, [location]);
+ 
+  
+  const getDistance = (coords1, coords2) => {
+    
+    // Calculate distance using Haversine formula or any preferred method
+    const R = 6371; // Radius of Earth in km
+    const dLat = degreesToRadians(coords2.latitude - coords1.latitude);
+    const dLon = degreesToRadians(coords2.longitude - coords1.longitude);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(degreesToRadians(coords1.latitude)) *
+        Math.cos(degreesToRadians(coords2.latitude)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+  };
+
+  const degreesToRadians = (degrees) => {
+    return degrees * (Math.PI / 180);
+  };
+
+
   // Display an error message if location permission is denied
   if (errorMsg) {
     return (
@@ -59,11 +103,13 @@ const MapPage = () => {
 
   // Render a loading message until the location is obtained
   if (!location) {
+    console.log("Loading")
     return (
       <View style={styles.container}>
         <Text>Loading...</Text>
       </View>
     );
+   
   }
 
   // Once location is available, render the map centered on the user's location
@@ -78,22 +124,29 @@ const MapPage = () => {
           longitudeDelta: 0.0421,
         }}
       >
-<Marker
-          coordinate={{
+
+          <Marker coordinate={{
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
           }}
-        >
-          {/* Custom icon as a child of the Marker */}
-          <Image 
-        source={require('../assets/user-icon.png')}
-        style={{ width: 40, height: 40 }}
-      />
-        </Marker>
+           title="Your Location">
+            <Image
+              source={require('../assets/user-icon.png')} // Custom user location icon
+              style={{ width: 30, height: 30 }}
+            />
+          </Marker>
+        
+
+
 
         {markers.map((marker, index) => (
-          <Marker key={index} coordinate={marker.coordinate} title={marker.title}>
-            <Image source={marker.icon} style={{ width: 20, height: 20 }} />
+          <Marker
+            key={index}
+            coordinate={marker.coordinate}
+            title={marker.title}
+          >
+            
+            <Image source={marker.icon} style={closestMarker && closestMarker.title === marker.title ? { width: 30, height: 30, backgroundColor:'white'} : { width: 30, height: 30}} />
           </Marker>
         ))}
 
