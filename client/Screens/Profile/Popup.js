@@ -11,14 +11,23 @@ import {
 } from 'react-native';
 
 const { height, width } = Dimensions.get('window');
-
+const charLimit = 250;
 export default function ModalPopup({ editable, visible, onClose, onSave, modifyField }) {
   const [text, setText] = useState(editable || '');
+
 
   const handleSave = () => {
     onSave(text); // Send the updated text back to ProfileScreen
     onClose(); // Close the modal
   };
+
+  const handleTextChange = (input) => {
+    if (input.length <= charLimit) {
+      setText(input);
+    } else {
+      alert("Character limit is 250!");
+    }
+  }
 
   return (
     <Modal
@@ -33,11 +42,14 @@ export default function ModalPopup({ editable, visible, onClose, onSave, modifyF
           <Text style={styles.modalText}>{`Edit ${modifyField}`}</Text>
           <TextInput
             style={styles.input}
-            onChangeText={setText}
+            onChangeText={handleTextChange}
             value={text}
             placeholder= {`Enter new ${modifyField}`}
             placeholderTextColor="#999"
           />
+          <Text>
+            {`${text.length}/${charLimit} characters`}
+          </Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.closeButton]}
