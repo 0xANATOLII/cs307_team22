@@ -6,6 +6,7 @@ import RegistrationScreen from './Screens/RegistrationScreen';
 import ForgotPasswordScreen from './Screens/ForgotPasswordScreen';
 import ProfileScreen from './Screens/Profile/ProfileScreen';
 import ResetPasswordScreen from './Screens/ResetPasswordScreen';
+import MapPage from './Screens/MapPage';
 
 const Stack = createStackNavigator();
 
@@ -38,6 +39,11 @@ export default function App() {
           name="ResetPassword" 
           component={ResetPasswordScreen} 
           options={{ title: 'Reset Password' }} 
+        />
+        <Stack.Screen 
+        name="Map"
+        component={MapPage}
+        options={{title: 'Map'}}
         />
       </Stack.Navigator>
     </NavigationContainer>
