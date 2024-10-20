@@ -3,6 +3,7 @@ import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndica
 import ModalPopup from './Popup';
 import styles from '../../styles';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // Import the image picker
+import Config from "../../config.js";
 
 export default function ProfileScreen({ route, navigation }) {
   const { username } = route.params;
@@ -25,7 +26,7 @@ export default function ProfileScreen({ route, navigation }) {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/user/profile/${username}`, {
+        const response = await fetch(`${Config.API_URL}/user/profile/${username}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ export default function ProfileScreen({ route, navigation }) {
 
   const handleSaveDescription = async (newDescription) => {
     try {
-      const response = await fetch(`http://localhost:3000/user/updateDescription`, {
+      const response = await fetch(`${Config.API_URL}/user/updateDescription`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +102,7 @@ export default function ProfileScreen({ route, navigation }) {
     await confirmChange();
 
     try {
-      const response = await fetch(`http://localhost:3000/user/updateUsername`, {
+      const response = await fetch(`${Config.API_URL}/user/updateUsername`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -124,7 +125,7 @@ export default function ProfileScreen({ route, navigation }) {
     setIsPrivate(newPrivacySetting);
 
     try {
-      const response = await fetch('http://localhost:3000/user/updatePrivacy', {
+      const response = await fetch(`${Config.API_URL}/user/updatePrivacy`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +145,7 @@ export default function ProfileScreen({ route, navigation }) {
 
   const handleSignOut = async () => {
     try {
-      const response = await fetch('http://localhost:3000/user/signout', {
+      const response = await fetch(`${Config.API_URL}/user/signout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -167,7 +168,7 @@ export default function ProfileScreen({ route, navigation }) {
 
   const handleDeleteAccount = async () => {
     try {
-      const response = await fetch('http://localhost:3000/user/deleteAccount', {
+      const response = await fetch(`${Config.API_URL}/user/deleteAccount`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

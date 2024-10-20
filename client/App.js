@@ -7,11 +7,12 @@ import ForgotPasswordScreen from './Screens/ForgotPasswordScreen';
 import ProfileScreen from './Screens/Profile/ProfileScreen';
 import ResetPasswordScreen from './Screens/ResetPasswordScreen';
 import MapPage from './Screens/MapPage';
+import Config from "./config.js";
 
 const Stack = createStackNavigator();
 
 const linking = {
-  prefixes: ['http://localhost:8081', 'myapp://'],
+  prefixes: [Config.API_URL, 'myapp://'],
   config: {
     screens: {
       Home: 'home',

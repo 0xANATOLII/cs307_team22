@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable } from 'react-native';
 import styles from '../styles'; 
+import Config from "../config.js";
 
 export default function RegistrationScreen() {
   const [username, setUsername] = useState('');
@@ -44,7 +45,7 @@ export default function RegistrationScreen() {
         email: email,
         password: password,
       };
-    const response = await fetch('http://localhost:3000/user/register', { // this http may not be valid for you, run ngrok http 3000 to get new url
+    const response = await fetch(`${Config.API_URL}/user/register`, { // this http may not be valid for you, run ngrok http 3000 to get new url
       method: 'POST',  
       headers: {
         'Content-Type': 'application/json',  

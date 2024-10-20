@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, Alert } from 'react-native';
 import styles from '../styles'; 
+import Config from "../config.js";
 
 export default function ForgotPasswordScreen() {
     const [email, setEmail] = useState('');
@@ -14,7 +15,7 @@ export default function ForgotPasswordScreen() {
     //FIX THIS AND ADD TO PROFILE HISTORY
     const updateHistory = async () => {
       try {
-        const response = await fetch(`http://localhost:6000/user/${id}`, {
+        const response = await fetch(`${Config.API_URL}/user/${id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -42,7 +43,7 @@ export default function ForgotPasswordScreen() {
           }
         console.log("Email Recieved", email);
         try {
-          const response = await fetch('http://localhost:3000/user/requestPasswordReset', {
+          const response = await fetch(`${Config.API_URL}/user/requestPasswordReset`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
