@@ -20,13 +20,13 @@ export default function HomePage({ route }) {
 
       {/* Bottom navigation bar */}
       <View style={styles.bottomBar}>
-        <Pressable style={styles.navButton} onPress={() => navigation.navigate()}>
+        <Pressable style={styles.navButton} onPress={() => navigation.navigate('BadgeFeed')}>
           <Text style={styles.navText}>Badges</Text>
         </Pressable>
-        <Pressable style={styles.navButton} onPress={() => navigation.navigate('Explore', { username })}>
+        <Pressable style={styles.navButton} onPress={() => navigation.navigate()}>
           <Text style={styles.navText}>Explore</Text>
         </Pressable>
-        <Pressable style={styles.navButton} onPress={() => navigation.navigate('Settings', { username })}>
+        <Pressable style={styles.navButton} onPress={() => navigation.navigate()}>
           <Text style={styles.navText}>Friends</Text>
         </Pressable>
       </View>

@@ -6,7 +6,8 @@ import RegistrationScreen from './Screens/RegistrationScreen';
 import ForgotPasswordScreen from './Screens/ForgotPasswordScreen';
 import ProfileScreen from './Screens/Profile/ProfileScreen';
 import ResetPasswordScreen from './Screens/ResetPasswordScreen';
-import BeBoilerScreen from './Screens/BeBoilerScreen'
+import BeBoilerScreen from './Screens/BeBoilerScreen';
+import BadgeFeedScreen from './Screens/BadgeFeedScreen';
 
 const Stack = createStackNavigator();
 
@@ -19,7 +20,8 @@ const linking = {
       ForgotPassword: 'forgot-password',  // No spaces
       Profile: 'profile',
       ResetPassword: 'reset-password/:token', // The token parameter is part of the URL
-      BeBoiler: 'navigation'
+      BeBoiler: 'navigation',
+      BadgeFeed: 'badge-feed'
     },
   },
 };
@@ -45,6 +47,11 @@ export default function App() {
           name="BeBoiler" 
           component={BeBoilerScreen} 
           options={{ title: 'Be Boiler' }} 
+        />
+        <Stack.Screen 
+          name="BadgeFeed" 
+          component={BadgeFeedScreen} 
+          options={{ title: 'Badge Feed' }} 
         />
       </Stack.Navigator>
     </NavigationContainer>
