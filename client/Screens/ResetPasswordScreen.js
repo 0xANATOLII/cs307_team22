@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, Alert } from 'react-native';
 import styles from '../styles';
+import Config from "../config.js";
 
 export default function ResetPasswordScreen({ route, navigation }) {
   const [newPassword, setNewPassword] = useState('');
@@ -20,7 +21,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/user/resetPassword', {
+      const response = await fetch(`${Config.API_URL}/user/resetPassword`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
