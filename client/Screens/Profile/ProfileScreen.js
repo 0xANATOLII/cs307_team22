@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform } from 'react-native';
+import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform, TextInput, FlatList } from 'react-native';
 import ModalPopup from './Popup';
 import styles from '../../styles';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // Import the image picker
@@ -21,6 +21,8 @@ export default function ProfileScreen({ route, navigation }) {
     profileHistory: ['Change 1','Change 2'],
   });
   const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -35,6 +37,7 @@ export default function ProfileScreen({ route, navigation }) {
         if (response.ok) {
           const data = await response.json();
           setProfileInfo({
+            userId: data._id, // Ensure userId is set
             username: data.username,
             pfp: data.pfp ? { uri: data.pfp } : require('./default.png'),
             desc: data.desc || '',
@@ -121,24 +124,28 @@ export default function ProfileScreen({ route, navigation }) {
 
   const togglePrivacy = async () => {
     const newPrivacySetting = !isPrivate;
-    setIsPrivate(newPrivacySetting);
 
     try {
-      const response = await fetch('http://localhost:3000/user/updatePrivacy', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, privacy: newPrivacySetting }),
-      });
+        const response = await fetch(`http://localhost:3000/user/updatePrivacy`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: profileInfo.userId, isPrivate: newPrivacySetting }), // Send userId instead of username
+        });
 
-      if (!response.ok) {
-        Alert.alert('Error', 'Failed to update privacy setting.');
-        setIsPrivate(!newPrivacySetting);
-      }
+        const data = await response.json();
+
+        if (response.ok) {
+            setIsPrivate(newPrivacySetting);
+            console.log('Privacy updated:', data);
+        } else {
+            console.error('Failed to update privacy:', data);
+            Alert.alert('Error', data.message || 'Failed to update privacy setting.');
+        }
     } catch (error) {
-      Alert.alert('Error', 'Could not update privacy setting.');
-      setIsPrivate(!newPrivacySetting);
+        console.error('Error updating privacy:', error);
+        Alert.alert('Error', 'Could not update privacy setting.');
     }
   };
 
@@ -315,7 +322,57 @@ export default function ProfileScreen({ route, navigation }) {
       );
     }
 
+  // Function to handle search input changes
+  const handleSearchChange = async (query) => {
+    setSearchQuery(query);
 
+    if (query.length > 2) { // Start searching after 3 characters
+      try {
+        const response = await fetch(`http://localhost:3000/user/search?query=${query}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(data);
+        } else {
+          Alert.alert('Error', 'Failed to fetch search results.');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'An error occurred while searching.');
+      }
+    } else {
+      setSearchResults([]); // Clear results if query is too short
+    }
+  };
+
+  // Function to handle search button press
+  const handleSearch = async () => {
+    if (searchQuery.length > 2) { // Start searching after 3 characters
+      try {
+        const response = await fetch(`http://localhost:3000/user/search?query=${searchQuery}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(data);
+        } else {
+          Alert.alert('Error', 'Failed to fetch search results.');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'An error occurred while searching.');
+      }
+    } else {
+      Alert.alert('Error', 'Please enter at least 3 characters to search.');
+    }
+  };
 
   return (
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -513,8 +570,46 @@ export default function ProfileScreen({ route, navigation }) {
             </View>
           </View>
         </Modal>
+
+        {/* Search Bar */}
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search for users..."
+          value={searchQuery}
+          onChangeText={handleSearchChange}
+        />
+
+        {/* Search Results */}
+        <FlatList
+          data={searchResults}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <Pressable onPress={() => navigation.navigate('Profile', { username: item.username })}>
+              <Text style={styles.searchResultItem}>{item.username}</Text>
+            </Pressable>
+          )}
+        />
+
+        {/* Search Button */}
+        <Pressable onPress={handleSearch}>
+          <Text style={styles.searchButton}>Search</Text>
+        </Pressable>
       </ScrollView>
     );
   }
   
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+

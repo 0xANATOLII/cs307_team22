@@ -1,7 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException, BadRequestException, NotFoundException, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { TogglePrivacyDto } from './dto/toggle-privacy.dto';
+import { UserDocument } from './user.model';
+import { Types } from 'mongoose';
 
 @Controller('user')
 export class UserController {
@@ -59,17 +62,16 @@ export class UserController {
     return { message: 'Description updated successfully', description: updatedUser.description };
   }
 
-   @Patch('updatePrivacy/:username')
-  async updatePrivacy(
-    @Param('username') username: string,
-    @Body() body: { privacy: boolean },
-  ) {
-    const updatedUser = await this.userService.updatePrivacy(username, body.privacy);
-    return {
-      message: 'Privacy setting updated',
-      privacy: updatedUser.privacy,
-    };
-  }
+   @Patch('updatePrivacy')
+   async updatePrivacy(
+       @Body() togglePrivacyDto: TogglePrivacyDto,
+   ) {
+       const updatedUser = await this.userService.updatePrivacy(togglePrivacyDto.userId, togglePrivacyDto.isPrivate);
+       return {
+           message: 'Privacy setting updated',
+           privacy: updatedUser.privacy,
+       };
+   }
 
   @Post('requestPasswordReset')
   async requestPasswordReset(@Body() body: { email: string }) {
@@ -104,7 +106,10 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
     return this.userService.findOne(id);
   }
 
@@ -116,5 +121,18 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
+  }
+
+  @Get('search')
+  async searchUsers(@Query('query') query: string) {
+    if (!query) {
+      throw new BadRequestException('Query is required');
+    }
+
+    const users = await this.userService.searchUsers(query);
+    return users.map((user: any) => ({
+      id: user._id, // Use '_id' as defined in the User interface
+      username: user.username,
+    }));
   }
 }
