@@ -3,6 +3,7 @@ import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndica
 import ModalPopup from './Popup';
 import styles from '../../styles';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // Import the image picker
+import { deleteUser } from '../../api/userApi'; // pTH WRONG IDK?
 
 export default function ProfileScreen({ route, navigation }) {
   const { username } = route.params;
@@ -174,25 +175,14 @@ export default function ProfileScreen({ route, navigation }) {
 
   const handleDeleteAccount = async () => {
     try {
-      const response = await fetch('http://localhost:3000/user/deleteAccount', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: profileInfo.username }),
-      });
-
-      if (response.ok) {
+        const userId = profileInfo.userId; // Ensure you have the user ID
+        await deleteUser(userId); // Pass the user ID to the delete function
         Alert.alert('Success', 'Your account has been deleted.');
-        navigation.navigate('Home');
-      } else {
-        const errorData = await response.json();
-        Alert.alert('Error', errorData.message || 'Failed to delete account. Please try again.');
-      }
+        navigation.navigate('Login'); // Navigate to the login screen
     } catch (error) {
-      Alert.alert('Error', 'An error occurred while deleting the account. Please check your connection and try again.');
+        Alert.alert('Error', 'Failed to delete account: ' + error.message);
     } finally {
-      setIsDeleteAccountModalVisible(false);
+        setIsDeleteAccountModalVisible(false);
     }
   };
 
@@ -599,6 +589,9 @@ export default function ProfileScreen({ route, navigation }) {
   }
   
   
+
+
+
 
 
 
