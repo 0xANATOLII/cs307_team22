@@ -16,6 +16,82 @@ export class UserService {
   private mailService: MailService,
 ) {}
 
+
+
+async createUser(createUserDto: CreateUserDto){
+  if(!createUserDto)
+    throw new BadRequestException("Invalid data")
+
+  if(createUserDto.username.trim().length == 0 ||createUserDto.password.trim().length == 0 )
+    throw new BadRequestException("Invalid data")
+
+  // Check if this username exists
+
+  if (!this.userModel.findOne({ username: createUserDto.username}))
+    throw new BadRequestException("Accound with this username already exists !")
+
+  // hash password
+  const hashed = await bcrypt.hash(createUserDto.password)
+  //to remove password
+  createUserDto.password = ""
+  const newUser = new this.userModel({...createUserDto,username:createUserDto.username.toLocaleLowerCase(), password: hashed })
+  return newUser.save()
+}
+
+
+async findAll(): Promise<User[]>{
+
+  return this.userModel
+  .find()
+  .select('-password')
+  .exec();
+}
+
+async find(id: string):Promise<User> { 
+  return this.userModel
+  .findOne({ id: id })
+  .select('-password')
+  .exec();
+}
+
+async findUsersByUsername(username: string): Promise<User[]> {
+  return this.userModel
+    .find({ username: { $regex: username, $options: 'i' } }) 
+    .exec();
+}
+
+async update(id:string,updateUserDto:UpdateUserDto){
+    if(!id)
+      throw new BadRequestException("invalid Data")
+    if(!updateUserDto)
+      throw new BadRequestException("Invalid passed data!")
+    if (!this.find(id))
+      throw new BadRequestException("Passed user doesn't exist !")
+    const updUser = await this.userModel.findOneAndUpdate({id:id}, updateUserDto, { new: true });
+    
+    if (!updUser) {
+      throw new NotFoundException(`This user doesnt exist !`);
+    }
+    return updUser
+
+}
+
+async remove(id:string){
+  if(!id)
+    throw new BadRequestException("invalid Data")
+  if (!this.find(id))
+    throw new BadRequestException("Passed user doesn't exist !")
+  const remUser = await this.userModel.findByIdAndDelete({id:id});
+  
+  if (!remUser) {
+    throw new NotFoundException(`This user doesnt exist !`);
+  }
+  return remUser
+
+}
+
+
+
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     try {
       // Hash the password before saving
@@ -127,11 +203,6 @@ export class UserService {
     await user.save();
   }
 
-  async findAll(): Promise<Omit<User, 'password'>[]> {
-    const users = await this.userModel.find().exec();
-    return users.map(user => this._getUserDataWithoutPassword(user));
-  }
-
   async findOne(id: string): Promise<Omit<User, 'password'>> {
     const user = await this.userModel.findById(id).exec();
     if (!user) {
@@ -140,7 +211,7 @@ export class UserService {
     return this._getUserDataWithoutPassword(user);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
+  async updat_(id: string, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
     const updatedUser = await this.userModel
       .findByIdAndUpdate(id, updateUserDto, { new: true })
       .exec();
@@ -150,7 +221,7 @@ export class UserService {
     return this._getUserDataWithoutPassword(updatedUser);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove_(id: string): Promise<void> {
     const result = await this.userModel.findByIdAndDelete(id).exec();
     if (!result) {
       throw new NotFoundException(`User with ID ${id} not found`);
