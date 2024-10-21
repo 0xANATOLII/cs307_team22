@@ -319,6 +319,18 @@ export default function ProfileScreen({ route, navigation }) {
 
 
   return (
+    <SafeAreaView style={navigationStyles.safeArea}>
+    {/* Navigation Bar */}
+    <View style={navigationStyles.navBar}>
+      <Pressable 
+        style={navigationStyles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={navigationStyles.backButtonText}>Back</Text>
+      </Pressable>
+      <Text style={navigationStyles.navTitle}>Profile</Text>
+      <View style={{ width: 50 }} /> {/* Empty view for balanced spacing */}
+    </View>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.profileContainer}>
           {/* Profile Picture Upload */}
