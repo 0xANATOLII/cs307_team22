@@ -319,8 +319,9 @@ export default function ProfileScreen({ route, navigation }) {
 
 
   return (
+    /*
     <SafeAreaView style={navigationStyles.safeArea}>
-    {/* Navigation Bar */}
+
     <View style={navigationStyles.navBar}>
       <Pressable 
         style={navigationStyles.backButton}
@@ -329,24 +330,26 @@ export default function ProfileScreen({ route, navigation }) {
         <Text style={navigationStyles.backButtonText}>Back</Text>
       </Pressable>
       <Text style={navigationStyles.navTitle}>Profile</Text>
-      <View style={{ width: 50 }} /> {/* Empty view for balanced spacing */}
+      <View style={{ width: 50 }} /> 
     </View>
+    */
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.profileContainer}>
           {/* Profile Picture Upload */}
           <Pressable onPress={handleProfileImagePress}>
             <Image source={profileInfo.pfp || require('./default.png')} style={styles.profilePhoto} />
           </Pressable>
-        {/* File input for web */}
-        {Platform.OS === 'web' && (
-          <input
-            type="file"
-            id="profilePicInput"
-            accept="image/*"
-            style={{ display: 'none' }} // Hidden file input
-            onChange={handleFileChange}
-          />
-        )}          
+
+          {/* File input for web */}
+          {Platform.OS === 'web' && (
+            <input
+              type="file"
+              id="profilePicInput"
+              accept="image/*"
+              style={{ display: 'none' }} // Hidden file input
+              onChange={handleFileChange}
+            />
+          )}          
   
           {/* Username */}
           <Text style={styles.title}>{profileInfo.username}</Text>
@@ -464,31 +467,31 @@ export default function ProfileScreen({ route, navigation }) {
         </Modal>
   
         {/* Modal for confirming profile image upload */}
-      <Modal
-  transparent={true}
-  visible={isUploadModalVisible}
-  onRequestClose={() => setIsUploadModalVisible(false)}
-  animationType="fade" // Add fade animation for a smoother appearance
->
-  <View style={styles.modalBackdrop}>
-    <View style={styles.modalContainer}>
-      <Text style={styles.modalTitle}>Confirm Profile Picture</Text>
-      
-      {/* Preview of the selected image */}
-      <Image source={selectedImage} style={styles.modalImagePreview} />
-      
-      <View style={styles.modalButtons}>
-        <Pressable style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setIsUploadModalVisible(false)}>
-          <Text style={styles.modalButtonText}>Cancel</Text>
-        </Pressable>
+        <Modal
+          transparent={true}
+          visible={isUploadModalVisible}
+          onRequestClose={() => setIsUploadModalVisible(false)}
+          animationType="fade" // Add fade animation for a smoother appearance
+        >
+          <View style={styles.modalBackdrop}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Confirm Profile Picture</Text>
+              
+              {/* Preview of the selected image */}
+              <Image source={selectedImage} style={styles.modalImagePreview} />
+              
+              <View style={styles.modalButtons}>
+                <Pressable style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setIsUploadModalVisible(false)}>
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </Pressable>
 
-        <Pressable style={[styles.modalButton, styles.modalConfirmButton]} onPress={handleUploadImage}>
-          <Text style={styles.modalButtonText}>Confirm</Text>
-        </Pressable>
-      </View>
-    </View>
-  </View>
-</Modal>
+                <Pressable style={[styles.modalButton, styles.modalConfirmButton]} onPress={handleUploadImage}>
+                  <Text style={styles.modalButtonText}>Confirm</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
   
         {/* Delete Account Button */}
         <Pressable
@@ -527,6 +530,7 @@ export default function ProfileScreen({ route, navigation }) {
           </View>
         </Modal>
       </ScrollView>
+    /*</SafeAreaView>*/
     );
   }
   
