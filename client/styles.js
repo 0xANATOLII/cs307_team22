@@ -1,9 +1,11 @@
 import { StyleSheet } from 'react-native';
+import { Platform } from 'react-native';
 
 export default StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'white',
   },
   logo: {
@@ -174,8 +176,9 @@ export default StyleSheet.create({
     color: 'white',
   },
   scrollViewContent: {
+    paddingTop: 60,
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingBottom: 40,
   },
   profileContainer: {
     alignItems: 'center',
@@ -250,6 +253,51 @@ export default StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+
+  safeArea: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    paddingBottom: Platform.OS === 'ios' ? 20 : 0,  //PLATFORM DEPENDENT
+    zIndex: 1000,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+  },
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 8,
+  },
+  navText: {
+    fontSize: 12,
+    marginTop: 4,
+    color: '#666',
+  },
+  navTextActive: {
+    color: '#007AFF',
+  },
+  map: {
+    width: '100%',
+    height: '100%',
   },
   
   searchBar: {

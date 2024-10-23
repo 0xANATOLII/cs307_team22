@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, Image, ScrollView } from 'react-native';
 import styles from '../styles'; 
+import Config from "../config.js";
 
 export default function HomePage({ navigation }) {
   const [username, setUsername] = useState('');
@@ -14,7 +15,7 @@ export default function HomePage({ navigation }) {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/user/login', {
+      const response = await fetch(`${Config.API_URL}/user/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
