@@ -6,12 +6,6 @@ import styles from '../styles';
 
 export default function NearbyMonumentScreen({ route, navigation }) {
   const { username } = route.params;
-  useEffect(() => {
-    // Hide the default header
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
 
   const navigateToScreen = (screenName) => {
     navigation.navigate(screenName, { username });
@@ -20,46 +14,22 @@ export default function NearbyMonumentScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-      />
-      <Pressable 
-        style={({ pressed }) => [
-          styles.button,
-          pressed && { backgroundColor: '#555' } // Change background color when pressed
-        ]}
-      >
-        <Text style={styles.buttonText}>Register</Text>
-      </Pressable>
+      <Text style={styles.title}>Monument Screen (IN PROGRESS)</Text>
       </View>
 
       {/* Bottom Navigation Bar */}
       <View style={styles.bottomNav}>
         <Pressable 
           style={styles.navItem} 
-          onPress={() => navigateToScreen('Home')}
+          onPress={() => navigateToScreen('Map')}
         >
-          <MaterialIcons name="home" size={28} color="#666" />
-          <Text style={styles.navText}>Home</Text>
+          <MaterialIcons name="map" size={28} color="#666" />
+          <Text style={styles.navText}>Map</Text>
         </Pressable>
 
         <Pressable 
           style={styles.navItem} 
-          onPress={() => navigateToScreen('Search')}
+          onPress={() => navigateToScreen('Monument')}
         >
           <MaterialIcons name="star" size={28} color="#007AFF" />
           <Text style={[styles.navText,styles.navTextActive]}>Monument</Text>

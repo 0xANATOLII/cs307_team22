@@ -5,6 +5,7 @@ export default StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'white',
   },
   logo: {
@@ -256,6 +257,7 @@ export default StyleSheet.create({
 
   safeArea: {
     flex: 1,
+    justifyContent: 'center',
   },
   bottomNav: {
     position: 'absolute',
@@ -292,6 +294,10 @@ export default StyleSheet.create({
   },
   navTextActive: {
     color: '#007AFF',
+  },
+  map: {
+    width: '100%',
+    height: '100%',
   },
   
 });

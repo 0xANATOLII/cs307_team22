@@ -57,13 +57,6 @@ export default function ProfileScreen({ route, navigation }) {
     fetchProfileData();
   }, []);
 
-  useEffect(() => {
-    // Hide the default header
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
-
   const navigateToScreen = (screenName) => {
     navigation.navigate(screenName, { username });
   };
@@ -424,10 +417,10 @@ export default function ProfileScreen({ route, navigation }) {
       <View style={styles.bottomNav}>
         <Pressable 
           style={styles.navItem} 
-          onPress={() => navigateToScreen('Home')}
+          onPress={() => navigateToScreen('Map')}
         >
-          <MaterialIcons name="home" size={28} color="#666" />
-          <Text style={styles.navText}>Home</Text>
+          <MaterialIcons name="map" size={28} color="#666" />
+          <Text style={styles.navText}>Map</Text>
         </Pressable>
 
         <Pressable 

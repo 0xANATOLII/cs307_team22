@@ -28,7 +28,11 @@ const linking = {
 export default function App() {
   return (
     <NavigationContainer linking={linking}>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Home" screenOptions={{
+        headerShown: false,
+        animationEnabled: false,
+        gestureEnabled: false,
+      }}>
         <Stack.Screen name="Home" component={HomePage} />
         <Stack.Screen name="Registration" component={RegistrationScreen} />
         <Stack.Screen 
@@ -44,9 +48,9 @@ export default function App() {
           options={{ title: 'Reset Password' }} 
         />
         <Stack.Screen 
-        name="Map"
-        component={MapPage}
-        options={{title: 'Map'}}
+          name="Map"
+          component={MapPage}
+          options={{title: 'Map'}}
         />
       </Stack.Navigator>
     </NavigationContainer>

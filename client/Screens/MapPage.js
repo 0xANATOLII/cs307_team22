@@ -1,9 +1,13 @@
 // components/MapPage.js
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image} from 'react-native';
+import { Pressable, View, Text, Image} from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-const MapPage = () => {
+import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; //Import NavBar Icons
+import styles from '../styles'; 
+
+export default function MapPage({ route, navigation }) {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
     const [min,setMin] = useState(-1);
@@ -52,6 +56,11 @@ const MapPage = () => {
 
     })();
   }, []);
+
+  const { username } = route.params;
+  const navigateToScreen = (screenName) => {
+    navigation.navigate(screenName, { username });
+  };
 
   useEffect(() => {
     if (location) {
@@ -114,7 +123,8 @@ const MapPage = () => {
 
   // Once location is available, render the map centered on the user's location
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
+      {/*Map Section*/}
       <MapView
         style={styles.map}
         initialRegion={{
@@ -135,10 +145,6 @@ const MapPage = () => {
               style={{ width: 30, height: 30 }}
             />
           </Marker>
-        
-
-
-
         {markers.map((marker, index) => (
           <Marker
             key={index}
@@ -151,20 +157,42 @@ const MapPage = () => {
         ))}
 
       </MapView>
-    </View>
+
+      {/* Bottom Navigation Bar */}
+      <View style={styles.bottomNav}>
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Map')}
+        >
+          <MaterialIcons name="map" size={28} color="#007AFF" />
+          <Text style={[styles.navText,styles.navTextActive]}>Map</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Monument')}
+        >
+          <MaterialIcons name="star" size={28} color="#666" />
+          <Text style={styles.navText}>Monument</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Messages')}
+        >
+          <MaterialIcons name="chat" size={28} color="#666" />
+          <Text style={styles.navText}>Messages</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Profile')}
+        >
+          <MaterialIcons name="person" size={28} color="#666" />
+          <Text style={styles.navText}>Profile</Text>
+        </Pressable>
+      </View>
+
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  map: {
-    width: '100%',
-    height: '100%',
-  },
-});
-
-export default MapPage;
