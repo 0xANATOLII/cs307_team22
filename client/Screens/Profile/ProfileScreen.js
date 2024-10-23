@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform } from 'react-native';
+import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform, SafeAreaView } from 'react-native';
 import ModalPopup from './Popup';
 import styles from '../../styles';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // Import the image picker
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; //Import NavBar Icons
 import Config from "../../config.js";
 
 export default function ProfileScreen({ route, navigation }) {
@@ -55,6 +56,17 @@ export default function ProfileScreen({ route, navigation }) {
 
     fetchProfileData();
   }, []);
+
+  useEffect(() => {
+    // Hide the default header
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
+  const navigateToScreen = (screenName) => {
+    navigation.navigate(screenName, { username });
+  };
 
   const handleSaveDescription = async (newDescription) => {
     try {
@@ -191,8 +203,8 @@ export default function ProfileScreen({ route, navigation }) {
   };
 
   
-   // Function to open the camera or image library on mobile, or file input for web
-   const handleProfileImagePress = () => {
+  // Function to open the camera or image library on mobile, or file input for web
+  const handleProfileImagePress = () => {
     if (Platform.OS === 'web') {
       document.getElementById('profilePicInput').click(); // Trigger file input for web
     } else {
@@ -212,6 +224,8 @@ export default function ProfileScreen({ route, navigation }) {
       ]);
     }
   };
+
+  //Loading wheel for profile page
   if (loading) {
     return (
       <View style={styles.container}>
@@ -220,25 +234,21 @@ export default function ProfileScreen({ route, navigation }) {
     );
   }
 
-
-
-
-
-    // Open the camera
-    const handleTakePhoto = () => {
-      launchCamera(
-        { mediaType: 'photo', saveToPhotos: true },
-        (response) => {
-          if (response.assets) {
-            setSelectedImage({ uri: response.assets[0].uri });
-            setIsUploadModalVisible(true); // Show modal to confirm upload
-          }
+  // Open the camera
+  const handleTakePhoto = () => {
+    launchCamera(
+      { mediaType: 'photo', saveToPhotos: true },
+      (response) => {
+        if (response.assets) {
+          setSelectedImage({ uri: response.assets[0].uri });
+          setIsUploadModalVisible(true); // Show modal to confirm upload
         }
-      );
-    };
+      }
+    );
+  };
   
    // Open the image library (mobile only)
-   const handleChoosePhoto = () => {
+  const handleChoosePhoto = () => {
     launchImageLibrary(
       { mediaType: 'photo' },
       (response) => {
@@ -259,6 +269,8 @@ export default function ProfileScreen({ route, navigation }) {
       setIsUploadModalVisible(true); // Show modal to confirm upload
     }
   };
+
+
   const handleUploadImage = async () => {
     try {
       // Simulate the upload process and store the selected image in profileInfo
@@ -308,229 +320,241 @@ export default function ProfileScreen({ route, navigation }) {
     }
   };
   */
-    if (loading) {
-      return (
-        <View style={styles.container}>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      );
-    }
-
 
 
   return (
-    /*
-    <SafeAreaView style={navigationStyles.safeArea}>
-
-    <View style={navigationStyles.navBar}>
-      <Pressable 
-        style={navigationStyles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={navigationStyles.backButtonText}>Back</Text>
-      </Pressable>
-      <Text style={navigationStyles.navTitle}>Profile</Text>
-      <View style={{ width: 50 }} /> 
-    </View>
-    */
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.profileContainer}>
           {/* Profile Picture Upload */}
           <Pressable onPress={handleProfileImagePress}>
-            <Image source={profileInfo.pfp || require('./default.png')} style={styles.profilePhoto} />
+              <Image source={profileInfo.pfp || require('./default.png')} style={styles.profilePhoto} />
           </Pressable>
-
           {/* File input for web */}
           {Platform.OS === 'web' && (
-            <input
-              type="file"
-              id="profilePicInput"
-              accept="image/*"
-              style={{ display: 'none' }} // Hidden file input
-              onChange={handleFileChange}
-            />
+              <input
+                type="file"
+                id="profilePicInput"
+                accept="image/*"
+                style={{ display: 'none' }} // Hidden file input
+                onChange={handleFileChange}
+              />
           )}          
   
           {/* Username */}
           <Text style={styles.title}>{profileInfo.username}</Text>
           <Pressable
-            style={[styles.button, { marginTop: 10 }]}
-            onPress={() => setIsUsernameModalVisible(true)}
-          >
-            <Text style={styles.buttonText}>Edit Username</Text>
+              style={[styles.button, { marginTop: 10 }]}
+              onPress={() => setIsUsernameModalVisible(true)}
+            >
+              <Text style={styles.buttonText}>Edit Username</Text>
           </Pressable>
   
           {/* Description Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.sectionText}>{profileInfo.desc}</Text>
-            <Pressable
-              style={[styles.button, { marginTop: 10 }]}
-              onPress={() => setIsDescriptionModalVisible(true)}
-            >
-              <Text style={styles.buttonText}>Edit Description</Text>
-            </Pressable>
+              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.sectionText}>{profileInfo.desc}</Text>
+              <Pressable
+                style={[styles.button, { marginTop: 10 }]}
+                onPress={() => setIsDescriptionModalVisible(true)}
+              >
+                <Text style={styles.buttonText}>Edit Description</Text>
+              </Pressable>
           </View>
   
           {/* Privacy Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Privacy Settings</Text>
-            <View style={styles.privacyToggle}>
-              <Text style={styles.sectionContent}>{isPrivate ? 'Private Mode' : 'Public Mode'}</Text>
-              <Switch
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={isPrivate ? '#f5dd4b' : '#f4f3f4'}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={togglePrivacy}
-                value={isPrivate}
-              />
-            </View>
+              <Text style={styles.sectionTitle}>Privacy Settings</Text>
+              <View style={styles.privacyToggle}>
+                <Text style={styles.sectionContent}>{isPrivate ? 'Private Mode' : 'Public Mode'}</Text>
+                <Switch
+                  trackColor={{ false: '#767577', true: '#81b0ff' }}
+                  thumbColor={isPrivate ? '#f5dd4b' : '#f4f3f4'}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={togglePrivacy}
+                  value={isPrivate}
+                />
+              </View>
           </View>
   
           {/* Achievements Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Achievements</Text>
-            <View style={styles.achievementList}>
-              {profileInfo.achievementList.map((achievement, index) => (
-                <View key={index} style={styles.achievement}>
-                  <Text style={styles.achievementTitle}>{achievement[0]}</Text>
-                  <Text style={styles.sectionText}>{achievement[1]}</Text>
-                </View>
-              ))}
-            </View>
+              <Text style={styles.sectionTitle}>Achievements</Text>
+              <View style={styles.achievementList}>
+                {profileInfo.achievementList.map((achievement, index) => (
+                  <View key={index} style={styles.achievement}>
+                    <Text style={styles.achievementTitle}>{achievement[0]}</Text>
+                    <Text style={styles.sectionText}>{achievement[1]}</Text>
+                  </View>
+                ))}
+              </View>
           </View>
   
           {/* Profile History Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Profile History</Text>
-            <View style={styles.achievementList}>
-              {profileInfo.profileHistory.map((historyItem, index) => (
-                <View key={index} style={styles.achievement}>
-                  <Text style={styles.achievementTitle}>{historyItem}</Text>
-                </View>
-              ))}
-            </View>
+              <Text style={styles.sectionTitle}>Profile History</Text>
+              <View style={styles.achievementList}>
+                {profileInfo.profileHistory.map((historyItem, index) => (
+                  <View key={index} style={styles.achievement}>
+                    <Text style={styles.achievementTitle}>{historyItem}</Text>
+                  </View>
+                ))}
+              </View>
           </View>
   
           {/* Sign Out Button */}
           <Pressable
-            style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]}
-            onPress={() => setIsSignOutDialogOpen(true)}
-          >
-            <Text style={[styles.buttonText, { color: 'white' }]}>Sign Out</Text>
+              style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]}
+              onPress={() => setIsSignOutDialogOpen(true)}
+            >
+              <Text style={[styles.buttonText, { color: 'white' }]}>Sign Out</Text>
           </Pressable>
+
+          {/* Delete Account Button */}
+          <Pressable
+            style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20}]}
+            onPress={() => setIsDeleteAccountModalVisible(true)}
+          >
+            <Text style={[styles.buttonText, { color: 'white' }]}>Delete Account</Text>
+          </Pressable> 
         </View>
-  
-        {/* Keep all Modal components here */}
-        <ModalPopup
-            editable={profileInfo.username}
-            visible={isUsernameModalVisible}
-            onClose={() => setIsUsernameModalVisible(false)}
-            onSave={handleSaveUsername}
-            modifyField={"Username"}
-        />
-        <ModalPopup
-            editable={profileInfo.desc}
-            visible={isDescriptionModalVisible}
-            onClose={() => setIsDescriptionModalVisible(false)}
-            onSave={handleSaveDescription}
-            modifyField={"Description"}
-          />
-
-        {/* Signout Modal */}
-        <Modal
-          animationType="none"
-          transparent={true}
-          visible={isSignOutDialogOpen}
-          onRequestClose={() => setIsSignOutDialogOpen(false)}
-        >
-          <View style={styles.SignoutCenteredView}>
-            <View style={styles.SignoutModalView}>
-              <Text style={styles.SignoutModalTitle}>Are you sure you want to sign out?</Text>
-              <Text style={styles.SignoutModalText}>This action will log you out of your account.</Text>
-              <View style={styles.SignoutModalButtonContainer}>
-                <Pressable
-                  style={[styles.SignoutButton, styles.SignoutButtonOutline]}
-                  onPress={() => setIsSignOutDialogOpen(false)}
-                >
-                  <Text style={styles.SignoutButtonOutlineText}>Cancel</Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.SignoutButton, styles.SignoutButtonFilled]}
-                  onPress={handleSignOut}
-                >
-                  <Text style={styles.SignoutButtonFilledText}>Sign Out</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        </Modal>
-  
-        {/* Modal for confirming profile image upload */}
-        <Modal
-          transparent={true}
-          visible={isUploadModalVisible}
-          onRequestClose={() => setIsUploadModalVisible(false)}
-          animationType="fade" // Add fade animation for a smoother appearance
-        >
-          <View style={styles.modalBackdrop}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Confirm Profile Picture</Text>
-              
-              {/* Preview of the selected image */}
-              <Image source={selectedImage} style={styles.modalImagePreview} />
-              
-              <View style={styles.modalButtons}>
-                <Pressable style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setIsUploadModalVisible(false)}>
-                  <Text style={styles.modalButtonText}>Cancel</Text>
-                </Pressable>
-
-                <Pressable style={[styles.modalButton, styles.modalConfirmButton]} onPress={handleUploadImage}>
-                  <Text style={styles.modalButtonText}>Confirm</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        </Modal>
-  
-        {/* Delete Account Button */}
-        <Pressable
-          style={[styles.button, { backgroundColor: '#ff0000', marginTop: 20 }]}
-          onPress={() => setIsDeleteAccountModalVisible(true)}
-        >
-          <Text style={[styles.buttonText, { color: 'white' }]}>Delete Account</Text>
-        </Pressable>
-  
-        {/* Delete Account Confirmation Modal */}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={isDeleteAccountModalVisible}
-          onRequestClose={() => setIsDeleteAccountModalVisible(false)}
-        >
-          <View style={styles.SignoutCenteredView}>
-            <View style={styles.SignoutModalView}>
-              <Text style={styles.SignoutModalTitle}>Are you sure you want to delete your account?</Text>
-              <Text style={styles.SignoutModalText}>This action cannot be undone.</Text>
-              <View style={styles.SignoutModalButtonContainer}>
-                <Pressable
-                  style={[styles.SignoutButton, styles.SignoutButtonOutline]}
-                  onPress={() => setIsDeleteAccountModalVisible(false)}
-                >
-                  <Text style={styles.SignoutButtonOutlineText}>Cancel</Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.SignoutButton, styles.SignoutButtonFilled, { backgroundColor: '#ff0000' }]}
-                  onPress={handleDeleteAccount}
-                >
-                  <Text style={styles.SignoutButtonFilledText}>Delete Account</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        </Modal>
       </ScrollView>
-    /*</SafeAreaView>*/
+
+      {/* Bottom Navigation Bar */}
+      <View style={styles.bottomNav}>
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Home')}
+        >
+          <MaterialIcons name="home" size={28} color="#666" />
+          <Text style={styles.navText}>Home</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Monument')}
+        >
+          <MaterialIcons name="star" size={28} color="#666" />
+          <Text style={styles.navText}>Monument</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Messages')}
+        >
+          <MaterialIcons name="chat" size={28} color="#666" />
+          <Text style={styles.navText}>Messages</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Profile')}
+        >
+          <MaterialIcons name="person" size={28} color="#007AFF" />
+          <Text style={[styles.navText, styles.navTextActive]}>Profile</Text>
+        </Pressable>
+      </View>
+    
+      {/* Keep all Modal components here */}
+      <ModalPopup
+          editable={profileInfo.username}
+              visible={isUsernameModalVisible}
+              onClose={() => setIsUsernameModalVisible(false)}
+              onSave={handleSaveUsername}
+          modifyField={"Username"}
+      />
+      <ModalPopup
+          editable={profileInfo.desc}
+              visible={isDescriptionModalVisible}
+              onClose={() => setIsDescriptionModalVisible(false)}
+              onSave={handleSaveDescription}
+          modifyField={"Description"}
+      />
+      {/* Signout Modal */}
+      <Modal
+            animationType="none"
+            transparent={true}
+            visible={isSignOutDialogOpen}
+            onRequestClose={() => setIsSignOutDialogOpen(false)}
+          >
+            <View style={styles.SignoutCenteredView}>
+              <View style={styles.SignoutModalView}>
+                <Text style={styles.SignoutModalTitle}>Are you sure you want to sign out?</Text>
+                <Text style={styles.SignoutModalText}>This action will log you out of your account.</Text>
+                <View style={styles.SignoutModalButtonContainer}>
+                  <Pressable
+                    style={[styles.SignoutButton, styles.SignoutButtonOutline]}
+                    onPress={() => setIsSignOutDialogOpen(false)}
+                  >
+                    <Text style={styles.SignoutButtonOutlineText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.SignoutButton, styles.SignoutButtonFilled]}
+                    onPress={handleSignOut}
+                  >
+                    <Text style={styles.SignoutButtonFilledText}>Sign Out</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+      </Modal>
+
+      {/* Modal for confirming profile image upload */}
+      <Modal
+            transparent={true}
+            visible={isUploadModalVisible}
+            onRequestClose={() => setIsUploadModalVisible(false)}
+            animationType="fade" // Add fade animation for a smoother appearance
+          >
+            <View style={styles.modalBackdrop}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Confirm Profile Picture</Text>
+                
+                {/* Preview of the selected image */}
+                <Image source={selectedImage} style={styles.modalImagePreview} />
+                
+                <View style={styles.modalButtons}>
+                  <Pressable style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setIsUploadModalVisible(false)}>
+                    <Text style={styles.modalButtonText}>Cancel</Text>
+                  </Pressable>
+
+                  <Pressable style={[styles.modalButton, styles.modalConfirmButton]} onPress={handleUploadImage}>
+                    <Text style={styles.modalButtonText}>Confirm</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+      </Modal>
+       
+      {/* Delete Account Confirmation Modal */}
+      <Modal
+            animationType="fade"
+            transparent={true}
+            visible={isDeleteAccountModalVisible}
+            onRequestClose={() => setIsDeleteAccountModalVisible(false)}
+          >
+            <View style={styles.SignoutCenteredView}>
+              <View style={styles.SignoutModalView}>
+                <Text style={styles.SignoutModalTitle}>Are you sure you want to delete your account?</Text>
+                <Text style={styles.SignoutModalText}>This action cannot be undone.</Text>
+                <View style={styles.SignoutModalButtonContainer}>
+                  <Pressable
+                    style={[styles.SignoutButton, styles.SignoutButtonOutline]}
+                    onPress={() => setIsDeleteAccountModalVisible(false)}
+                  >
+                    <Text style={styles.SignoutButtonOutlineText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.SignoutButton, styles.SignoutButtonFilled, { backgroundColor: '#ff0000' }]}
+                    onPress={handleDeleteAccount}
+                  >
+                    <Text style={styles.SignoutButtonFilledText}>Delete Account</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+      </Modal>
+    </SafeAreaView>
     );
   }
   

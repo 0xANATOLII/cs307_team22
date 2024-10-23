@@ -8,6 +8,7 @@ import ProfileScreen from './Screens/Profile/ProfileScreen';
 import ResetPasswordScreen from './Screens/ResetPasswordScreen';
 import MapPage from './Screens/MapPage';
 import Config from "./config.js";
+import NearbyMonumentScreen from './Screens/NearbyMonumentScreen';
 
 const Stack = createStackNavigator();
 
@@ -36,6 +37,7 @@ export default function App() {
           options={{ title: 'Forgot Password' }} // Display title with spaces
         />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Monument" component={NearbyMonumentScreen} />
         <Stack.Screen 
           name="ResetPassword" 
           component={ResetPasswordScreen} 

@@ -9,6 +9,10 @@ export default function HomePage({ navigation }) {
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
+    navigation.navigate('Profile', { username });
+    return;
+
+    //DELETTE ABOVE LOGIN BYPASS
     if (!username || !password) {
       alert('Please enter both username and password');
       return;

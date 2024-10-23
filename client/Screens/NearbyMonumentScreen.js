@@ -1,38 +1,41 @@
 // screens/NearbyMonumentScreen.js
-import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {View, Text, Pressable, SafeAreaView,TextInput} from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; //Import NavBar Icons
 import styles from '../styles'; 
-import Config from "../config.js";
 
-export default function NearbyMonumentScreen() {
+export default function NearbyMonumentScreen({ route, navigation }) {
+  const { username } = route.params;
+  useEffect(() => {
+    // Hide the default header
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
+  const navigateToScreen = (screenName) => {
+    navigation.navigate(screenName, { username });
+  };
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
       <Text style={styles.title}>Register</Text>
       <TextInput
         style={styles.input}
         placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
       />
       <TextInput
         style={styles.input}
         placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
       />
       <TextInput
         style={styles.input}
         placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
       />
       <Pressable 
         style={({ pressed }) => [
@@ -42,7 +45,43 @@ export default function NearbyMonumentScreen() {
       >
         <Text style={styles.buttonText}>Register</Text>
       </Pressable>
-    </View>
+      </View>
+
+      {/* Bottom Navigation Bar */}
+      <View style={styles.bottomNav}>
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Home')}
+        >
+          <MaterialIcons name="home" size={28} color="#666" />
+          <Text style={styles.navText}>Home</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Search')}
+        >
+          <MaterialIcons name="star" size={28} color="#007AFF" />
+          <Text style={[styles.navText,styles.navTextActive]}>Monument</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Messages')}
+        >
+          <MaterialIcons name="chat" size={28} color="#666" />
+          <Text style={styles.navText}>Messages</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Profile')}
+        >
+          <MaterialIcons name="person" size={28} color="#666" />
+          <Text style={styles.navText}>Profile</Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
 
