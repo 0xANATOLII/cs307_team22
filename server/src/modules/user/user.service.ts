@@ -7,6 +7,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
 import { MailService } from '../mail/mail.service';
+import { Types } from 'mongoose';
 
 
 
@@ -52,10 +53,14 @@ export class UserService {
     return this._getUserDataWithoutPassword(user);
   }
 
-  async updatePrivacy(username: string, privacy: boolean): Promise<Omit<User, 'password'>> {
-    const user = await this.userModel.findOneAndUpdate(
-      { username },
-      { privacy },
+  async updatePrivacy(userId: string, isPrivate: boolean): Promise<Omit<User, 'password'>> {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { privacy: isPrivate },
       { new: true },
     ).exec();
     if (!user) {
@@ -160,5 +165,12 @@ export class UserService {
   private _getUserDataWithoutPassword(user: UserDocument): Omit<User, 'password'> {
     const { password, ...userWithoutPassword } = user.toObject();
     return userWithoutPassword;
+  }
+
+  async searchUsers(query: string): Promise<Omit<User, 'password'>[]> {
+    const users = await this.userModel.find({
+      username: { $regex: query, $options: 'i' } // Case-insensitive search
+    }).exec();
+    return users.map(user => this._getUserDataWithoutPassword(user)); // Ensure to return without password
   }
 }

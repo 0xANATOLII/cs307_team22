@@ -23,6 +23,8 @@ export default function ProfileScreen({ route, navigation }) {
     profileHistory: ['Change 1','Change 2'],
   });
   const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -37,6 +39,7 @@ export default function ProfileScreen({ route, navigation }) {
         if (response.ok) {
           const data = await response.json();
           setProfileInfo({
+            userId: data._id, // Ensure userId is set
             username: data.username,
             pfp: data.pfp ? { uri: data.pfp } : require('./default.png'),
             desc: data.desc || '',
@@ -127,9 +130,9 @@ export default function ProfileScreen({ route, navigation }) {
 
   const togglePrivacy = async () => {
     const newPrivacySetting = !isPrivate;
-    setIsPrivate(newPrivacySetting);
 
     try {
+
       const response = await fetch(`${Config.API_URL}/user/updatePrivacy`, {
         method: 'PATCH',
         headers: {
@@ -138,13 +141,18 @@ export default function ProfileScreen({ route, navigation }) {
         body: JSON.stringify({ username, privacy: newPrivacySetting }),
       });
 
-      if (!response.ok) {
-        Alert.alert('Error', 'Failed to update privacy setting.');
-        setIsPrivate(!newPrivacySetting);
-      }
+        const data = await response.json();
+
+        if (response.ok) {
+            setIsPrivate(newPrivacySetting);
+            console.log('Privacy updated:', data);
+        } else {
+            console.error('Failed to update privacy:', data);
+            Alert.alert('Error', data.message || 'Failed to update privacy setting.');
+        }
     } catch (error) {
-      Alert.alert('Error', 'Could not update privacy setting.');
-      setIsPrivate(!newPrivacySetting);
+        console.error('Error updating privacy:', error);
+        Alert.alert('Error', 'Could not update privacy setting.');
     }
   };
 
@@ -183,15 +191,11 @@ export default function ProfileScreen({ route, navigation }) {
 
       if (response.ok) {
         Alert.alert('Success', 'Your account has been deleted.');
-        navigation.navigate('Home');
-      } else {
-        const errorData = await response.json();
-        Alert.alert('Error', errorData.message || 'Failed to delete account. Please try again.');
-      }
+        navigation.navigate('Login'); // Navigate to the login screen
     } catch (error) {
-      Alert.alert('Error', 'An error occurred while deleting the account. Please check your connection and try again.');
+        Alert.alert('Error', 'Failed to delete account: ' + error.message);
     } finally {
-      setIsDeleteAccountModalVisible(false);
+        setIsDeleteAccountModalVisible(false);
     }
   };
 
@@ -313,7 +317,65 @@ export default function ProfileScreen({ route, navigation }) {
     }
   };
   */
+    if (loading) {
+      return (
+        <View style={styles.container}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      );
+    }
 
+  // Function to handle search input changes
+  const handleSearchChange = async (query) => {
+    setSearchQuery(query);
+
+    if (query.length > 2) { // Start searching after 3 characters
+      try {
+        const response = await fetch(`http://localhost:3000/user/search?query=${query}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(data);
+        } else {
+          Alert.alert('Error', 'Failed to fetch search results.');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'An error occurred while searching.');
+      }
+    } else {
+      setSearchResults([]); // Clear results if query is too short
+    }
+  };
+
+  // Function to handle search button press
+  const handleSearch = async () => {
+    if (searchQuery.length > 2) { // Start searching after 3 characters
+      try {
+        const response = await fetch(`http://localhost:3000/user/search?query=${searchQuery}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(data);
+        } else {
+          Alert.alert('Error', 'Failed to fetch search results.');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'An error occurred while searching.');
+      }
+    } else {
+      Alert.alert('Error', 'Please enter at least 3 characters to search.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -552,3 +614,20 @@ export default function ProfileScreen({ route, navigation }) {
   }
   
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
