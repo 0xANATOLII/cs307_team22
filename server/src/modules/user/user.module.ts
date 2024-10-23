@@ -7,11 +7,11 @@ import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]), // Register User schema with Mongoose
     MailModule,
   ],
   controllers: [UserController],
   providers: [UserService],
-  exports: [UserService], // Export UserService for use in other modules
+  exports: [UserService, MongooseModule], // Export MongooseModule to make UserModel accessible in other modules
 })
 export class UserModule {}

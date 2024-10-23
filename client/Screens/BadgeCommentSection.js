@@ -9,7 +9,7 @@ export default function BadgeCommentSection({ badgeId, username }) {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/badges/${badgeId}/comments`, {
+        const response = await fetch(`http://localhost:3000/badge/${badgeId}/comments`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -42,7 +42,7 @@ export default function BadgeCommentSection({ badgeId, username }) {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/badges/${badgeId}/comment`, {
+      const response = await fetch(`http://localhost:3000/badge/${badgeId}/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export default function BadgeCommentSection({ badgeId, username }) {
   // Delete comment
   const handleCommentDelete = async (commentId) => {
     try {
-      const response = await fetch(`http://localhost:3000/badges/${badgeId}/comment/${commentId}`, {
+      const response = await fetch(`http://localhost:3000/badge/${badgeId}/comment/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
