@@ -192,6 +192,7 @@ export default function ProfileScreen({ route, navigation }) {
       if (response.ok) {
         Alert.alert('Success', 'Your account has been deleted.');
         navigation.navigate('Login'); // Navigate to the login screen
+      }
     } catch (error) {
         Alert.alert('Error', 'Failed to delete account: ' + error.message);
     } finally {
