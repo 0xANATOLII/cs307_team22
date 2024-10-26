@@ -188,17 +188,19 @@ export default function ProfileScreen({ route, navigation }) {
         },
         body: JSON.stringify({ username: profileInfo.username }),
       });
-
+  
       if (response.ok) {
         Alert.alert('Success', 'Your account has been deleted.');
         navigation.navigate('Login'); // Navigate to the login screen
       }
+      } // <-- Closing brace added here for the if statement
     } catch (error) {
-        Alert.alert('Error', 'Failed to delete account: ' + error.message);
+      Alert.alert('Error', 'Failed to delete account: ' + error.message);
     } finally {
-        setIsDeleteAccountModalVisible(false);
+      setIsDeleteAccountModalVisible(false);
     }
   };
+  
 
   
   // Function to open the camera or image library on mobile, or file input for web
