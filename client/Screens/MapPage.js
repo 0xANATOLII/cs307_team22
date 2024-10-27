@@ -5,6 +5,7 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; //Import NavBar Icons
+import ModalPopup from './Profile/Popup';
 import styles from '../styles'; 
 
 export default function MapPage({ route, navigation }) {
