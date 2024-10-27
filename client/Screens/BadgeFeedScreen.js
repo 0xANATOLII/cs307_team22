@@ -5,6 +5,8 @@ import BadgeCommentSection from './BadgeCommentSection'; // Adjust path as neede
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; //Import NavBar Icons
 import styles from '../styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Config from '../config';
+
 
 export default function BadgeFeedScreen({ route, navigation }) {
   const { username } = route.params;
@@ -18,7 +20,7 @@ export default function BadgeFeedScreen({ route, navigation }) {
   useEffect(() => {
     async function fetchBadges() {
       try {
-        const response = await axios.get('http://localhost:3000/badge'); // Adjust API URL
+        const response = await axios.get(`${Config.API_URL}/badge`); // Adjust API URL
         setBadges(response.data);
       } catch (error) {
         console.error('Error fetching badges:', error);
@@ -39,7 +41,7 @@ export default function BadgeFeedScreen({ route, navigation }) {
         username: username, // Use the passed userId
         monumentId: 'home', // Default value for monumentId
       };
-      const response = await axios.post('http://localhost:3000/badge/create', badgeDataWithIds);
+      const response = await axios.post(`${Config.API_URL}/badge/create`, badgeDataWithIds);
       setBadges((prevBadges) => [...prevBadges, response.data]);
     } catch (error) {
       console.error('Error creating badge:', error);
