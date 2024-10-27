@@ -6,7 +6,6 @@ import RegistrationScreen from './Screens/RegistrationScreen';
 import ForgotPasswordScreen from './Screens/ForgotPasswordScreen';
 import ProfileScreen from './Screens/Profile/ProfileScreen';
 import ResetPasswordScreen from './Screens/ResetPasswordScreen';
-import BeBoilerScreen from './Screens/BeBoilerScreen';
 import BadgeFeedScreen from './Screens/BadgeFeedScreen';
 import MapPage from './Screens/MapPage';
 import Config from "./config.js";
@@ -51,11 +50,6 @@ export default function App() {
           name="ResetPassword" 
           component={ResetPasswordScreen} 
           options={{ title: 'Reset Password' }} 
-        />
-        <Stack.Screen 
-          name="BeBoiler" 
-          component={BeBoilerScreen} 
-          options={{ title: 'Be Boiler' }} 
         />
         <Stack.Screen 
           name="BadgeFeed" 

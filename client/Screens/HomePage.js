@@ -28,7 +28,7 @@ export default function HomePage({ navigation }) {
       if (response.ok) {
         alert('Login Successful');
         // Proceed to next screen or store user session, etc.
-        navigation.navigate('BeBoiler', { username });
+        navigation.navigate('Map', { username });
       } else {
         alert(data.message || 'Login failed');
       }

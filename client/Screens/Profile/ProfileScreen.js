@@ -497,10 +497,10 @@ export default function ProfileScreen({ route, navigation }) {
 
         <Pressable 
           style={styles.navItem} 
-          onPress={() => navigateToScreen('Messages')}
+          onPress={() => navigateToScreen('BadgeFeed')}
         >
           <MaterialIcons name="chat" size={28} color="#666" />
-          <Text style={styles.navText}>Messages</Text>
+          <Text style={styles.navText}>BadgeFeed</Text>
         </Pressable>
 
         <Pressable 
