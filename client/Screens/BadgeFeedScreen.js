@@ -72,7 +72,7 @@ export default function BadgeFeedScreen({ route, navigation }) {
   // Render each badge with its name and the username of the creator
   const renderBadge = ({ item }) => (
     <View style={styles.BSbadgeContainer}>
-      <Text style={stylesBSbadgeTitle}>{item.name}</Text>
+      <Text style={styles.BSbadgeTitle}>{item.name}</Text>
   
       {/* Check if item.userId exists before accessing item.userId.username */}
       {item.userId && item.userId.username ? (
