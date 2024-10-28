@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, Image, ScrollView } from 'react-native';
 import styles from '../styles'; 
+import Config from "../config.js";
 
 export default function HomePage({ navigation }) {
   const [username, setUsername] = useState('');
@@ -14,7 +15,7 @@ export default function HomePage({ navigation }) {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/user/login', {
+      const response = await fetch(`${Config.API_URL}/user/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,7 +28,7 @@ export default function HomePage({ navigation }) {
       if (response.ok) {
         alert('Login Successful');
         // Proceed to next screen or store user session, etc.
-        navigation.navigate('BeBoiler', { username });
+        navigation.navigate('Map', { username });
       } else {
         alert(data.message || 'Login failed');
       }
@@ -87,18 +88,6 @@ export default function HomePage({ navigation }) {
           ]}
         >
           <Text style={styles.buttonText}>Forgot Password?</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.button}>
-        <Pressable
-          onPress={() => navigation.navigate('Map')}
-          style={({ pressed }) => [
-            styles.button,
-            pressed && { backgroundColor: '#555' }
-          ]}
-        >
-          <Text style={styles.buttonText}>Map</Text>
         </Pressable>
       </View>
     </View>

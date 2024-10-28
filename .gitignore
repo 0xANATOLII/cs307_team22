@@ -41,3 +41,4 @@ npm-debug.log*
 
 # Environment Variables
 .env
+client/config.js
