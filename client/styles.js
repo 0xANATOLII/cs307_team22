@@ -252,4 +252,41 @@ export default StyleSheet.create({
     textAlign: 'center',
   },
   
+  searchBar: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    marginBottom: 16,
+  },
+  searchResultItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  searchBar: {
+    flex: 1,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 8,
+  },
+  searchButton: {
+    marginLeft: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: 'black',
+    borderRadius: 5,
+  },
+  searchButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
 });
