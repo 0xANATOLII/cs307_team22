@@ -29,4 +29,10 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   pfp?: string;
+
+  @IsOptional()
+  privacy?: boolean = false;
+
+
+
 }

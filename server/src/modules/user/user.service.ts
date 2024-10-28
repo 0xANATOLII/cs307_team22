@@ -7,6 +7,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
 import { MailService } from '../mail/mail.service';
+import { LoginAuthDto } from '../auth/dto/login-auth.dto';
 
 
 
@@ -18,27 +19,38 @@ export class UserService {
 
 
 
-async createUser(createUserDto: CreateUserDto){
+async create(createUserDto: CreateUserDto){
+
+  
   if(!createUserDto)
     throw new BadRequestException("Invalid data")
 
-  if(createUserDto.username.trim().length == 0 ||createUserDto.password.trim().length == 0 )
+  if(createUserDto.email.trim().length == 0 ||createUserDto.username.trim().length == 0 ||createUserDto.password.trim().length == 0 )
     throw new BadRequestException("Invalid data")
 
   // Check if this username exists
-
-  if (!this.userModel.findOne({ username: createUserDto.username}))
+  if (this.userModel.findOne({ username: createUserDto.username}))
     throw new BadRequestException("Accound with this username already exists !")
-
   // hash password
-  const hashed = await bcrypt.hash(createUserDto.password)
+  const hashed = await bcrypt.hash(createUserDto.password,+process.env.JWT_SALT)
+
   //to remove password
   createUserDto.password = ""
   const newUser = new this.userModel({...createUserDto,username:createUserDto.username.toLocaleLowerCase(), password: hashed })
-  return newUser.save()
+  return await newUser.save()
+
 }
 
+async validate(login:LoginAuthDto){
+  const user = await this.userModel.findOne({username:login.username})
+  if(!user||!await bcrypt.compare(login.password,user.password)){
+    throw new BadRequestException("Invalid credentials!")
+  }
 
+  return {sub:user.id,email:user.email};
+}
+
+/********************** */
 async findAll(): Promise<User[]>{
 
   return this.userModel
@@ -57,6 +69,7 @@ async find(id: string):Promise<User> {
 async findUsersByUsername(username: string): Promise<User[]> {
   return this.userModel
     .find({ username: { $regex: username, $options: 'i' } }) 
+    .select('-password')
     .exec();
 }
 
@@ -92,6 +105,67 @@ async remove(id:string){
 
 
 
+async sendPasswordResetEmail(email: string):Promise<Boolean> {
+
+
+  //Check if this user exists 
+  const user = await this.userModel.findOne({email:email});
+  if (!user){
+    return true;
+  }
+
+  try{
+  // Generate a unique reset token and its expiration
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const tokenExpires = new Date();
+  tokenExpires.setHours(tokenExpires.getHours() + 1); // Token valid for 1 hour
+
+  user.resetPasswordToken = resetToken;
+  user.resetPasswordExpires = tokenExpires;
+  await user.save();
+
+  // Send email (configure your email service here)
+  // Example: Use a real email service in production
+  const resetUrl = `http://localhost:8081/reset-password/${resetToken}`;
+  console.log(`Reset token for ${email}: ${resetUrl}`);
+  await this.mailService.sendMail(
+    email,
+    'Password Reset Request',
+    `Please use this link to reset your password: ${resetUrl}`,
+    `<p>Please use this link to reset your password: <a href="${resetUrl}">${resetUrl}</a></p>`
+  );
+
+  return true;
+}catch(e){
+  throw new BadRequestException("Something went wrong ! Try again !")
+}
+finally{
+  return false;
+}
+}
+
+
+
+
+async resetPassword(token: string, newPassword: string): Promise<void> {
+  const user = await this.userModel.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: new Date() },
+  });
+
+  if (!user) {
+    throw new BadRequestException('Invalid or expired token');
+  }
+
+  // Hash the new password and save it
+  user.password = await bcrypt.hash(newPassword, 10);
+  user.resetPasswordToken = undefined; // Clear the reset token
+  user.resetPasswordExpires = undefined;
+  await user.save();
+}
+
+
+/*
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     try {
       // Hash the password before saving
@@ -232,4 +306,7 @@ async remove(id:string){
     const { password, ...userWithoutPassword } = user.toObject();
     return userWithoutPassword;
   }
+
+
+  */
 }

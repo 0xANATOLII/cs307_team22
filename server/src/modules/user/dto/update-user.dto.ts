@@ -24,4 +24,7 @@ export class UpdateUserDto {
     @IsOptional()
     pfp?: string;
 
+    @IsOptional()
+    privacy: boolean;
+
 }
