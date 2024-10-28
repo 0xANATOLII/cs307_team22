@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, NotFoundException, Query, Logger } from '@nestjs/common';
 import { BadgeService } from './badge.service';
 import { CreateBadgeDto } from './dto/create-badge.dto';
 import { UpdateBadgeDto } from './dto/update-badge.dto';
@@ -6,6 +6,7 @@ import { Types } from 'mongoose';
 
 @Controller('badge')
 export class BadgeController {
+  private readonly logger = new Logger(BadgeController.name);
   constructor(private readonly badgeService: BadgeService) {}
 
   @Post('create')
@@ -50,6 +51,7 @@ async create(@Body() createBadgeDto: CreateBadgeDto) {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
+    this.logger.debug(`Deleting badge with ID: ${id}`);
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid ID format');
     }

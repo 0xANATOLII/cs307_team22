@@ -9,7 +9,7 @@ export default function BadgeCommentSection({ badgeId, username }) {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/badge/${badgeId}/comments`, {
+        const response = await fetch(`${Config.API_URL}/badge/${badgeId}/comments`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -20,10 +20,10 @@ export default function BadgeCommentSection({ badgeId, username }) {
           const data = await response.json();
           setComments(data);
         } else {
-          Alert.alert('Error', 'Failed to load comments');
+          alert('Error', 'Failed to load comments');
         }
       } catch (error) {
-        Alert.alert('Error', 'An error occurred while loading comments');
+        alert('Error', 'An error occurred while loading comments');
       }
     };
 
@@ -33,16 +33,16 @@ export default function BadgeCommentSection({ badgeId, username }) {
   // Submit new comment
   const handleCommentSubmit = async () => {
     if (newComment.length > 200) {
-      Alert.alert('Error', 'Comment exceeds character limit of 200.');
+      alert('Error', 'Comment exceeds character limit of 200.');
       return;
     }
     if (newComment.trim() === '') {
-      Alert.alert('Error', 'Comment cannot be empty.');
+      alert('Error', 'Comment cannot be empty.');
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/badge/${badgeId}/comment`, {
+      const response = await fetch(`${Config.API_URL}/badge/${badgeId}/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,19 +57,19 @@ export default function BadgeCommentSection({ badgeId, username }) {
         const newCommentData = await response.json();
         setComments([...comments, newCommentData]);
         setNewComment('');
-        Alert.alert('Success', 'Comment added!');
+        alert('Success', 'Comment added!');
       } else {
-        Alert.alert('Error', 'Failed to submit comment');
+        alert('Error', 'Failed to submit comment');
       }
     } catch (error) {
-      Alert.alert('Error', 'An error occurred while submitting the comment');
+      alert('Error', 'An error occurred while submitting the comment');
     }
   };
 
   // Delete comment
   const handleCommentDelete = async (commentId) => {
     try {
-      const response = await fetch(`http://localhost:3000/badge/${badgeId}/comment/${commentId}`, {
+      const response = await fetch(`${Config.API_URL}/badge/${badgeId}/comment/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -78,12 +78,12 @@ export default function BadgeCommentSection({ badgeId, username }) {
 
       if (response.ok) {
         setComments(comments.filter((comment) => comment._id !== commentId));
-        Alert.alert('Success', 'Comment deleted.');
+        alert('Success', 'Comment deleted.');
       } else {
-        Alert.alert('Error', 'Failed to delete comment');
+        alert('Error', 'Failed to delete comment');
       }
     } catch (error) {
-      Alert.alert('Error', 'An error occurred while deleting the comment');
+      alert('Error', 'An error occurred while deleting the comment');
     }
   };
 

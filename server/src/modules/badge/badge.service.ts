@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateBadgeDto } from './dto/create-badge.dto';
@@ -8,6 +8,7 @@ import { User, UserDocument } from '../user/schema/user.schema';
 
 @Injectable()
 export class BadgeService {
+  private readonly logger = new Logger(BadgeService.name);
   constructor(
     @InjectModel(Badge.name) private badgeModel: Model<BadgeDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -35,10 +36,16 @@ export class BadgeService {
   }
 
   // Fetch all badges
-  async findAll(): Promise<Omit<Badge, '_id'>[]> {
+  async findAll(): Promise<Badge[]> {
     const badges = await this.badgeModel.find().populate('userId').exec();
-    return badges.map(badge => this._getBadgeDataWithoutId(badge));
+  
+    // Map each badge to ensure `_id` is included in the final object
+    return badges.map(badge => {
+      const badgeObj = badge.toObject(); // Convert Mongoose document to plain JS object
+      return { ...badgeObj, _id: badgeObj._id }; // Explicitly include `_id`
+    });
   }
+  
 
   // Fetch a single badge by its ID
   async findOne(id: string): Promise<Omit<Badge, '_id'>> {
@@ -68,6 +75,7 @@ export class BadgeService {
 
   // Remove a badge by its ID
   async remove(id: string): Promise<void> {
+    this.logger.debug(`Service layer - Removing badge with ID: ${id}`);
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid badge ID format');
     }

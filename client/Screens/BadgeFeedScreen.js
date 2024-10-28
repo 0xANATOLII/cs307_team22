@@ -21,6 +21,7 @@ export default function BadgeFeedScreen({ route, navigation }) {
     async function fetchBadges() {
       try {
         const response = await axios.get(`${Config.API_URL}/badge`); // Adjust API URL
+        console.log("fetched badges: ", response.data);
         setBadges(response.data);
       } catch (error) {
         console.error('Error fetching badges:', error);
@@ -61,44 +62,97 @@ export default function BadgeFeedScreen({ route, navigation }) {
     setNewBadge({ name: '', picture: '', location: '' });
   };
 
+  const handleBadgeLike = async (badgeId) => {
+    console.log('Liking badge with ID:', badgeId);
+    try {
+      const response = await axios.post(`${Config.API_URL}/badge/${badgeId}/like`);
+      if (response.status === 200) {
+        const updatedBadge = response.data;
+        setBadges((prevBadges) =>
+          prevBadges.map((badge) => (badge._id === badgeId ? updatedBadge : badge))
+        );
+      }
+    } catch (error) {
+      console.error('Error liking badge:', error);
+      alert('Error', 'An error occurred while liking the badge');
+    }
+  };
+
+  const handleBadgeDelete = async (badgeId) => {
+    console.log('Deleting badge with ID:', badgeId);
+    try {
+      const response = await fetch(`${Config.API_URL}/badge/${badgeId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });      
+      if (response.ok) {
+        // Remove the deleted badge from the local state
+        setBadges((prevBadges) => prevBadges.filter((badge) => badge._id !== badgeId));
+        alert('Badge deleted successfully');
+      } else {
+        alert('Failed to delete badge');
+      }
+    } catch (error) {
+      console.error('Error deleting badge:', error);
+      alert('An error occurred while deleting the badge');
+    }
+  };
+  
+
   // Toggle visibility of comments for a specific badge
   const toggleCommentsVisibility = (badgeId) => {
     setVisibleComments((prevState) => ({
       ...prevState,
-      [badgeId]: !prevState[badgeId],
+      [badgeId]: !prevState[badgeId],  // Toggle only the specific badgeId
     }));
   };
 
   // Render each badge with its name and the username of the creator
-  const renderBadge = ({ item }) => (
-    <View style={styles.BSbadgeContainer}>
-      <Text style={styles.BSbadgeTitle}>{item.name}</Text>
+  const renderBadge = ({ item }) => {
+    // Debugging: Log the entire badge item to inspect its structure
+    console.log('Rendering badge item:', item);
+    console.log('Badge ID:', item._id); // Specific check for `_id`
   
-      {/* Check if item.userId exists before accessing item.userId.username */}
-      {item.userId && item.userId.username ? (
-        <Text style={styles.BSbadgeSubtitle}>Created by: {item.userId.username}</Text>
-      ) : (
-        <Text style={styles.BSbadgeSubtitle}>Creator unknown</Text>  // Fallback if userId or username is missing
-      )}
-  
-      {/* Button to toggle comment section */}
-      <Pressable
-        style={styles.BScommentToggleButton}
-        onPress={() => toggleCommentsVisibility(item._id)}
-      >
-        <Text style={styles.BScommentToggleText}>
-          {visibleComments[item._id] ? 'Hide Comments' : 'See Comments'}
+    return (
+      <View style={styles.BSbadgeContainer}>
+        <Text style={styles.BSbadgeTitle}>{item.name}</Text>
+        <Text style={styles.BSbadgeSubtitle}>
+          Created by: {item.userId?.username || 'Unknown'}
         </Text>
-      </Pressable>
   
-      {/* Show comments if visibleComments for the badge is true */}
-      {visibleComments[item._id] && (
-        <BadgeCommentSection badgeId={item._id} username={username} />
-      )}
-    </View>
-  );
+        {/* Like and Comment Toggle Buttons in a Row */}
+        <View style={styles.buttonRow}>
+          <Pressable onPress={() => handleBadgeLike(item._id)} style={styles.likeButton}>
+            <Text style={styles.likeButtonText}>Like</Text>
+          </Pressable>
+          <Text style={styles.likeCount}>Likes: {item.likes || 0}</Text>
   
-
+          <Pressable style={styles.BScommentToggleButton} onPress={() => toggleCommentsVisibility(item._id)}>
+            <Text style={styles.BScommentToggleText}>
+              {visibleComments[item._id] ? 'Hide Comments' : 'See Comments'}
+            </Text>
+          </Pressable>
+        </View>
+  
+        {/* Display Comments */}
+        {visibleComments[item._id] && (
+          <BadgeCommentSection key={item._id} badgeId={item._id} username={username} />
+        )}
+  
+        {/* Conditionally render delete button if the logged-in user is the badge creator */}
+        {item.userId?.username === username && (
+          <Pressable style={styles.BSdeleteButton} onPress={() => handleBadgeDelete(item._id)}>
+            <Text style={styles.BSdeleteButtonText}>Delete Badge</Text>
+          </Pressable>
+        )}
+      </View>
+    );
+  };
+  
+  
+  
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.BScontainer}>

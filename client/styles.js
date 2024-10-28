@@ -398,4 +398,37 @@ export default StyleSheet.create({
     fontSize: 18,
     color: '#777',
   },
+  buttonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  likeButton: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  likeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  likeCount: {
+    color: '#888',
+    marginRight: 10,
+  },
+  BScommentToggleButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  BScommentToggleText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 });
+
