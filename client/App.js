@@ -10,6 +10,7 @@ import BadgeFeedScreen from './Screens/BadgeFeedScreen';
 import MapPage from './Screens/MapPage';
 import Config from "./config.js";
 import NearbyMonumentScreen from './Screens/NearbyMonumentScreen';
+import CameraPage from './Screens/BadgeCreate';
 
 
 const Stack = createStackNavigator();
@@ -60,6 +61,12 @@ export default function App() {
           name="Map"
           component={MapPage}
           options={{title: 'Map'}}
+        />
+
+        <Stack.Screen 
+          name="CameraRoll"
+          component={CameraPage}
+          options={{title: 'Camera'}}
         />
       </Stack.Navigator>
     </NavigationContainer>
