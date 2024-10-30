@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException, BadRequestException, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException, BadRequestException, NotFoundException, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -14,6 +14,15 @@ export class UserController {
   async register(@Body() createUserDto: CreateUserDto) {
     const user = await this.userService.create(createUserDto);
     return { message: 'User registered successfully', userId: user.username};
+  }
+
+  @Delete('/deleteAccount')
+  async deleteAccount(@Body('username') username: string, @Body('password') password: string): Promise<{ message: string }> {
+    const isDeleted = await this.userService.deleteAccount(username, password);
+    if (!isDeleted) {
+      throw new HttpException('Invalid credentials or user not found', HttpStatus.UNAUTHORIZED);
+    }
+    return { message: 'Account successfully deleted' };
   }
 
   @Post('login')

@@ -3,8 +3,11 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable } from 'react-native';
 import styles from '../styles'; 
 import Config from "../config.js";
+import { useNavigation } from '@react-navigation/native';
 
 export default function RegistrationScreen() {
+  const navigation = useNavigation();
+
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -59,7 +62,7 @@ export default function RegistrationScreen() {
     if (response.ok) {
       alert('Registration Successful');
       // Redirect or navigate to another screen (e.g., Login screen)
-      navigation.navigate('Login');
+      navigation.navigate('Home');
     } else {
       // If the backend returns an error (e.g., email already exists), display it
       if (data.message === 'Email already in use') {

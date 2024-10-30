@@ -35,6 +35,24 @@ export class UserService {
     }
   }
 
+  async deleteAccount(username: string, password: string): Promise<boolean> {
+    // Find the user by username
+    const user = await this.userModel.findOne({ username });
+    if (!user) {
+      return false; // User not found
+    }
+
+    // Validate the password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return false; // Password is incorrect
+    }
+
+    // Delete the user
+    await this.userModel.deleteOne({ username });
+    return true;
+  }
+
   async validateUser(username: string, password: string): Promise<Omit<User, 'password'> | null> {
     const user = await this.userModel.findOne({ username }).exec();
     if (!user) {
