@@ -10,7 +10,7 @@ export default function MonumentScreen({ route, navigation }) {
   const [userLocation, setUserLocation] = useState(null);
   const { username } = route.params;
  // const [isWithinRadius, setIsWithinRadius] = useState(false);  USE FOR BADGE
-  const RADIUS_THRESHOLD = 0.01; // 10 meters in kilometers USE FOR BADGE
+//const RADIUS_THRESHOLD = 0.01; 10 meters in kilometers USE FOR BADGE
 
   // Same markers array as MapPage
   const markers = [
@@ -116,20 +116,12 @@ export default function MonumentScreen({ route, navigation }) {
         const passedMarkers = route.params?.closestMarkers;
         const passedLocation = route.params?.userLocation;
 
-        let location = await Location.getCurrentPositionAsync({});
         if (passedMarkers && passedLocation) {
-          const distance = getDistance(location, passedLocation);
-          if(distance <= RADIUS_THRESHOLD) {
             setMonuments(passedMarkers);
             setUserLocation(passedLocation);
-          }
-          else {
-            // If old data is passed, calculate everything
-            setUserLocation(location.coords);
-            calculateNearbyMonuments(location.coords);
-          }
         } else {
           // If no passed data, calculate everything
+          let location = await Location.getCurrentPositionAsync({});
           setUserLocation(location.coords);
           calculateNearbyMonuments(location.coords);
         }
