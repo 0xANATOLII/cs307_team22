@@ -29,6 +29,7 @@ export class BadgeService {
       picture: createBadgeDto.picture,
       location: createBadgeDto.location,
       userId: user._id,  // Use the ObjectId from the user document
+      username: user.username,
       monumentId: createBadgeDto.monumentId || 'home',  // Use default monumentId if not provided
     });
 
@@ -99,4 +100,94 @@ export class BadgeService {
     const { _id, ...badgeWithoutId } = badge.toObject(); // Omit the _id field
     return badgeWithoutId;
   }
+
+  async findCommentsByBadgeId(badgeId: string) {
+    if (!Types.ObjectId.isValid(badgeId)) {
+      throw new NotFoundException('Invalid badge ID format');
+    }
+  
+    const badge = await this.badgeModel.findById(badgeId, 'comments').populate('comments.userId', 'username').exec();
+    if (!badge) {
+      throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+    }
+    return badge.comments; // Return only the comments array
+  }
+
+  async addCommentToBadge(badgeId: string, commentDto: { userId: string; commentText: string ; username: string}) {
+    this.logger.log(`Attempting to add comment to badge ID: ${badgeId} by user ${commentDto.username}`);
+    
+    if (!Types.ObjectId.isValid(badgeId) || !Types.ObjectId.isValid(commentDto.userId)) {
+      this.logger.error(`Invalid badge or user ID format. Badge ID: ${badgeId}, User ID: ${commentDto.userId}`);
+      throw new BadRequestException('Invalid badge or user ID format');
+    }
+
+    const newComment = {
+      userId: new Types.ObjectId(commentDto.userId),
+      username: commentDto.username,
+      commentText: commentDto.commentText,
+      createdAt: new Date(),
+    };
+
+    try {
+      const updatedBadge = await this.badgeModel.findByIdAndUpdate(
+        badgeId,
+        { $push: { comments: newComment } },
+        { new: true }
+      ).populate('comments.userId', 'username').exec();
+
+      if (!updatedBadge) {
+        this.logger.warn(`Badge with ID ${badgeId} not found for adding comment`);
+        throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+      }
+      return updatedBadge;
+    } catch (error) {
+      this.logger.error(`Error adding comment to badge ID ${badgeId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  async addLikeToBadge(badgeId: string, userId: string) {
+    // Check if the user has already liked the badge
+    const badge = await this.badgeModel.findById(badgeId);
+    if (!badge) {
+      throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+    }
+  
+    const existingLike = badge.likes.find((like) => like.userId.toString() === userId);
+    if (existingLike) {
+      throw new ConflictException('User has already liked this badge');
+    }
+  
+    // Add the new like
+    const newLike = {
+      userId: new Types.ObjectId(userId),
+      likedAt: new Date(),
+    };
+    badge.likes.push(newLike);
+  
+    // Save the updated badge
+    await badge.save();
+    return badge;
+  }
+  
+
+  async unlikeBadge(badgeId: string, userId: string): Promise<Badge> {
+    if (!Types.ObjectId.isValid(badgeId) || !Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid badge or user ID format');
+    }
+  
+    // Remove the like entry with the matching userId from the likes array
+    const updatedBadge = await this.badgeModel.findByIdAndUpdate(
+      badgeId,
+      { $pull: { likes: { userId: new Types.ObjectId(userId) } } },  // Match like entry by userId
+      { new: true },
+    ).exec();
+  
+    if (!updatedBadge) {
+      throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+    }
+    
+    return updatedBadge;
+  }
+  
 }

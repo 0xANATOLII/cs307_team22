@@ -144,4 +144,10 @@ export class UserController {
       username: user.username,
     }));
   }
+
+  @Get('id/:username')
+  async getUserId(@Param('username') username: string) {
+    const userId = await this.userService.getUserIdByUsername(username);
+    return { userId };
+  }
 }

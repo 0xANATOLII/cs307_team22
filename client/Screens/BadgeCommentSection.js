@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, FlatList, StyleSheet, Alert } from 'react-native';
+import Config from '../config';
 
-export default function BadgeCommentSection({ badgeId, username }) {
+export default function BadgeCommentSection({ badgeId, username}) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [userId, setUserId] = useState(null);
 
   // Fetch comments for the specific badge
   useEffect(() => {
@@ -15,29 +17,47 @@ export default function BadgeCommentSection({ badgeId, username }) {
             'Content-Type': 'application/json',
           },
         });
-
         if (response.ok) {
           const data = await response.json();
           setComments(data);
         } else {
-          alert('Error', 'Failed to load comments');
+          alert('Error Failed to load comments');
         }
       } catch (error) {
-        alert('Error', 'An error occurred while loading comments');
+        alert('Error An error occurred while loading comments');
       }
     };
 
     fetchComments();
   }, [badgeId]);
 
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const response = await fetch(`${Config.API_URL}/user/id/${username}`);
+        if (response.ok) {
+          const data = await response.json();
+          setUserId(data.userId);  // Assuming response includes userId as { userId: '...'}
+        } else {
+          console.error('Failed to fetch user ID');
+        }
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+
+    fetchUserId();
+  }, [username]);
+
+
   // Submit new comment
   const handleCommentSubmit = async () => {
     if (newComment.length > 200) {
-      alert('Error', 'Comment exceeds character limit of 200.');
+      alert('Error: Comment exceeds character limit of 200.');
       return;
     }
     if (newComment.trim() === '') {
-      alert('Error', 'Comment cannot be empty.');
+      alert('Error Comment cannot be empty.');
       return;
     }
 
@@ -48,8 +68,9 @@ export default function BadgeCommentSection({ badgeId, username }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: 'userId_here', // Replace with actual user ID
+          userId: userId,
           commentText: newComment,
+          username: username,
         }),
       });
 
@@ -57,12 +78,12 @@ export default function BadgeCommentSection({ badgeId, username }) {
         const newCommentData = await response.json();
         setComments([...comments, newCommentData]);
         setNewComment('');
-        alert('Success', 'Comment added!');
+        alert('Success Comment added!');
       } else {
-        alert('Error', 'Failed to submit comment');
+        alert('Error Failed to submit comment');
       }
     } catch (error) {
-      alert('Error', 'An error occurred while submitting the comment');
+      alert('Error An error occurred while submitting the comment');
     }
   };
 
@@ -80,10 +101,10 @@ export default function BadgeCommentSection({ badgeId, username }) {
         setComments(comments.filter((comment) => comment._id !== commentId));
         alert('Success', 'Comment deleted.');
       } else {
-        alert('Error', 'Failed to delete comment');
+        alert('Error Failed to delete comment');
       }
     } catch (error) {
-      alert('Error', 'An error occurred while deleting the comment');
+      alert('Error An error occurred while deleting the comment');
     }
   };
 
@@ -94,11 +115,11 @@ export default function BadgeCommentSection({ badgeId, username }) {
       {/* Comment List */}
       <FlatList
         data={comments}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item, index) => (item._id ? item._id.toString() : `comment-${index}`)}
         renderItem={({ item }) => (
           <View style={styles.comment}>
-            <Text style={styles.commentUser}>{item.username}</Text>
-            <Text style={styles.commentText}>{item.comment}</Text>
+            <Text style={styles.commentUser}>{item.username || 'Unknown'}</Text>
+            <Text style={styles.commentText}>{item.commentText || 'No content'}</Text>
             {item.username === username && (
               <Pressable onPress={() => handleCommentDelete(item._id)}>
                 <Text style={styles.deleteButton}>Delete</Text>
@@ -107,6 +128,7 @@ export default function BadgeCommentSection({ badgeId, username }) {
           </View>
         )}
       />
+
 
       {/* Comment Input */}
       <TextInput

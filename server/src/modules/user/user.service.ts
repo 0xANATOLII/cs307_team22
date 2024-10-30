@@ -191,4 +191,12 @@ export class UserService {
     }).exec();
     return users.map(user => this._getUserDataWithoutPassword(user)); // Ensure to return without password
   }
+
+  async getUserIdByUsername(username: string): Promise<string> {
+    const user = await this.userModel.findOne({ username }).select('_id').exec();
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+    return user._id.toString();
+  }
 }

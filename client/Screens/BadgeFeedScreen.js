@@ -15,13 +15,13 @@ export default function BadgeFeedScreen({ route, navigation }) {
   const [badges, setBadges] = useState([]);
   const [visibleComments, setVisibleComments] = useState({});
   const [newBadge, setNewBadge] = useState({ name: '', picture: '', location: '' });
+  const [userId, setUserId] = useState(null);
 
   // Fetch all badges from the server
   useEffect(() => {
     async function fetchBadges() {
       try {
         const response = await axios.get(`${Config.API_URL}/badge`); // Adjust API URL
-        console.log("fetched badges: ", response.data);
         setBadges(response.data);
       } catch (error) {
         console.error('Error fetching badges:', error);
@@ -29,6 +29,25 @@ export default function BadgeFeedScreen({ route, navigation }) {
     }
     fetchBadges();
   }, []);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const response = await fetch(`${Config.API_URL}/user/id/${username}`);
+        if (response.ok) {
+          const data = await response.json();
+          setUserId(data.userId);  // Assuming response includes userId as { userId: '...'}
+        } else {
+          console.error('Failed to fetch user ID');
+        }
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+
+    fetchUserId();
+  }, [username]);
+
 
   const navigateToScreen = (screenName) => {
     navigation.navigate(screenName, { username });
@@ -62,21 +81,40 @@ export default function BadgeFeedScreen({ route, navigation }) {
     setNewBadge({ name: '', picture: '', location: '' });
   };
 
-  const handleBadgeLike = async (badgeId) => {
-    console.log('Liking badge with ID:', badgeId);
+  const handleBadgeLikeToggle = async (badgeId) => {
+    const badge = badges.find((badge) => badge._id === badgeId);
+    const isLiked = badge.likes && badge.likes.some((like) => like.userId === userId);
+  
     try {
-      const response = await axios.post(`${Config.API_URL}/badge/${badgeId}/like`);
+      let response;
+  
+      if (isLiked) {
+        // Unlike request with axios.delete and userId as a query parameter
+        response = await axios.delete(`${Config.API_URL}/badge/${badgeId}/unlike`, {
+          data: {userId: userId}, 
+        });
+      } else {
+        // Like request with axios.post
+        response = await axios.post(`${Config.API_URL}/badge/${badgeId}/like`, {
+          userId: userId, // Ensure userId is available in scope
+        });
+      }
+  
       if (response.status === 200) {
         const updatedBadge = response.data;
+  
+        // Update badges state with the updated badge
         setBadges((prevBadges) =>
-          prevBadges.map((badge) => (badge._id === badgeId ? updatedBadge : badge))
+          prevBadges.map((badge) =>
+            badge._id === badgeId ? updatedBadge : badge
+          )
         );
       }
     } catch (error) {
-      console.error('Error liking badge:', error);
-      alert('Error', 'An error occurred while liking the badge');
+      console.error(`Error ${isLiked ? 'unliking' : 'liking'} badge:`, error);
     }
   };
+  
 
   const handleBadgeDelete = async (badgeId) => {
     console.log('Deleting badge with ID:', badgeId);
@@ -111,23 +149,20 @@ export default function BadgeFeedScreen({ route, navigation }) {
 
   // Render each badge with its name and the username of the creator
   const renderBadge = ({ item }) => {
-    // Debugging: Log the entire badge item to inspect its structure
-    console.log('Rendering badge item:', item);
-    console.log('Badge ID:', item._id); // Specific check for `_id`
+    const isLiked = item.likes && item.likes.some((like) => like.userId === userId);
   
     return (
       <View style={styles.BSbadgeContainer}>
         <Text style={styles.BSbadgeTitle}>{item.name}</Text>
         <Text style={styles.BSbadgeSubtitle}>
-          Created by: {item.userId?.username || 'Unknown'}
+          Created by: {item.username || 'Unknown'}
         </Text>
   
-        {/* Like and Comment Toggle Buttons in a Row */}
         <View style={styles.buttonRow}>
-          <Pressable onPress={() => handleBadgeLike(item._id)} style={styles.likeButton}>
-            <Text style={styles.likeButtonText}>Like</Text>
+          <Pressable onPress={() => handleBadgeLikeToggle(item._id)} style={styles.likeButton}>
+            <Text style={styles.likeButtonText}>{isLiked ? 'Unlike' : 'Like'}</Text>
           </Pressable>
-          <Text style={styles.likeCount}>Likes: {item.likes || 0}</Text>
+          <Text style={styles.likeCount}>Likes: {item.likes ? item.likes.length : 0}</Text>
   
           <Pressable style={styles.BScommentToggleButton} onPress={() => toggleCommentsVisibility(item._id)}>
             <Text style={styles.BScommentToggleText}>
@@ -136,12 +171,10 @@ export default function BadgeFeedScreen({ route, navigation }) {
           </Pressable>
         </View>
   
-        {/* Display Comments */}
         {visibleComments[item._id] && (
           <BadgeCommentSection key={item._id} badgeId={item._id} username={username} />
         )}
   
-        {/* Conditionally render delete button if the logged-in user is the badge creator */}
         {item.userId?.username === username && (
           <Pressable style={styles.BSdeleteButton} onPress={() => handleBadgeDelete(item._id)}>
             <Text style={styles.BSdeleteButtonText}>Delete Badge</Text>
@@ -150,6 +183,7 @@ export default function BadgeFeedScreen({ route, navigation }) {
       </View>
     );
   };
+  
   
   
   

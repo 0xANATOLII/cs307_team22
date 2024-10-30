@@ -10,13 +10,11 @@ export class BadgeController {
   constructor(private readonly badgeService: BadgeService) {}
 
   @Post('create')
-async create(@Body() createBadgeDto: CreateBadgeDto) {
-  const badge = await this.badgeService.create(createBadgeDto);
-  return { message: 'Badge created successfully', badge };
-}
-
-
-
+  async create(@Body() createBadgeDto: CreateBadgeDto) {
+    this.logger.log(`creating badge for username: ${createBadgeDto.username}`);
+    const badge = await this.badgeService.create(createBadgeDto);
+    return { message: 'Badge created successfully', badge };
+  }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
@@ -74,6 +72,66 @@ async create(@Body() createBadgeDto: CreateBadgeDto) {
       id: badge._id,
       name: badge.name,
       location: badge.location,
+      userId: badge.userId,
     }));
   }
+
+  @Get(':badgeId/comments')
+  async getBadgeComments(@Param('badgeId') badgeId: string) {
+    this.logger.log(`Fetching comments for badge ID: ${badgeId}`);
+    try {
+      const comments = await this.badgeService.findCommentsByBadgeId(badgeId);
+      if (!comments) {
+        this.logger.warn(`No comments found for badge ID: ${badgeId}`);
+        throw new NotFoundException(`Comments for badge ID ${badgeId} not found`);
+      }
+      return comments;
+    } catch (error) {
+      this.logger.error(`Error fetching comments for badge ID ${badgeId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @Post(':badgeId/comment')
+  async addComment(
+    @Param('badgeId') badgeId: string,
+    @Body() commentDto: { userId: string; commentText: string ; username: string;}
+  ) {
+    this.logger.log(`Adding comment to badge ID: ${badgeId}`);
+    try {
+      const updatedBadge = await this.badgeService.addCommentToBadge(badgeId, commentDto);
+      return { message: 'Comment added successfully', updatedBadge };
+    } catch (error) {
+      this.logger.error(`Error adding comment to badge ID ${badgeId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @Post(':badgeId/like')
+  async likeBadge(
+    @Param('badgeId') badgeId: string,
+    @Body('userId') userId: string,
+  ) {
+    return this.badgeService.addLikeToBadge(badgeId, userId);
+  }
+
+  @Delete(':badgeId/unlike')
+    async unlikeBadge(
+      @Param('badgeId') badgeId: string,
+      @Body('userId') userId: string,
+    ) {
+      this.logger.debug(`Attempting to unlike badge with ID: ${badgeId}, by user ID: ${userId}`);
+      try {
+        const updatedBadge = await this.badgeService.unlikeBadge(badgeId, userId);
+        return {
+          message: 'Badge unliked successfully',
+          badge: updatedBadge,
+        };
+      } catch (error) {
+        this.logger.error(`Error unliking badge ID ${badgeId}: ${error.message}`, error.stack);
+        throw error;
+      }
+    }
+
+
 }
