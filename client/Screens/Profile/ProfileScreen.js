@@ -84,6 +84,49 @@ export default function ProfileScreen({ route, navigation }) {
       Alert.alert('Error', 'An error occurred while updating the description.');
     }
   };
+  const handleSaveUsername = async (newUsername) => {
+    const confirmChange = () => {
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Confirm Change",
+          "You can only change your username thrice, are you sure you want to proceed?",
+          [
+            {
+              text: "Cancel",
+              onPress: () => resolve(false), // Resolve the promise with false
+              style: "cancel",
+            },
+            {
+              text: "OK",
+              onPress: () => resolve(true), // Resolve the promise with true
+            },
+          ],
+          { cancelable: false }
+        );
+      });
+    };
+  
+    await confirmChange();
+
+    try {
+      const response = await fetch(`${Config.API_URL}/user/updateUsername`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, username: newUsername}),
+      });
+      if (response.ok) {
+        setProfileInfo((prev) => ({ ...prev, username: newUsername }));
+        Alert.alert('Success', 'Username updated successfully!');
+      } else {
+        Alert.alert('Error', 'Failed to update username');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while updating the username.');
+    }
+  };
+
 
   const togglePrivacy = async () => {
     const newPrivacySetting = !isPrivate;
@@ -141,6 +184,21 @@ export default function ProfileScreen({ route, navigation }) {
     navigation.navigate('Home');
   };
 
+  const handleUploadImage = async () => {
+    try {
+      // Simulate the upload process and store the selected image in profileInfo
+      setProfileInfo((prev) => ({ ...prev, pfp: { uri: selectedImage.uri } }));
+      
+      // Display success message
+      Alert.alert('Success', 'Profile picture updated successfully!');
+    } catch (error) {
+      // Handle any unexpected errors
+      Alert.alert('Error', 'An error occurred while updating the profile picture.');
+    } finally {
+      // Close the upload modal
+      setIsUploadModalVisible(false);
+    }
+  };
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -150,13 +208,64 @@ export default function ProfileScreen({ route, navigation }) {
             <Image source={profileInfo.pfp || require('./default.png')} style={styles.profilePhoto} />
           </Pressable>
   
-          {/* Username */}
-          <Text style={styles.title}>{profileInfo.username}</Text>
+         {/* Username */}
+         <Text style={styles.title}>{profileInfo.username}</Text>
+          <Pressable
+              style={[styles.button, { marginTop: 10 }]}
+              onPress={() => setIsUsernameModalVisible(true)}
+            >
+              <Text style={styles.buttonText}>Edit Username</Text>
+          </Pressable>
   
           {/* Description Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.sectionText}>{profileInfo.desc}</Text>
+              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.sectionText}>{profileInfo.desc}</Text>
+              <Pressable
+                style={[styles.button, { marginTop: 10 }]}
+                onPress={() => setIsDescriptionModalVisible(true)}
+              >
+                <Text style={styles.buttonText}>Edit Description</Text>
+              </Pressable>
+          </View>
+            {/* Privacy Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Privacy Settings</Text>
+              <View style={styles.privacyToggle}>
+                <Text style={styles.sectionContent}>{isPrivate ? 'Private Mode' : 'Public Mode'}</Text>
+                <Switch
+                  trackColor={{ false: '#767577', true: '#81b0ff' }}
+                  thumbColor={isPrivate ? '#f5dd4b' : '#f4f3f4'}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={togglePrivacy}
+                  value={isPrivate}
+                />
+              </View>
+          </View>
+  
+          {/* Achievements Section */}
+          <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Achievements</Text>
+              <View style={styles.achievementList}>
+                {profileInfo.achievementList.map((achievement, index) => (
+                  <View key={index} style={styles.achievement}>
+                    <Text style={styles.achievementTitle}>{achievement[0]}</Text>
+                    <Text style={styles.sectionText}>{achievement[1]}</Text>
+                  </View>
+                ))}
+              </View>
+          </View>
+  
+          {/* Profile History Section */}
+          <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Profile History</Text>
+              <View style={styles.achievementList}>
+                {profileInfo.profileHistory.map((historyItem, index) => (
+                  <View key={index} style={styles.achievement}>
+                    <Text style={styles.achievementTitle}>{historyItem}</Text>
+                  </View>
+                ))}
+              </View>
           </View>
   
           {/* Privacy Section */}
@@ -191,7 +300,111 @@ export default function ProfileScreen({ route, navigation }) {
           </Pressable>
         </View>
       </ScrollView>
+            {/* Bottom Navigation Bar */}
+            <View style={styles.bottomNav}>
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Map')}
+        >
+          <MaterialIcons name="map" size={28} color="#666" />
+          <Text style={styles.navText}>Map</Text>
+        </Pressable>
 
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Monument')}
+        >
+          <MaterialIcons name="star" size={28} color="#666" />
+          <Text style={styles.navText}>Monument</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('BadgeFeed')}
+        >
+          <MaterialIcons name="chat" size={28} color="#666" />
+          <Text style={styles.navText}>BadgeFeed</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => navigateToScreen('Profile')}
+        >
+          <MaterialIcons name="person" size={28} color="#007AFF" />
+          <Text style={[styles.navText, styles.navTextActive]}>Profile</Text>
+        </Pressable>
+      </View>
+
+  {/* Keep all Modal components here */}
+  <ModalPopup
+          editable={profileInfo.username}
+              visible={isUsernameModalVisible}
+              onClose={() => setIsUsernameModalVisible(false)}
+              onSave={handleSaveUsername}
+          modifyField={"Username"}
+      />
+      <ModalPopup
+          editable={profileInfo.desc}
+              visible={isDescriptionModalVisible}
+              onClose={() => setIsDescriptionModalVisible(false)}
+              onSave={handleSaveDescription}
+          modifyField={"Description"}
+      />
+      {/* Signout Modal */}
+      <Modal
+            animationType="none"
+            transparent={true}
+            visible={isSignOutDialogOpen}
+            onRequestClose={() => setIsSignOutDialogOpen(false)}
+          >
+            <View style={styles.SignoutCenteredView}>
+              <View style={styles.SignoutModalView}>
+                <Text style={styles.SignoutModalTitle}>Are you sure you want to sign out?</Text>
+                <Text style={styles.SignoutModalText}>This action will log you out of your account.</Text>
+                <View style={styles.SignoutModalButtonContainer}>
+                  <Pressable
+                    style={[styles.SignoutButton, styles.SignoutButtonOutline]}
+                    onPress={() => setIsSignOutDialogOpen(false)}
+                  >
+                    <Text style={styles.SignoutButtonOutlineText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.SignoutButton, styles.SignoutButtonFilled]}
+                    onPress={handleSignOut}
+                  >
+                    <Text style={styles.SignoutButtonFilledText}>Sign Out</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+      </Modal>
+
+      {/* Modal for confirming profile image upload */}
+      <Modal
+            transparent={true}
+            visible={isUploadModalVisible}
+            onRequestClose={() => setIsUploadModalVisible(false)}
+            animationType="fade" // Add fade animation for a smoother appearance
+          >
+            <View style={styles.modalBackdrop}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Confirm Profile Picture</Text>
+                
+                {/* Preview of the selected image */}
+                <Image source={selectedImage} style={styles.modalImagePreview} />
+                
+                <View style={styles.modalButtons}>
+                  <Pressable style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setIsUploadModalVisible(false)}>
+                    <Text style={styles.modalButtonText}>Cancel</Text>
+                  </Pressable>
+
+                  <Pressable style={[styles.modalButton, styles.modalConfirmButton]} onPress={handleUploadImage}>
+                    <Text style={styles.modalButtonText}>Confirm</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+      </Modal>
       {/* Delete Account Confirmation Modal */}
       <Modal
         animationType="fade"
