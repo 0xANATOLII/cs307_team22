@@ -430,5 +430,60 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  monumentHeader: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  monumentCard: {
+    flexDirection: 'row',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  monumentCardInactive: {
+    opacity: 0.6,
+  },
+  monumentIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 16,
+  },
+  monumentInfo: {
+    flex: 1,
+  },
+  monumentTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  monumentDistance: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  inRangeText: {
+    color: 'green',
+    fontWeight: 'bold',
+  },
+  refreshButton: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  rbutton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  refreshbuttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
 });
 
