@@ -48,8 +48,9 @@ export class UserService {
       return false; // Password is incorrect
     }
 
-    // Delete the user
-    await this.userModel.deleteOne({ username });
+      // Soft delete by setting deletedAt
+    user.deletedAt = new Date();
+    await user.save();
     return true;
   }
 
@@ -59,8 +60,27 @@ export class UserService {
       return null;
     }
 
+    // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    return isPasswordValid ? this._getUserDataWithoutPassword(user) : null;
+    if (!isPasswordValid) {
+      return null; // Password is incorrect
+    }
+        // Check for soft delete
+        if (user.deletedAt) {
+         // const gracePeriodDays = 30;
+          const expirationDate = new Date(user.deletedAt.getTime() + 100 * 1000); //make grace period 100 seconds for demo purposes
+    
+          if (new Date() > expirationDate) {
+            await this.userModel.deleteOne({ username });
+            return null; // Account permanently deleted
+          }
+    
+          // Reactivate account
+          user.deletedAt = null;
+          await user.save();
+        }
+    
+        return user;
   }
 
   async findByUsername(username: string): Promise<Omit<User, 'password'>> {
