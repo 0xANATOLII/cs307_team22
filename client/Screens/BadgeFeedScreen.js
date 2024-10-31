@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, FlatList, StyleSheet, TextInput } from 'react-native';
+import { View, Text, Pressable, FlatList, TextInput, ActivityIndicator} from 'react-native';
 import axios from 'axios';
 import BadgeCommentSection from './BadgeCommentSection'; // Adjust path as needed
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; //Import NavBar Icons
@@ -16,17 +16,22 @@ export default function BadgeFeedScreen({ route, navigation }) {
   const [visibleComments, setVisibleComments] = useState({});
   const [newBadge, setNewBadge] = useState({ name: '', picture: '', location: '' });
   const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Fetch all badges from the server
-  useEffect(() => {
-    async function fetchBadges() {
-      try {
-        const response = await axios.get(`${Config.API_URL}/badge`); // Adjust API URL
-        setBadges(response.data);
-      } catch (error) {
-        console.error('Error fetching badges:', error);
-      }
+
+  const fetchBadges = async () => {
+    try {
+      const response = await axios.get(`${Config.API_URL}/badge`); // Adjust API URL
+      setBadges(response.data);
+    } catch (error) {
+      console.error('Error fetching badges:', error);
+    } finally {
+      setLoading(false);  // Hide loading indicator
     }
+  };
+
+  useEffect(() => {
     fetchBadges();
   }, []);
 
@@ -61,10 +66,12 @@ export default function BadgeFeedScreen({ route, navigation }) {
         username: username, // Use the passed userId
         monumentId: 'home', // Default value for monumentId
       };
-      const response = await axios.post(`${Config.API_URL}/badge/create`, badgeDataWithIds);
-      setBadges((prevBadges) => [...prevBadges, response.data]);
+      await axios.post(`${Config.API_URL}/badge/create`, badgeDataWithIds);
+      await fetchBadges();
     } catch (error) {
       console.error('Error creating badge:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,7 +81,6 @@ export default function BadgeFeedScreen({ route, navigation }) {
       alert('Badge name is required');
       return;
     }
-
     createBadge(newBadge); // Call the function to create a badge
 
     // Reset the form
@@ -110,6 +116,7 @@ export default function BadgeFeedScreen({ route, navigation }) {
           )
         );
       }
+      await fetchBadges();
     } catch (error) {
       console.error(`Error ${isLiked ? 'unliking' : 'liking'} badge:`, error);
     }
@@ -216,12 +223,14 @@ export default function BadgeFeedScreen({ route, navigation }) {
         </View>
 
         {/* List of badges or "No badges" message */}
-        {badges.length === 0 ? (
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : badges.length === 0 ? (
           <Text style={styles.BSnoBadgesText}>No badges available</Text>
         ) : (
           <FlatList
             data={badges}
-            keyExtractor={(item, index) => item._id ? item._id : index.toString()}  // Fallback to index if _id is missing
+            keyExtractor={(item, index) => item._id ? item._id : index.toString()}
             renderItem={renderBadge}
           />
         )}

@@ -189,5 +189,22 @@ export class BadgeService {
     
     return updatedBadge;
   }
+
+  async deleteCommentFromBadge(badgeId: string, commentId: string): Promise<Badge> {
+    if (!Types.ObjectId.isValid(badgeId) || !Types.ObjectId.isValid(commentId)) {
+      throw new BadRequestException('Invalid badge or comment ID format');
+    }
+  
+    const updatedBadge = await this.badgeModel.findByIdAndUpdate(
+      badgeId,
+      { $pull: { comments: { _id: commentId } } }, // Remove comment by ID
+      { new: true },
+    ).exec();
+  
+    if (!updatedBadge) {
+      throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+    }
+    return updatedBadge;
+  }
   
 }

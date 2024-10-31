@@ -116,22 +116,37 @@ export class BadgeController {
   }
 
   @Delete(':badgeId/unlike')
-    async unlikeBadge(
-      @Param('badgeId') badgeId: string,
-      @Body('userId') userId: string,
-    ) {
-      this.logger.debug(`Attempting to unlike badge with ID: ${badgeId}, by user ID: ${userId}`);
-      try {
-        const updatedBadge = await this.badgeService.unlikeBadge(badgeId, userId);
-        return {
-          message: 'Badge unliked successfully',
-          badge: updatedBadge,
-        };
-      } catch (error) {
-        this.logger.error(`Error unliking badge ID ${badgeId}: ${error.message}`, error.stack);
-        throw error;
-      }
+  async unlikeBadge(
+    @Param('badgeId') badgeId: string,
+    @Body('userId') userId: string,
+  ) {
+    this.logger.debug(`Attempting to unlike badge with ID: ${badgeId}, by user ID: ${userId}`);
+    try {
+      const updatedBadge = await this.badgeService.unlikeBadge(badgeId, userId);
+      return {
+        message: 'Badge unliked successfully',
+        badge: updatedBadge,
+      };
+    } catch (error) {
+      this.logger.error(`Error unliking badge ID ${badgeId}: ${error.message}`, error.stack);
+      throw error;
     }
+  }
+
+  @Delete(':badgeId/comment/:commentId')
+  async deleteComment(
+    @Param('badgeId') badgeId: string,
+    @Param('commentId') commentId: string,
+  ) {
+    this.logger.log(`Deleting comment with ID: ${commentId} from badge ID: ${badgeId}`);
+    try {
+      const updatedBadge = await this.badgeService.deleteCommentFromBadge(badgeId, commentId);
+      return { message: 'Comment deleted successfully', updatedBadge };
+    } catch (error) {
+      this.logger.error(`Error deleting comment ID ${commentId} from badge ID ${badgeId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
 
 
 }

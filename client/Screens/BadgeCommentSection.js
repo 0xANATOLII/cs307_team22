@@ -8,26 +8,26 @@ export default function BadgeCommentSection({ badgeId, username}) {
   const [userId, setUserId] = useState(null);
 
   // Fetch comments for the specific badge
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const response = await fetch(`${Config.API_URL}/badge/${badgeId}/comments`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setComments(data);
-        } else {
-          alert('Error Failed to load comments');
-        }
-      } catch (error) {
-        alert('Error An error occurred while loading comments');
+  const fetchComments = async () => {
+    try {
+      const response = await fetch(`${Config.API_URL}/badge/${badgeId}/comments`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setComments(data);
+      } else {
+        alert('Error Failed to load comments');
       }
-    };
+    } catch (error) {
+      alert('Error An error occurred while loading comments');
+    }
+  };
 
+  useEffect(() => {
     fetchComments();
   }, [badgeId]);
 
@@ -82,6 +82,7 @@ export default function BadgeCommentSection({ badgeId, username}) {
       } else {
         alert('Error Failed to submit comment');
       }
+    await fetchComments();
     } catch (error) {
       alert('Error An error occurred while submitting the comment');
     }
@@ -103,6 +104,7 @@ export default function BadgeCommentSection({ badgeId, username}) {
       } else {
         alert('Error Failed to delete comment');
       }
+      await fetchComments();
     } catch (error) {
       alert('Error An error occurred while deleting the comment');
     }
