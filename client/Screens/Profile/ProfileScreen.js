@@ -164,7 +164,7 @@ export default function ProfileScreen({ route, navigation }) {
       });
   
       if (response.ok) {
-        Alert.alert('Success', 'Your account has been deleted.');
+        Alert.alert('Success', 'Your account has been deleted. You can log back in within 100 seconds to restore your account.');
         navigation.navigate('Home');
       } else {
         Alert.alert('Error', 'Failed to delete account. Incorrect password.');

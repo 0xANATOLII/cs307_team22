@@ -12,7 +12,8 @@ username:string
 email:string
 @Prop({ required: true })
 password:string
-
+@Prop()
+deletedAt? : Date | null;
 @Prop()
 name?:string
 @Prop()
