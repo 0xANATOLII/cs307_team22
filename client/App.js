@@ -10,6 +10,7 @@ import BadgeFeedScreen from './Screens/BadgeFeedScreen';
 import MapPage from './Screens/MapPage';
 import Config from "./config.js";
 import NearbyMonumentScreen from './Screens/NearbyMonumentScreen';
+import FriendsScreen from './Screens/FriendsScreen';
 
 
 const Stack = createStackNavigator();
@@ -24,7 +25,8 @@ const linking = {
       Profile: 'profile',
       ResetPassword: 'reset-password/:token', // The token parameter is part of the URL
       BeBoiler: 'navigation',
-      BadgeFeed: 'badge-feed'
+      BadgeFeed: 'badge-feed',
+      FriendsScreen: 'friends',
     },
   },
 };
@@ -60,6 +62,11 @@ export default function App() {
           name="Map"
           component={MapPage}
           options={{title: 'Map'}}
+        />
+        <Stack.Screen 
+          name="Friends"
+          component={FriendsScreen}
+          options={{title: 'Friends'}}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -283,6 +283,7 @@ export default StyleSheet.create({
     shadowRadius: 3.84,
   },
   navItem: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 8,

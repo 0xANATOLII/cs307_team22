@@ -4,7 +4,7 @@ import { Pressable, View, Text, Image} from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; //Import NavBar Icons
+import BottomNav from './BottomNav';
 import ModalPopup from './Profile/Popup';
 import styles from '../styles'; 
 
@@ -182,40 +182,14 @@ export default function MapPage({ route, navigation }) {
       </MapView>
 
       {/* Bottom Navigation Bar */}
-      <View style={styles.bottomNav}>
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Map')}
-        >
-          <MaterialIcons name="map" size={28} color="#007AFF" />
-          <Text style={[styles.navText,styles.navTextActive]}>Map</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Monument')}
-        >
-          <MaterialIcons name="star" size={28} color="#666" />
-          <Text style={styles.navText}>Monument</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('BadgeFeed')}
-        >
-          <MaterialIcons name="chat" size={28} color="#666" />
-          <Text style={styles.navText}>BadgeFeed</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Profile')}
-        >
-          <MaterialIcons name="person" size={28} color="#666" />
-          <Text style={styles.navText}>Profile</Text>
-        </Pressable>
-      </View>
-
+      <BottomNav 
+        route={route}
+        navigation={navigation} 
+        username={username}
+        closestMarkers={closestMarkers}
+        userLocation={location.coords}
+        currentScreen={"Map"}
+      />
     </SafeAreaView>
   );
 };

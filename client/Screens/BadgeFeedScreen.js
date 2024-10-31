@@ -6,6 +6,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; //Import Na
 import styles from '../styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Config from '../config';
+import BottomNav from './BottomNav';
 
 
 export default function BadgeFeedScreen({ route, navigation }) {
@@ -52,11 +53,6 @@ export default function BadgeFeedScreen({ route, navigation }) {
 
     fetchUserId();
   }, [username]);
-
-
-  const navigateToScreen = (screenName) => {
-    navigation.navigate(screenName, { username });
-  };
 
   // Create a new badge and update the state
   const createBadge = async (badgeData) => {
@@ -237,39 +233,12 @@ export default function BadgeFeedScreen({ route, navigation }) {
       </View>
 
       {/* Bottom Navigation Bar */}
-      <View style={styles.bottomNav}>
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Map')}
-        >
-          <MaterialIcons name="map" size={28} color="#666" />
-          <Text style={styles.navText}>Map</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Monument')}
-        >
-          <MaterialIcons name="star" size={28} color="#666" />
-          <Text style={styles.navText}>Monument</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('BadgeFeed')}
-        >
-          <MaterialIcons name="chat" size={28} color="#007AFF" />
-          <Text style={[styles.navText,styles.navTextActive]}>BadgeFeed</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Profile')}
-        >
-          <MaterialIcons name="person" size={28} color="#666" />
-          <Text style={styles.navText}>Profile</Text>
-        </Pressable>
-      </View>
+      <BottomNav 
+        route={route}
+        navigation={navigation} 
+        username={username} 
+        currentScreen={"BadgeFeed"}
+      />
     </SafeAreaView>
   );
 }

@@ -5,6 +5,7 @@ import styles from '../../styles';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Config from "../../config.js";
+import BottomNav from '../BottomNav';
 
 export default function ProfileScreen({ route, navigation }) {
   const { username } = route.params;
@@ -59,10 +60,6 @@ export default function ProfileScreen({ route, navigation }) {
 
     fetchProfileData();
   }, []);
-
-  const navigateToScreen = (screenName) => {
-    navigation.navigate(screenName, { username });
-  };
 
   const handleSaveDescription = async (newDescription) => {
     try {
@@ -300,40 +297,13 @@ export default function ProfileScreen({ route, navigation }) {
           </Pressable>
         </View>
       </ScrollView>
-            {/* Bottom Navigation Bar */}
-            <View style={styles.bottomNav}>
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Map')}
-        >
-          <MaterialIcons name="map" size={28} color="#666" />
-          <Text style={styles.navText}>Map</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Monument')}
-        >
-          <MaterialIcons name="star" size={28} color="#666" />
-          <Text style={styles.navText}>Monument</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('BadgeFeed')}
-        >
-          <MaterialIcons name="chat" size={28} color="#666" />
-          <Text style={styles.navText}>BadgeFeed</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Profile')}
-        >
-          <MaterialIcons name="person" size={28} color="#007AFF" />
-          <Text style={[styles.navText, styles.navTextActive]}>Profile</Text>
-        </Pressable>
-      </View>
+      {/* Bottom Navigation Bar */}
+      <BottomNav 
+        route={route}
+        navigation={navigation} 
+        username={username} 
+        currentScreen={"Profile"}
+      />
 
   {/* Keep all Modal components here */}
   <ModalPopup

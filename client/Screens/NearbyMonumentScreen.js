@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, Alert, Pressable } from 'react-native';
+import { View, Text, FlatList, Image, Alert, Pressable, ActivityIndicator} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import styles from '../styles';
+import BottomNav from './BottomNav';
 
 export default function MonumentScreen({ route, navigation }) {
   const [monuments, setMonuments] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
   const { username } = route.params;
+  const [loading, setLoading] = useState(true);
  // const [isWithinRadius, setIsWithinRadius] = useState(false);  USE FOR BADGE
 //const RADIUS_THRESHOLD = 0.01; 10 meters in kilometers USE FOR BADGE
 
@@ -115,6 +116,8 @@ export default function MonumentScreen({ route, navigation }) {
         // Try to get passed markers and location first
         const passedMarkers = route.params?.closestMarkers;
         const passedLocation = route.params?.userLocation;
+        console.log("Passed markers:", passedMarkers);
+        console.log("Passed location:", passedLocation);
 
         if (passedMarkers && passedLocation) {
             setMonuments(passedMarkers);
@@ -131,29 +134,31 @@ export default function MonumentScreen({ route, navigation }) {
         let location = await Location.getCurrentPositionAsync({});
         setUserLocation(location.coords);
         calculateNearbyMonuments(location.coords);
+        
       }
+      setLoading(false);
     };
-
     initializeLocation();
   }, []);
- 
-  const navigateToScreen = (screenName) => {
-    navigation.navigate(screenName, { username });
-  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.safeArea, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading nearby monuments...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Text style={styles.monumentHeader}>
-        Nearby Monuments 
-      </Text>
+      <Text style={styles.monumentHeader}>Nearby Monuments</Text>
       
       <FlatList
         data={monuments}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <View style={[
-            styles.monumentCard,styles.monumentCardInactive
-          ]}>
+          <View style={[styles.monumentCard, styles.monumentCardInactive]}>
             <Image source={item.icon} style={styles.monumentIcon} />
             <View style={styles.monumentInfo}>
               <Text style={styles.monumentTitle}>{item.title}</Text>
@@ -166,39 +171,12 @@ export default function MonumentScreen({ route, navigation }) {
       />
 
       {/* Bottom Navigation Bar */}
-      <View style={styles.bottomNav}>
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Map')}
-        >
-          <MaterialIcons name="map" size={28} color="#666" />
-          <Text style={styles.navText}>Map</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Monument')}
-        >
-          <MaterialIcons name="star" size={28} color="#007AFF" />
-          <Text style={[styles.navText,styles.navTextActive]}>Monument</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('BadgeFeed')}
-        >
-          <MaterialIcons name="chat" size={28} color="#666" />
-          <Text style={styles.navText}>BadgeFeed</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Profile')}
-        >
-          <MaterialIcons name="person" size={28} color="#666" />
-          <Text style={styles.navText}>Profile</Text>
-        </Pressable>
-      </View>
+      <BottomNav 
+        route={route}
+        navigation={navigation} 
+        username={username}
+        currentScreen={"Monument"}
+      />
     </SafeAreaView>
   );
 }
