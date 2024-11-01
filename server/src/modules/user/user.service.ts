@@ -68,7 +68,7 @@ export class UserService {
         // Check for soft delete
         if (user.deletedAt) {
          // const gracePeriodDays = 30;
-          const expirationDate = new Date(user.deletedAt.getTime() + 100 * 1000); //make grace period 100 seconds for demo purposes
+          const expirationDate = new Date(user.deletedAt.getTime() + 30 * 1000); //make grace period 30 seconds for demo purposes
     
           if (new Date() > expirationDate) {
             await this.userModel.deleteOne({ username });
