@@ -47,7 +47,6 @@ export default function ProfileScreen({ route, navigation }) {
             achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
             profileHistory: ['Change 1','Change 2'],
           });
-          setIsPrivate(data.privacy);
         } else {
           Alert.alert('Error', 'Failed to load profile data.');
         }
@@ -127,28 +126,32 @@ export default function ProfileScreen({ route, navigation }) {
 
   const togglePrivacy = async () => {
     const newPrivacySetting = !isPrivate;
-
+  
     try {
       const response = await fetch(`${Config.API_URL}/user/updatePrivacy`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, privacy: newPrivacySetting }),
+        body: JSON.stringify({ username, privacy: newPrivacySetting }), // Ensure these match backend expectations
       });
-
+      setIsPrivate(!isPrivate)
       const data = await response.json();
-
+  
+      console.log('Response status:', response.status); // Log status
+      console.log('Response data:', data); // Log data
+  
       if (response.ok) {
-        setIsPrivate(newPrivacySetting);
-        console.log('Privacy updated:', data);
+        console.log('Privacy updated:', data.message);
       } else {
         Alert.alert('Error', data.message || 'Failed to update privacy setting.');
       }
     } catch (error) {
+      console.error('Fetch error:', error); // Log fetch errors
       Alert.alert('Error', 'Could not update privacy setting.');
     }
   };
+  
 
   const handleDeleteAccount = async () => {
     try {
@@ -234,8 +237,9 @@ export default function ProfileScreen({ route, navigation }) {
                   trackColor={{ false: '#767577', true: '#81b0ff' }}
                   thumbColor={isPrivate ? '#f5dd4b' : '#f4f3f4'}
                   ios_backgroundColor="#3e3e3e"
-                  onValueChange={togglePrivacy}
                   value={isPrivate}
+                  onValueChange={togglePrivacy}
+                  
                 />
               </View>
           </View>
@@ -265,20 +269,6 @@ export default function ProfileScreen({ route, navigation }) {
               </View>
           </View>
   
-          {/* Privacy Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Privacy Settings</Text>
-            <View style={styles.privacyToggle}>
-              <Text style={styles.sectionContent}>{isPrivate ? 'Private Mode' : 'Public Mode'}</Text>
-              <Switch
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={isPrivate ? '#f5dd4b' : '#f4f3f4'}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={togglePrivacy}
-                value={isPrivate}
-              />
-            </View>
-          </View>
   
           {/* Sign Out Button */}
           <Pressable

@@ -91,20 +91,18 @@ export class UserService {
     return this._getUserDataWithoutPassword(user);
   }
 
-  async updatePrivacy(userId: string, isPrivate: boolean): Promise<Omit<User, 'password'>> {
-    if (!Types.ObjectId.isValid(userId)) {
-      throw new BadRequestException('Invalid user ID format');
-    }
-
-    const user = await this.userModel.findByIdAndUpdate(
-      userId,
-      { privacy: isPrivate },
-      { new: true },
-    ).exec();
+  async updatePrivacy(username: string, isPrivate: boolean): Promise<Omit<User, 'password'>> {
+    const user = await this.userModel.findOne({ username }).exec();
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return this._getUserDataWithoutPassword(user);
+
+    // Update the privacy field
+    user.privacy = isPrivate;
+    await user.save();
+
+    // Return the updated user without the password field
+    return user;
   }
 
   async updateDescription(username: string, description: string): Promise<User> {
@@ -182,7 +180,7 @@ export class UserService {
     }
     return this._getUserDataWithoutPassword(user);
   }
-
+/*
   async update(id: string, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
     const updatedUser = await this.userModel
       .findByIdAndUpdate(id, updateUserDto, { new: true })
@@ -192,14 +190,14 @@ export class UserService {
     }
     return this._getUserDataWithoutPassword(updatedUser);
   }
-
+*/
   async remove(id: string): Promise<void> {
     const result = await this.userModel.findByIdAndDelete(id).exec();
     if (!result) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
   }
-
+ 
   private _getUserDataWithoutPassword(user: UserDocument): Omit<User, 'password'> {
     const { password, ...userWithoutPassword } = user.toObject();
     return userWithoutPassword;
