@@ -12,7 +12,8 @@ username:string
 email:string
 @Prop({ required: true })
 password:string
-
+@Prop()
+deletedAt? : Date | null;
 @Prop()
 name?:string
 @Prop()
@@ -36,6 +37,15 @@ pfp?:string
 // Add the privacy field here
 @Prop({ default: false }) // Default value can be set to false
 privacy?: boolean; // Optional field
+
+@Prop({ type: [String], default: [] })
+following: string[];
+
+@Prop({ type: [String], default: [] })
+followers: string[];
+
+@Prop({ type: [String], default: [] })
+followRequests: string[];
 
 }
 

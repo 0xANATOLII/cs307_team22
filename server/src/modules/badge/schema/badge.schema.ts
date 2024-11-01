@@ -19,18 +19,23 @@ export class Badge {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
+  @Prop({ type: String, required: true })  // Add the username field here
+  username: string;
+
   @Prop({ type: Types.ObjectId, ref: 'Monument', required: true })
   monumentId: Types.ObjectId;
 
   @Prop([
     {
       userId: { type: Types.ObjectId, ref: 'User', required: true },
+      username: { type: String, required: true },
       commentText: { type: String, required: true },
       createdAt: { type: Date, default: Date.now },
     },
   ])
   comments: {
     userId: Types.ObjectId;
+    username: string;
     commentText: string;
     createdAt: Date;
   }[];
@@ -43,7 +48,7 @@ export class Badge {
   ])
   likes: {
     userId: Types.ObjectId;
-    createdAt: Date;
+    likedAt: Date;
   }[];
 }
 

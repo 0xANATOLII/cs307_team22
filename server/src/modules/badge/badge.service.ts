@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateBadgeDto } from './dto/create-badge.dto';
@@ -8,6 +8,7 @@ import { User, UserDocument } from '../user/schema/user.schema';
 
 @Injectable()
 export class BadgeService {
+  private readonly logger = new Logger(BadgeService.name);
   constructor(
     @InjectModel(Badge.name) private badgeModel: Model<BadgeDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -61,6 +62,7 @@ export class BadgeService {
       picturef: createBadgeDto.picturef,
       location: createBadgeDto.location,
       userId: user._id,  // Use the ObjectId from the user document
+      username: user.username,
       monumentId: createBadgeDto.monumentId || 'home',  // Use default monumentId if not provided
     });
 
@@ -68,10 +70,16 @@ export class BadgeService {
   }
 
   // Fetch all badges
-  async findAll(): Promise<Omit<Badge, '_id'>[]> {
+  async findAll(): Promise<Badge[]> {
     const badges = await this.badgeModel.find().populate('userId').exec();
-    return badges.map(badge => this._getBadgeDataWithoutId(badge));
+  
+    // Map each badge to ensure `_id` is included in the final object
+    return badges.map(badge => {
+      const badgeObj = badge.toObject(); // Convert Mongoose document to plain JS object
+      return { ...badgeObj, _id: badgeObj._id }; // Explicitly include `_id`
+    });
   }
+  
 
   // Fetch a single badge by its ID
   async findOne(id: string): Promise<Omit<Badge, '_id'>> {
@@ -101,6 +109,7 @@ export class BadgeService {
 
   // Remove a badge by its ID
   async remove(id: string): Promise<void> {
+    this.logger.debug(`Service layer - Removing badge with ID: ${id}`);
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid badge ID format');
     }
@@ -124,4 +133,111 @@ export class BadgeService {
     const { _id, ...badgeWithoutId } = badge.toObject(); // Omit the _id field
     return badgeWithoutId;
   }
+
+  async findCommentsByBadgeId(badgeId: string) {
+    if (!Types.ObjectId.isValid(badgeId)) {
+      throw new NotFoundException('Invalid badge ID format');
+    }
+  
+    const badge = await this.badgeModel.findById(badgeId, 'comments').populate('comments.userId', 'username').exec();
+    if (!badge) {
+      throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+    }
+    return badge.comments; // Return only the comments array
+  }
+
+  async addCommentToBadge(badgeId: string, commentDto: { userId: string; commentText: string ; username: string}) {
+    this.logger.log(`Attempting to add comment to badge ID: ${badgeId} by user ${commentDto.username}`);
+    
+    if (!Types.ObjectId.isValid(badgeId) || !Types.ObjectId.isValid(commentDto.userId)) {
+      this.logger.error(`Invalid badge or user ID format. Badge ID: ${badgeId}, User ID: ${commentDto.userId}`);
+      throw new BadRequestException('Invalid badge or user ID format');
+    }
+
+    const newComment = {
+      userId: new Types.ObjectId(commentDto.userId),
+      username: commentDto.username,
+      commentText: commentDto.commentText,
+      createdAt: new Date(),
+    };
+
+    try {
+      const updatedBadge = await this.badgeModel.findByIdAndUpdate(
+        badgeId,
+        { $push: { comments: newComment } },
+        { new: true }
+      ).populate('comments.userId', 'username').exec();
+
+      if (!updatedBadge) {
+        this.logger.warn(`Badge with ID ${badgeId} not found for adding comment`);
+        throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+      }
+      return updatedBadge;
+    } catch (error) {
+      this.logger.error(`Error adding comment to badge ID ${badgeId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  async addLikeToBadge(badgeId: string, userId: string) {
+    // Check if the user has already liked the badge
+    const badge = await this.badgeModel.findById(badgeId);
+    if (!badge) {
+      throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+    }
+  
+    const existingLike = badge.likes.find((like) => like.userId.toString() === userId);
+    if (existingLike) {
+      throw new ConflictException('User has already liked this badge');
+    }
+  
+    // Add the new like
+    const newLike = {
+      userId: new Types.ObjectId(userId),
+      likedAt: new Date(),
+    };
+    badge.likes.push(newLike);
+  
+    // Save the updated badge
+    await badge.save();
+    return badge;
+  }
+  
+
+  async unlikeBadge(badgeId: string, userId: string): Promise<Badge> {
+    if (!Types.ObjectId.isValid(badgeId) || !Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid badge or user ID format');
+    }
+  
+    // Remove the like entry with the matching userId from the likes array
+    const updatedBadge = await this.badgeModel.findByIdAndUpdate(
+      badgeId,
+      { $pull: { likes: { userId: new Types.ObjectId(userId) } } },  // Match like entry by userId
+      { new: true },
+    ).exec();
+  
+    if (!updatedBadge) {
+      throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+    }
+    
+    return updatedBadge;
+  }
+
+  async deleteCommentFromBadge(badgeId: string, commentId: string): Promise<Badge> {
+    if (!Types.ObjectId.isValid(badgeId) || !Types.ObjectId.isValid(commentId)) {
+      throw new BadRequestException('Invalid badge or comment ID format');
+    }
+  
+    const updatedBadge = await this.badgeModel.findByIdAndUpdate(
+      badgeId,
+      { $pull: { comments: { _id: commentId } } }, // Remove comment by ID
+      { new: true },
+    ).exec();
+  
+    if (!updatedBadge) {
+      throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+    }
+    return updatedBadge;
+  }
+  
 }

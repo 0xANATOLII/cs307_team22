@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform, SafeAreaView } from 'react-native';
+import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform, SafeAreaView, TextInput } from 'react-native';
 import ModalPopup from './Popup';
 import styles from '../../styles';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // Import the image picker
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; //Import NavBar Icons
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Config from "../../config.js";
+import BottomNav from '../BottomNav';
 
 export default function ProfileScreen({ route, navigation }) {
   const { username } = route.params;
@@ -19,12 +20,12 @@ export default function ProfileScreen({ route, navigation }) {
     username: username,
     pfp: null,
     desc: '',
-    achievementList: [['Achivement 1','Description of Achievment'],['Achivement 2','Description of Achievment']],
+    achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
     profileHistory: ['Change 1','Change 2'],
   });
   const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [password, setPassword] = useState('');  // New state variable for password input
+  const [isPasswordConfirmVisible, setIsPasswordConfirmVisible] = useState(false);  // Controls visibility of password input
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -39,14 +40,13 @@ export default function ProfileScreen({ route, navigation }) {
         if (response.ok) {
           const data = await response.json();
           setProfileInfo({
-            userId: data._id, // Ensure userId is set
+            userId: data._id,
             username: data.username,
             pfp: data.pfp ? { uri: data.pfp } : require('./default.png'),
             desc: data.desc || '',
-            achievementList: [['Achivement 1','Description of Achievment'],['Achivement 2','Description of Achievment']],
+            achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
             profileHistory: ['Change 1','Change 2'],
           });
-          setIsPrivate(data.privacy);
         } else {
           Alert.alert('Error', 'Failed to load profile data.');
         }
@@ -59,10 +59,6 @@ export default function ProfileScreen({ route, navigation }) {
 
     fetchProfileData();
   }, []);
-
-  const navigateToScreen = (screenName) => {
-    navigation.navigate(screenName, { username });
-  };
 
   const handleSaveDescription = async (newDescription) => {
     try {
@@ -84,7 +80,6 @@ export default function ProfileScreen({ route, navigation }) {
       Alert.alert('Error', 'An error occurred while updating the description.');
     }
   };
-
   const handleSaveUsername = async (newUsername) => {
     const confirmChange = () => {
       return new Promise((resolve) => {
@@ -128,56 +123,35 @@ export default function ProfileScreen({ route, navigation }) {
     }
   };
 
+
   const togglePrivacy = async () => {
     const newPrivacySetting = !isPrivate;
-
+  
     try {
-
       const response = await fetch(`${Config.API_URL}/user/updatePrivacy`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, privacy: newPrivacySetting }),
+        body: JSON.stringify({ username, privacy: newPrivacySetting }), // Ensure these match backend expectations
       });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            setIsPrivate(newPrivacySetting);
-            console.log('Privacy updated:', data);
-        } else {
-            console.error('Failed to update privacy:', data);
-            Alert.alert('Error', data.message || 'Failed to update privacy setting.');
-        }
-    } catch (error) {
-        console.error('Error updating privacy:', error);
-        Alert.alert('Error', 'Could not update privacy setting.');
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      const response = await fetch(`${Config.API_URL}/user/signout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username }),
-      });
-
+      setIsPrivate(!isPrivate)
+      const data = await response.json();
+  
+      console.log('Response status:', response.status); // Log status
+      console.log('Response data:', data); // Log data
+  
       if (response.ok) {
-        navigation.navigate('Home');
+        console.log('Privacy updated:', data.message);
       } else {
-        const errorData = await response.json();
-        Alert.alert('Error', errorData.message || 'Failed to sign out. Please try again.');
+        Alert.alert('Error', data.message || 'Failed to update privacy setting.');
       }
     } catch (error) {
-      Alert.alert('Error', 'An error occurred while signing out. Please check your connection and try again.');
-    } finally {
-      setIsSignOutDialogOpen(false);
+      console.error('Fetch error:', error); // Log fetch errors
+      Alert.alert('Error', 'Could not update privacy setting.');
     }
   };
+  
 
   const handleDeleteAccount = async () => {
     try {
@@ -186,89 +160,29 @@ export default function ProfileScreen({ route, navigation }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username: profileInfo.username }),
+        body: JSON.stringify({ username: profileInfo.username, password }),  // Send password with the request
       });
   
       if (response.ok) {
-        Alert.alert('Success', 'Your account has been deleted.');
-        navigation.navigate('Login'); // Navigate to the login screen
+        Alert.alert('Success', 'Your account has been deleted. You can log back in within 100 seconds to restore your account.');
+        navigation.navigate('Home');
+      } else {
+        Alert.alert('Error', 'Failed to delete account. Incorrect password.');
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to delete account: ' + error.message);
     } finally {
       setIsDeleteAccountModalVisible(false);
-    }
-  };
-  
-
-  
-  // Function to open the camera or image library on mobile, or file input for web
-  const handleProfileImagePress = () => {
-    if (Platform.OS === 'web') {
-      document.getElementById('profilePicInput').click(); // Trigger file input for web
-    } else {
-      Alert.alert('Upload Profile Picture', 'Choose an option:', [
-        {
-          text: 'Take Photo',
-          onPress: handleTakePhoto,
-        },
-        {
-          text: 'Choose from Library',
-          onPress: handleChoosePhoto,
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ]);
+      setPassword('');  // Clear the password input
+      setIsPasswordConfirmVisible(false);  // Reset password confirmation state
     }
   };
 
-  //Loading wheel for profile page
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-
-  // Open the camera
-  const handleTakePhoto = () => {
-    launchCamera(
-      { mediaType: 'photo', saveToPhotos: true },
-      (response) => {
-        if (response.assets) {
-          setSelectedImage({ uri: response.assets[0].uri });
-          setIsUploadModalVisible(true); // Show modal to confirm upload
-        }
-      }
-    );
+  const handleSignOut = async () => {
+    // Implement sign-out logic if needed
+    Alert.alert("Signed out", "You have successfully signed out.");
+    navigation.navigate('Home');
   };
-  
-   // Open the image library (mobile only)
-  const handleChoosePhoto = () => {
-    launchImageLibrary(
-      { mediaType: 'photo' },
-      (response) => {
-        if (response.assets) {
-          setSelectedImage({ uri: response.assets[0].uri });
-          setIsUploadModalVisible(true); // Show modal to confirm upload
-        }
-      }
-    );
-  };
-
-  // File input change handler (for web)
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setSelectedImage({ uri: imageUrl });
-      setIsUploadModalVisible(true); // Show modal to confirm upload
-    }
-  };
-
 
   const handleUploadImage = async () => {
     try {
@@ -285,121 +199,17 @@ export default function ProfileScreen({ route, navigation }) {
       setIsUploadModalVisible(false);
     }
   };
-/*  comment out for now, backend doesnt work
-  // Upload the selected image and update the profile picture
-  const handleUploadImage = async () => {
-    try {
-      const formData = new FormData();
-      formData.append('username', profileInfo.username);
-      formData.append('pfp', {
-        uri: selectedImage.uri,
-        name: 'profile.jpg',
-        type: 'image/jpeg',
-      });
-  
-      const response = await fetch('http://localhost:3000/user/uploadProfilePic', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        body: formData,
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        setProfileInfo((prev) => ({ ...prev, pfp: { uri: data.pfp } }));
-        Alert.alert('Success', 'Profile picture updated successfully!');
-      } else {
-        Alert.alert('Error', 'Failed to upload profile picture.');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'An error occurred while uploading the profile picture.');
-    } finally {
-      setIsUploadModalVisible(false);
-    }
-  };
-  */
-    if (loading) {
-      return (
-        <View style={styles.container}>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      );
-    }
-
-  // Function to handle search input changes
-  const handleSearchChange = async (query) => {
-    setSearchQuery(query);
-
-    if (query.length > 2) { // Start searching after 3 characters
-      try {
-        const response = await fetch(`http://localhost:3000/user/search?query=${query}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setSearchResults(data);
-        } else {
-          Alert.alert('Error', 'Failed to fetch search results.');
-        }
-      } catch (error) {
-        Alert.alert('Error', 'An error occurred while searching.');
-      }
-    } else {
-      setSearchResults([]); // Clear results if query is too short
-    }
-  };
-
-  // Function to handle search button press
-  const handleSearch = async () => {
-    if (searchQuery.length > 2) { // Start searching after 3 characters
-      try {
-        const response = await fetch(`http://localhost:3000/user/search?query=${searchQuery}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setSearchResults(data);
-        } else {
-          Alert.alert('Error', 'Failed to fetch search results.');
-        }
-      } catch (error) {
-        Alert.alert('Error', 'An error occurred while searching.');
-      }
-    } else {
-      Alert.alert('Error', 'Please enter at least 3 characters to search.');
-    }
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.profileContainer}>
           {/* Profile Picture Upload */}
-          <Pressable onPress={handleProfileImagePress}>
-              <Image source={profileInfo.pfp || require('./default.png')} style={styles.profilePhoto} />
+          <Pressable onPress={() => {}}>
+            <Image source={profileInfo.pfp || require('./default.png')} style={styles.profilePhoto} />
           </Pressable>
-          {/* File input for web */}
-          {Platform.OS === 'web' && (
-              <input
-                type="file"
-                id="profilePicInput"
-                accept="image/*"
-                style={{ display: 'none' }} // Hidden file input
-                onChange={handleFileChange}
-              />
-          )}          
   
-          {/* Username */}
-          <Text style={styles.title}>{profileInfo.username}</Text>
+         {/* Username */}
+         <Text style={styles.title}>{profileInfo.username}</Text>
           <Pressable
               style={[styles.button, { marginTop: 10 }]}
               onPress={() => setIsUsernameModalVisible(true)}
@@ -418,9 +228,8 @@ export default function ProfileScreen({ route, navigation }) {
                 <Text style={styles.buttonText}>Edit Description</Text>
               </Pressable>
           </View>
-  
-          {/* Privacy Section */}
-          <View style={styles.section}>
+            {/* Privacy Section */}
+            <View style={styles.section}>
               <Text style={styles.sectionTitle}>Privacy Settings</Text>
               <View style={styles.privacyToggle}>
                 <Text style={styles.sectionContent}>{isPrivate ? 'Private Mode' : 'Public Mode'}</Text>
@@ -428,8 +237,9 @@ export default function ProfileScreen({ route, navigation }) {
                   trackColor={{ false: '#767577', true: '#81b0ff' }}
                   thumbColor={isPrivate ? '#f5dd4b' : '#f4f3f4'}
                   ios_backgroundColor="#3e3e3e"
-                  onValueChange={togglePrivacy}
                   value={isPrivate}
+                  onValueChange={togglePrivacy}
+                  
                 />
               </View>
           </View>
@@ -459,61 +269,34 @@ export default function ProfileScreen({ route, navigation }) {
               </View>
           </View>
   
+  
           {/* Sign Out Button */}
           <Pressable
-              style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]}
-              onPress={() => setIsSignOutDialogOpen(true)}
-            >
-              <Text style={[styles.buttonText, { color: 'white' }]}>Sign Out</Text>
+            style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]}
+            onPress={handleSignOut}
+          >
+            <Text style={[styles.buttonText, { color: 'white' }]}>Sign Out</Text>
           </Pressable>
 
           {/* Delete Account Button */}
           <Pressable
-            style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20}]}
+            style={[styles.button, { backgroundColor: '#ff4136', marginTop: 20 }]}
             onPress={() => setIsDeleteAccountModalVisible(true)}
           >
             <Text style={[styles.buttonText, { color: 'white' }]}>Delete Account</Text>
-          </Pressable> 
+          </Pressable>
         </View>
       </ScrollView>
-
       {/* Bottom Navigation Bar */}
-      <View style={styles.bottomNav}>
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Map')}
-        >
-          <MaterialIcons name="map" size={28} color="#666" />
-          <Text style={styles.navText}>Map</Text>
-        </Pressable>
+      <BottomNav 
+        route={route}
+        navigation={navigation} 
+        username={username} 
+        currentScreen={"Profile"}
+      />
 
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Monument')}
-        >
-          <MaterialIcons name="star" size={28} color="#666" />
-          <Text style={styles.navText}>Monument</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('BadgeFeed')}
-        >
-          <MaterialIcons name="chat" size={28} color="#666" />
-          <Text style={styles.navText}>BadgeFeed</Text>
-        </Pressable>
-
-        <Pressable 
-          style={styles.navItem} 
-          onPress={() => navigateToScreen('Profile')}
-        >
-          <MaterialIcons name="person" size={28} color="#007AFF" />
-          <Text style={[styles.navText, styles.navTextActive]}>Profile</Text>
-        </Pressable>
-      </View>
-    
-      {/* Keep all Modal components here */}
-      <ModalPopup
+  {/* Keep all Modal components here */}
+  <ModalPopup
           editable={profileInfo.username}
               visible={isUsernameModalVisible}
               onClose={() => setIsUsernameModalVisible(false)}
@@ -582,22 +365,43 @@ export default function ProfileScreen({ route, navigation }) {
               </View>
             </View>
       </Modal>
-       
       {/* Delete Account Confirmation Modal */}
       <Modal
-            animationType="fade"
-            transparent={true}
-            visible={isDeleteAccountModalVisible}
-            onRequestClose={() => setIsDeleteAccountModalVisible(false)}
-          >
-            <View style={styles.SignoutCenteredView}>
-              <View style={styles.SignoutModalView}>
-                <Text style={styles.SignoutModalTitle}>Are you sure you want to delete your account?</Text>
-                <Text style={styles.SignoutModalText}>This action cannot be undone.</Text>
-                <View style={styles.SignoutModalButtonContainer}>
+        animationType="fade"
+        transparent={true}
+        visible={isDeleteAccountModalVisible}
+        onRequestClose={() => setIsDeleteAccountModalVisible(false)}
+      >
+        <View style={styles.SignoutCenteredView}>
+          <View style={styles.SignoutModalView}>
+            <Text style={styles.SignoutModalTitle}>Are you sure you want to delete your account?</Text>
+            <Text style={styles.SignoutModalText}>This action cannot be undone.</Text>
+
+            {isPasswordConfirmVisible ? (
+              <>
+                <Text style={styles.SignoutModalText}>Please enter your password to confirm:</Text>
+                <TextInput
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#ccc',
+                    padding: 10,
+                    marginTop: 10,
+                    borderRadius: 5,
+                    backgroundColor: '#fff',
+                  }}
+                  secureTextEntry={true}
+                  placeholder="Enter Password"
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <View style={{ marginTop: 20, flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Pressable
                     style={[styles.SignoutButton, styles.SignoutButtonOutline]}
-                    onPress={() => setIsDeleteAccountModalVisible(false)}
+                    onPress={() => {
+                      setIsDeleteAccountModalVisible(false);
+                      setIsPasswordConfirmVisible(false);
+                      setPassword('');
+                    }}
                   >
                     <Text style={styles.SignoutButtonOutlineText}>Cancel</Text>
                   </Pressable>
@@ -605,31 +409,29 @@ export default function ProfileScreen({ route, navigation }) {
                     style={[styles.SignoutButton, styles.SignoutButtonFilled, { backgroundColor: '#ff0000' }]}
                     onPress={handleDeleteAccount}
                   >
-                    <Text style={styles.SignoutButtonFilledText}>Delete Account</Text>
+                    <Text style={styles.SignoutButtonFilledText}>Confirm Delete</Text>
                   </Pressable>
                 </View>
+              </>
+            ) : (
+              <View style={styles.SignoutModalButtonContainer}>
+                <Pressable
+                  style={[styles.SignoutButton, styles.SignoutButtonOutline]}
+                  onPress={() => setIsDeleteAccountModalVisible(false)}
+                >
+                  <Text style={styles.SignoutButtonOutlineText}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.SignoutButton, styles.SignoutButtonFilled, { backgroundColor: '#ff0000' }]}
+                  onPress={() => setIsPasswordConfirmVisible(true)}
+                >
+                  <Text style={styles.SignoutButtonFilledText}>Delete Account</Text>
+                </Pressable>
               </View>
-            </View>
+            )}
+          </View>
+        </View>
       </Modal>
     </SafeAreaView>
-    );
-  }
-  
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  );
+}

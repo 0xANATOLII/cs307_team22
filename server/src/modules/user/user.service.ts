@@ -35,14 +35,52 @@ export class UserService {
     }
   }
 
+  async deleteAccount(username: string, password: string): Promise<boolean> {
+    // Find the user by username
+    const user = await this.userModel.findOne({ username });
+    if (!user) {
+      return false; // User not found
+    }
+
+    // Validate the password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return false; // Password is incorrect
+    }
+
+      // Soft delete by setting deletedAt
+    user.deletedAt = new Date();
+    await user.save();
+    return true;
+  }
+
   async validateUser(username: string, password: string): Promise<Omit<User, 'password'> | null> {
     const user = await this.userModel.findOne({ username }).exec();
     if (!user) {
       return null;
     }
 
+    // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    return isPasswordValid ? this._getUserDataWithoutPassword(user) : null;
+    if (!isPasswordValid) {
+      return null; // Password is incorrect
+    }
+        // Check for soft delete
+        if (user.deletedAt) {
+         // const gracePeriodDays = 30;
+          const expirationDate = new Date(user.deletedAt.getTime() + 100 * 1000); //make grace period 100 seconds for demo purposes
+    
+          if (new Date() > expirationDate) {
+            await this.userModel.deleteOne({ username });
+            return null; // Account permanently deleted
+          }
+    
+          // Reactivate account
+          user.deletedAt = null;
+          await user.save();
+        }
+    
+        return user;
   }
 
   async findByUsername(username: string): Promise<Omit<User, 'password'>> {
@@ -53,20 +91,18 @@ export class UserService {
     return this._getUserDataWithoutPassword(user);
   }
 
-  async updatePrivacy(userId: string, isPrivate: boolean): Promise<Omit<User, 'password'>> {
-    if (!Types.ObjectId.isValid(userId)) {
-      throw new BadRequestException('Invalid user ID format');
-    }
-
-    const user = await this.userModel.findByIdAndUpdate(
-      userId,
-      { privacy: isPrivate },
-      { new: true },
-    ).exec();
+  async updatePrivacy(username: string, isPrivate: boolean): Promise<Omit<User, 'password'>> {
+    const user = await this.userModel.findOne({ username }).exec();
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return this._getUserDataWithoutPassword(user);
+
+    // Update the privacy field
+    user.privacy = isPrivate;
+    await user.save();
+
+    // Return the updated user without the password field
+    return user;
   }
 
   async updateDescription(username: string, description: string): Promise<User> {
@@ -144,7 +180,7 @@ export class UserService {
     }
     return this._getUserDataWithoutPassword(user);
   }
-
+/*
   async update(id: string, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
     const updatedUser = await this.userModel
       .findByIdAndUpdate(id, updateUserDto, { new: true })
@@ -154,14 +190,14 @@ export class UserService {
     }
     return this._getUserDataWithoutPassword(updatedUser);
   }
-
+*/
   async remove(id: string): Promise<void> {
     const result = await this.userModel.findByIdAndDelete(id).exec();
     if (!result) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
   }
-
+ 
   private _getUserDataWithoutPassword(user: UserDocument): Omit<User, 'password'> {
     const { password, ...userWithoutPassword } = user.toObject();
     return userWithoutPassword;
@@ -172,5 +208,82 @@ export class UserService {
       username: { $regex: query, $options: 'i' } // Case-insensitive search
     }).exec();
     return users.map(user => this._getUserDataWithoutPassword(user)); // Ensure to return without password
+  }
+
+  async getUserIdByUsername(username: string): Promise<string> {
+    const user = await this.userModel.findOne({ username }).select('_id').exec();
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+    return user._id.toString();
+  }
+
+  async sendFollowRequest(userId: string, targetUserId: string): Promise<any> {
+    const targetUser = await this.userModel.findById(targetUserId);
+    if (!targetUser) throw new NotFoundException('Target user not found');
+  
+    // Add userId to target user's follow requests
+    if (!targetUser.followRequests.includes(userId)) {
+      targetUser.followRequests.push(userId);
+      await targetUser.save();
+    }
+    return { message: 'Follow request sent successfully' };
+  }
+
+  async acceptFollowRequest(userId: string, targetUserId: string): Promise<any> {
+    const user = await this.userModel.findById(userId);
+    const targetUser = await this.userModel.findById(targetUserId);
+    if (!user || !targetUser) throw new NotFoundException('User not found');
+  
+    // Add each other as friends
+    if (!user.following.includes(targetUserId)) user.following.push(targetUserId);
+    if (!targetUser.followers.includes(userId)) targetUser.followers.push(userId);
+
+    // Remove from follow requests
+    user.followRequests = user.followRequests.filter(req => req !== targetUserId);
+    await user.save();
+    await targetUser.save();
+  
+    return { message: 'Follow request accepted' };
+  }
+
+  async rejectFollowRequest(userId: string, targetUserId: string): Promise<any> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+  
+    // Remove the request without adding as friends
+    user.followRequests = user.followRequests.filter(req => req !== targetUserId);
+    await user.save();
+  
+    return { message: 'Follow request rejected' };
+  }
+  
+  async unfollowUser(userId: string, targetUserId: string): Promise<User> {
+    const user = await this.userModel.findById(userId);
+    const targetUser = await this.userModel.findById(targetUserId);
+
+    if (!user || !targetUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Remove targetUserId from user's following list
+    user.following = user.following.filter(id => id.toString() !== targetUserId);
+    await user.save();
+
+    // Remove userId from targetUser's followers list
+    targetUser.followers = targetUser.followers.filter(id => id.toString() !== userId);
+    await targetUser.save();
+
+    return user;
+  }
+
+  async getFollowing(userId: string): Promise<string[]> {
+    const user = await this.userModel.findById(userId).select('following').exec();
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user.following; // Returns array of user IDs being followed as strings
   }
 }

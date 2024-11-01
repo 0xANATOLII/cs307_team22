@@ -283,6 +283,7 @@ export default StyleSheet.create({
     shadowRadius: 3.84,
   },
   navItem: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 8,
@@ -394,8 +395,137 @@ export default StyleSheet.create({
   },
   BSnoBadgesText: {
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 10,
+    marginBottom: 10,
     fontSize: 18,
     color: '#777',
   },
+  buttonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  likeButton: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  likeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  likeCount: {
+    color: '#888',
+    marginRight: 10,
+  },
+  BScommentToggleButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  BScommentToggleText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  monumentHeader: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  monumentCard: {
+    flexDirection: 'row',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  monumentCardInactive: {
+    opacity: 0.6,
+  },
+  monumentIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 16,
+  },
+  monumentInfo: {
+    flex: 1,
+  },
+  monumentTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  monumentDistance: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  inRangeText: {
+    color: 'green',
+    fontWeight: 'bold',
+  },
+  refreshButton: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  rbutton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  refreshbuttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  BSsectionHeader: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginVertical: 10,
+    color: '#333',
+  },
+  userItemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  usernameText: {
+    fontSize: 16,
+    flex: 1,  // Allow the username text to take up available space
+  },
+  followButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 6,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+  },
+  followButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  unfollowButton: {
+    backgroundColor: '#FF3B30', // Red for "Unfollow" button
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  
 });
+

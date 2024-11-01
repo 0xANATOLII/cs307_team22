@@ -1,19 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException, BadRequestException, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException, BadRequestException, NotFoundException, Query, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { TogglePrivacyDto } from './dto/toggle-privacy.dto';
 import { UserDocument } from './user.model';
 import { Types } from 'mongoose';
 
 @Controller('user')
 export class UserController {
+  private readonly logger = new Logger(UserController.name);
   constructor(private readonly userService: UserService) {}
 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
     const user = await this.userService.create(createUserDto);
     return { message: 'User registered successfully', userId: user.username};
+  }
+
+  @Delete('/deleteAccount')
+  async deleteAccount(@Body('username') username: string, @Body('password') password: string): Promise<{ message: string }> {
+    const isDeleted = await this.userService.deleteAccount(username, password);
+    if (!isDeleted) {
+      throw new HttpException('Invalid credentials or user not found', HttpStatus.UNAUTHORIZED);
+    }
+    return { message: 'Account successfully deleted' };
   }
 
   @Post('login')
@@ -50,6 +59,8 @@ export class UserController {
     @Body() body: { username: string; description: string },
   ) {
     const { username, description } = body;
+    this.logger.log(username)
+
     if (!description || !username) {
       throw new BadRequestException('Username and description are required');
     }
@@ -62,16 +73,21 @@ export class UserController {
     return { message: 'Description updated successfully', description: updatedUser.description };
   }
 
-   @Patch('updatePrivacy')
-   async updatePrivacy(
-       @Body() togglePrivacyDto: TogglePrivacyDto,
-   ) {
-       const updatedUser = await this.userService.updatePrivacy(togglePrivacyDto.userId, togglePrivacyDto.isPrivate);
-       return {
-           message: 'Privacy setting updated',
-           privacy: updatedUser.privacy,
-       };
-   }
+  @Patch('updatePrivacy')
+  async updatePrivacy(
+    @Body() body: { username: string; privacy: boolean },
+
+  ){
+    const { username, privacy } = body;
+
+    this.logger.log(username)
+    this.logger.log(privacy)
+    const updatedUser = await this.userService.updatePrivacy(username, privacy);
+    if (!updatedUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return { message: 'Privacy setting updated successfully' };
+  }
 
   @Post('requestPasswordReset')
   async requestPasswordReset(@Body() body: { email: string }) {
@@ -113,26 +129,67 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
-  }
+ 
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
 
-  @Get('search')
-  async searchUsers(@Query('query') query: string) {
+  @Get('search/:query')
+  async searchUsers(@Param('query') query: string) {
     if (!query) {
       throw new BadRequestException('Query is required');
     }
-
+    this.logger.log("Query:", query);
     const users = await this.userService.searchUsers(query);
     return users.map((user: any) => ({
-      id: user._id, // Use '_id' as defined in the User interface
+      id: user._id.toString(), // Use '_id' as defined in the User interface
       username: user.username,
+      privacy: user.privacy,
     }));
+  }
+
+  @Get('id/:username')
+  async getUserId(@Param('username') username: string) {
+    const userId = await this.userService.getUserIdByUsername(username);
+    return { userId };
+  }
+
+  @Post('request')
+  async sendFollowRequest(
+    @Body('userId') userId: string,
+    @Body('targetUserId') targetUserId: string
+  ) {
+    return this.userService.sendFollowRequest(userId, targetUserId);
+  }
+
+  @Post('accept')
+  async acceptFollowRequest(
+    @Body('userId') userId: string,
+    @Body('targetUserId') targetUserId: string
+  ) {
+    return this.userService.acceptFollowRequest(userId, targetUserId);
+  }
+
+  @Post('reject')
+  async rejectFollowRequest(
+    @Body('userId') userId: string,
+    @Body('targetUserId') targetUserId: string
+  ) {
+    return this.userService.rejectFollowRequest(userId, targetUserId);
+  }
+
+  @Post(':userId/unfollow')
+  async unfollowUser(
+    @Param('userId') userId: string,
+    @Body('targetUserId') targetUserId: string,
+  ) {
+    return this.userService.unfollowUser(userId, targetUserId);
+  }
+  
+  @Get(':userId/following')
+  async getFollowing(@Param('userId') userId: string) {
+    return await this.userService.getFollowing(userId);
   }
 }

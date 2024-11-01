@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, NotFoundException, Query, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, NotFoundException, Query, UseInterceptors,Logger } from '@nestjs/common';
+
 import { BadgeService } from './badge.service';
 import { CreateBadgeDto } from './dto/create-badge.dto';
 import { UpdateBadgeDto } from './dto/update-badge.dto';
@@ -13,10 +14,11 @@ import { Response } from 'express';
 
 
 
-//6716cadf0fa5c38f7d74d4d0
 @Controller('badge')
 export class BadgeController {
+  private readonly logger = new Logger(BadgeController.name);
   constructor(private readonly badgeService: BadgeService) {}
+
 
   @Post()
   @UseInterceptors(FileFieldsInterceptor([
@@ -88,7 +90,6 @@ async create(@Body() createBadgeDto: CreateBadgeDto) {
 
 
 
-
   @Get(':id')
   async findOne(@Param('id') id: string) {
     if (!Types.ObjectId.isValid(id)) {
@@ -122,6 +123,7 @@ async create(@Body() createBadgeDto: CreateBadgeDto) {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
+    this.logger.debug(`Deleting badge with ID: ${id}`);
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid ID format');
     }
@@ -144,6 +146,81 @@ async create(@Body() createBadgeDto: CreateBadgeDto) {
       id: badge._id,
       name: badge.name,
       location: badge.location,
+      userId: badge.userId,
     }));
   }
+
+  @Get(':badgeId/comments')
+  async getBadgeComments(@Param('badgeId') badgeId: string) {
+    this.logger.log(`Fetching comments for badge ID: ${badgeId}`);
+    try {
+      const comments = await this.badgeService.findCommentsByBadgeId(badgeId);
+      if (!comments) {
+        this.logger.warn(`No comments found for badge ID: ${badgeId}`);
+        throw new NotFoundException(`Comments for badge ID ${badgeId} not found`);
+      }
+      return comments;
+    } catch (error) {
+      this.logger.error(`Error fetching comments for badge ID ${badgeId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @Post(':badgeId/comment')
+  async addComment(
+    @Param('badgeId') badgeId: string,
+    @Body() commentDto: { userId: string; commentText: string ; username: string;}
+  ) {
+    this.logger.log(`Adding comment to badge ID: ${badgeId}`);
+    try {
+      const updatedBadge = await this.badgeService.addCommentToBadge(badgeId, commentDto);
+      return { message: 'Comment added successfully', updatedBadge };
+    } catch (error) {
+      this.logger.error(`Error adding comment to badge ID ${badgeId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @Post(':badgeId/like')
+  async likeBadge(
+    @Param('badgeId') badgeId: string,
+    @Body('userId') userId: string,
+  ) {
+    return this.badgeService.addLikeToBadge(badgeId, userId);
+  }
+
+  @Delete(':badgeId/unlike')
+  async unlikeBadge(
+    @Param('badgeId') badgeId: string,
+    @Body('userId') userId: string,
+  ) {
+    this.logger.debug(`Attempting to unlike badge with ID: ${badgeId}, by user ID: ${userId}`);
+    try {
+      const updatedBadge = await this.badgeService.unlikeBadge(badgeId, userId);
+      return {
+        message: 'Badge unliked successfully',
+        badge: updatedBadge,
+      };
+    } catch (error) {
+      this.logger.error(`Error unliking badge ID ${badgeId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @Delete(':badgeId/comment/:commentId')
+  async deleteComment(
+    @Param('badgeId') badgeId: string,
+    @Param('commentId') commentId: string,
+  ) {
+    this.logger.log(`Deleting comment with ID: ${commentId} from badge ID: ${badgeId}`);
+    try {
+      const updatedBadge = await this.badgeService.deleteCommentFromBadge(badgeId, commentId);
+      return { message: 'Comment deleted successfully', updatedBadge };
+    } catch (error) {
+      this.logger.error(`Error deleting comment ID ${commentId} from badge ID ${badgeId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+
 }

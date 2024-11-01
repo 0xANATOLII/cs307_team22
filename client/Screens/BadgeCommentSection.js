@@ -1,55 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, FlatList, StyleSheet, Alert } from 'react-native';
+import Config from '../config';
 
-export default function BadgeCommentSection({ badgeId, username }) {
+export default function BadgeCommentSection({ badgeId, username}) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [userId, setUserId] = useState(null);
 
   // Fetch comments for the specific badge
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/badge/${badgeId}/comments`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+  const fetchComments = async () => {
+    try {
+      const response = await fetch(`${Config.API_URL}/badge/${badgeId}/comments`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setComments(data);
+      } else {
+        alert('Error Failed to load comments');
+      }
+    } catch (error) {
+      alert('Error An error occurred while loading comments');
+    }
+  };
 
+  useEffect(() => {
+    fetchComments();
+  }, [badgeId]);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const response = await fetch(`${Config.API_URL}/user/id/${username}`);
         if (response.ok) {
           const data = await response.json();
-          setComments(data);
+          setUserId(data.userId);  // Assuming response includes userId as { userId: '...'}
         } else {
-          Alert.alert('Error', 'Failed to load comments');
+          console.error('Failed to fetch user ID');
         }
       } catch (error) {
-        Alert.alert('Error', 'An error occurred while loading comments');
+        console.error('Error fetching user ID:', error);
       }
     };
 
-    fetchComments();
-  }, [badgeId]);
+    fetchUserId();
+  }, [username]);
+
 
   // Submit new comment
   const handleCommentSubmit = async () => {
     if (newComment.length > 200) {
-      Alert.alert('Error', 'Comment exceeds character limit of 200.');
+      alert('Error: Comment exceeds character limit of 200.');
       return;
     }
     if (newComment.trim() === '') {
-      Alert.alert('Error', 'Comment cannot be empty.');
+      alert('Error Comment cannot be empty.');
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/badge/${badgeId}/comment`, {
+      const response = await fetch(`${Config.API_URL}/badge/${badgeId}/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: 'userId_here', // Replace with actual user ID
+          userId: userId,
           commentText: newComment,
+          username: username,
         }),
       });
 
@@ -57,19 +78,20 @@ export default function BadgeCommentSection({ badgeId, username }) {
         const newCommentData = await response.json();
         setComments([...comments, newCommentData]);
         setNewComment('');
-        Alert.alert('Success', 'Comment added!');
+        alert('Success Comment added!');
       } else {
-        Alert.alert('Error', 'Failed to submit comment');
+        alert('Error Failed to submit comment');
       }
+    await fetchComments();
     } catch (error) {
-      Alert.alert('Error', 'An error occurred while submitting the comment');
+      alert('Error An error occurred while submitting the comment');
     }
   };
 
   // Delete comment
   const handleCommentDelete = async (commentId) => {
     try {
-      const response = await fetch(`http://localhost:3000/badge/${badgeId}/comment/${commentId}`, {
+      const response = await fetch(`${Config.API_URL}/badge/${badgeId}/comment/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -78,12 +100,13 @@ export default function BadgeCommentSection({ badgeId, username }) {
 
       if (response.ok) {
         setComments(comments.filter((comment) => comment._id !== commentId));
-        Alert.alert('Success', 'Comment deleted.');
+        alert('Success', 'Comment deleted.');
       } else {
-        Alert.alert('Error', 'Failed to delete comment');
+        alert('Error Failed to delete comment');
       }
+      await fetchComments();
     } catch (error) {
-      Alert.alert('Error', 'An error occurred while deleting the comment');
+      alert('Error An error occurred while deleting the comment');
     }
   };
 
@@ -94,11 +117,11 @@ export default function BadgeCommentSection({ badgeId, username }) {
       {/* Comment List */}
       <FlatList
         data={comments}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item, index) => (item._id ? item._id.toString() : `comment-${index}`)}
         renderItem={({ item }) => (
           <View style={styles.comment}>
-            <Text style={styles.commentUser}>{item.username}</Text>
-            <Text style={styles.commentText}>{item.comment}</Text>
+            <Text style={styles.commentUser}>{item.username || 'Unknown'}</Text>
+            <Text style={styles.commentText}>{item.commentText || 'No content'}</Text>
             {item.username === username && (
               <Pressable onPress={() => handleCommentDelete(item._id)}>
                 <Text style={styles.deleteButton}>Delete</Text>
@@ -107,6 +130,7 @@ export default function BadgeCommentSection({ badgeId, username }) {
           </View>
         )}
       />
+
 
       {/* Comment Input */}
       <TextInput
