@@ -10,7 +10,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CameraPage({route, navigation}) {
 
-
 const { closestMon, location, setClosestMon, setLocation } = useContext(LocationContext)
 
 const [permission, requestPermission] = useCameraPermissions();
@@ -45,32 +44,26 @@ const screenHeight = Dimensions.get('window').height;
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
   function toggleCameraFacingf() {
-  setFacing_f(current => (current === 'front' ? 'back' : 'front'));
+    setFacing_f(current => (current === 'front' ? 'back' : 'front'));
   }
 
 
   const takePicture = async () => {
     if (cameraRef.current) {
       const photo = await cameraRef.current.takePictureAsync();
-    
       setPhoto(photo);
     }
-   
   };
 
 
   const takePicturef = async () => {
     if ( cameraRef_f.current) {
-  
       const photo_f = await cameraRef_f.current.takePictureAsync();
       setPhotof(photo_f);
-     
     }
-   
   };
 
   const back_n = ()=>{
-    
     navigation.navigate('Map', { username: route.params.username });
   }
   //Post mode
@@ -266,35 +259,3 @@ const post_styles = StyleSheet.create({
           marginTop: 10,
         },
       });
-
-
-
-      /*
- {photo && (
-      
-            <TouchableOpacity style={styles.retakeButton} onPress={() => setPhoto(null)}>
-                <Text style={styles.text}>Retake</Text>
-            </TouchableOpacity>
-
-          
-
-            )}
-
-                <MapView
-      style={[post_styles.map, { height: screenHeight * 0.25 }]}
-      initialRegion={{
-        latitude: 37.78825, // Change to the monument's latitude
-        longitude: -122.4324, // Change to the monument's longitude
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      }}
-    >
-      <Marker
-        coordinate={{ latitude: 37.78825, longitude: -122.4324 }}
-        title="Monument Location"
-      />
-    </MapView>
-*/
-/* <TouchableOpacity style={styles.button} onPress={changeCamera}>
-        <Text style={styles.text}>Flip Cameras</Text>
-      </TouchableOpacity>*/

@@ -64,9 +64,7 @@ export default function MapPage({
             const newLocation = await Location.getCurrentPositionAsync({
               accuracy: Location.Accuracy.BestForNavigation
             });
-            console.log("Location updated via interval:", newLocation); // Debug log
             setLocation(newLocation);
-            checkProximity(newLocation.coords);
           } catch (error) {
             console.error("Error getting location:", error);
           }
@@ -147,40 +145,19 @@ export default function MapPage({
 
   // Check if user is within radius of any monument
   //CODE FOR DETECTING BADGE PROXIMITY
-  const checkProximity = (userLoc) => {
-    if (isPromptVisible) {
+  const checkProximity = (userLoc,monument) => {
+    if (isPromptVisible || isMiniMap) {
       return;
     }
-
-    let closestMonument = null;
-    let closestDistance = Infinity;
   
-    markers.forEach(monument => {
-      const distance = getDistance(userLoc, monument.coordinate);
-      if (distance <= RADIUS_THRESHOLD && distance < closestDistance) {
-        closestDistance = distance;
-        closestMonument = monument;
-      }
-    });
-  
-    const withinRadius = (closestMonument !== null);
-    setIsWithinRadius(withinRadius);
-  
-    if (withinRadius) {
-      setIsPromptVisible(true);
+    const distance = getDistance(userLoc, monument.coordinate);
+    if (distance > RADIUS_THRESHOLD) {
       Alert.alert(
-        "You can earn a Badge!",
-        `You're within range of ${closestMonument.title}. Do you want to create a badge or cancel?`,
+        "Not Close Enough :(",
+        `You need to be within 30 meters of ${monument.title}. Refer to the Monument Page for distances`,
         [
-          { 
-            text: "Create Badge", 
-            onPress: () => {
-              Alert.alert("Creating Badge", closestMonument.title)
-              setIsPromptVisible(false);
-            }
-          },
           {
-            text: "Cancel",
+            text: "Ok",
             onPress: () => {
               setIsPromptVisible(false); // Reset after user responds
             },
@@ -193,7 +170,36 @@ export default function MapPage({
           }
         }
       );
+      return;
     }
+
+    setIsPromptVisible(true);
+    Alert.alert(
+      "You can earn a Badge!",
+      `You're within range of ${monument.title}. Do you want to create a badge or cancel?`,
+      [
+        { 
+          text: "Create Badge", 
+          onPress: () => {
+            navigation.navigate("CameraRoll", { username: route.params.username });
+            setIsPromptVisible(false);
+          }
+        },
+        {
+          text: "Cancel",
+          onPress: () => {
+            setIsPromptVisible(false); // Reset after user responds
+          },
+          style: "cancel"
+        }
+      ],
+      {
+        onDismiss: () => {
+          setIsPromptVisible(false); 
+        }
+      }
+    );
+
   };
 
   // Display an error message if location permission is denied
@@ -227,11 +233,8 @@ export default function MapPage({
     > 
 
 
-        <TouchableOpacity style={styles_btn.topRightButton} onPress={() => alert('Right Button Pressed')}>
-        
+        <TouchableOpacity style={styles_btn.topRightButton} onPress={() => alert('Right Button Pressed')}>      
         <Text>Back</Text>
-
-        {/* <MaterialIcons name="more-vert" size={24} color="red" />*/}
         </TouchableOpacity>
     
         
@@ -252,7 +255,9 @@ export default function MapPage({
 
           {markers.map((marker, index) => (
             <Marker key={index} coordinate={marker.coordinate} title={marker.title}>
-              <Image source={marker.icon} style={closestMarker && closestMarker.title === marker.title ? { width: 30, height: 30, backgroundColor: 'red' } : { width: 30, height: 30 }} />
+              <TouchableOpacity onPress={() => checkProximity(location.coords,marker)}>
+                <Image source={marker.icon} style={closestMarker && closestMarker.title === marker.title ? { width: 30, height: 30, backgroundColor: 'red' } : { width: 30, height: 30 }} />
+              </TouchableOpacity>
             </Marker>
           ))}
         </MapView>
