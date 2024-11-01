@@ -150,6 +150,18 @@ export class UserController {
     }));
   }
 
+  @Get('recommended')
+  async getRecommendedUsers() {
+    this.logger.log('Fetching recommended users');
+    const users = await this.userService.getRecommendedUsers();
+
+    return users.map((user: any) => ({
+      id: user._id.toString(),
+      username: user.username,
+      privacy: user.privacy,
+    }));
+  }
+
   @Get('id/:username')
   async getUserId(@Param('username') username: string) {
     const userId = await this.userService.getUserIdByUsername(username);

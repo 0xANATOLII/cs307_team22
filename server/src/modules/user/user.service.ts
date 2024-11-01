@@ -287,4 +287,10 @@ export class UserService {
 
     return user.following; // Returns array of user IDs being followed as strings
   }
+
+  async getRecommendedUsers(): Promise<Omit<User, 'password'>[]> {
+    // Example criteria for recommendations
+    const users = await this.userModel.find({ isActive: true }).limit(10).exec(); // Modify criteria as needed
+    return users;
+  }
 }

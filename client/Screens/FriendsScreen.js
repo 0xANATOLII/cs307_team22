@@ -41,17 +41,18 @@ export default function FriendsPage({ route, navigation }) {
       console.error('Error fetching following users:', error);
     }
   };
-  
 
   // Fetch Friend Requests and Recommended Users
   const fetchFriendData = async () => {
     try {
       setLoading(true);
-      const requestsResponse = await axios.get(`${Config.API_URL}/friends/requests/${userId}`);
+      const requestsResponse = await axios.get(`${Config.API_URL}/user/requests/${userId}`);
       setFriendRequests(requestsResponse.data);
 
-      const recommendationsResponse = await axios.get(`${Config.API_URL}/users/recommended`);
-      setRecommendedUsers(recommendationsResponse.data);
+      if (!searchQuery) {
+        const recommendationsResponse = await axios.get(`${Config.API_URL}/user/recommended`);
+        setRecommendedUsers(recommendationsResponse.data);
+      }
     } catch (error) {
       console.error('Error fetching friend data:', error);
     } finally {
@@ -61,10 +62,10 @@ export default function FriendsPage({ route, navigation }) {
 
   useEffect(() => {
     if (userId) {
-        fetchFriendData();
-        fetchFollowingUsers();
+      fetchFriendData();
+      fetchFollowingUsers();
     }
-  }, [userId]);
+  }, [userId, searchQuery]);
 
   // Search users based on query
   const handleSearch = async () => {
@@ -74,6 +75,7 @@ export default function FriendsPage({ route, navigation }) {
       const response = await axios.get(`${Config.API_URL}/user/search/${searchQuery}`);
       const filteredResults = response.data.filter(user => user.username !== username);
       setSearchResults(filteredResults);
+      setRecommendedUsers([]); // Clear recommended users when searching
     } catch (error) {
       console.error('Error searching users:', error);
     } finally {
@@ -88,22 +90,6 @@ export default function FriendsPage({ route, navigation }) {
       fetchFriendData();
     } catch (error) {
       console.error(`Error ${action} friend request:`, error);
-    }
-  };
-
-  // Follow a Recommended User
-  const handleFollowRequest = async (targetUserId, isPrivate) => {
-    try {
-      if (isPrivate) {
-        await axios.post(`${Config.API_URL}/user/request`, { userId, targetUserId });
-        alert('Follow request sent.');
-      } else {
-        await axios.post(`${Config.API_URL}/user/accept`, { userId, targetUserId });
-        alert('Followed successfully.');
-      }
-      fetchFriendData();
-    } catch (error) {
-      console.error('Error sending follow request:', error);
     }
   };
 
@@ -122,14 +108,13 @@ export default function FriendsPage({ route, navigation }) {
     </View>
   );
 
+  // Follow and unfollow toggling
   const handleFollowToggle = async (targetUserId, isPrivate) => {
     try {
       if (followingUsers.includes(targetUserId)) {
-        // Unfollow the user if already following
         await axios.post(`${Config.API_URL}/user/${userId}/unfollow`, { userId, targetUserId });
         alert('Unfollowed successfully.');
       } else {
-        // Follow or send a request based on privacy
         if (isPrivate) {
           await axios.post(`${Config.API_URL}/user/request`, { userId, targetUserId });
           alert('Follow request sent.');
@@ -139,7 +124,7 @@ export default function FriendsPage({ route, navigation }) {
           alert('Followed successfully.');
         }
       }
-      fetchFollowingUsers(); // Refresh friend data
+      fetchFollowingUsers(); // Refresh following data
     } catch (error) {
       console.error('Error following/unfollowing user:', error);
     }
@@ -147,20 +132,16 @@ export default function FriendsPage({ route, navigation }) {
 
   // Render Recommended User or Search Result Item
   const renderUserItem = ({ item }) => {
-    console.log("item", item);
-    console.log("item id:",item.id);
-    console.log("item privacy", item.isPrivate);
     const isFollowing = followingUsers.includes(item.id); // Check if already following
-    console.log("isFollowing:", isFollowing);
 
     return (
       <View style={styles.userItemContainer}>
         <Text style={styles.usernameText}>{item.username}</Text>
         <Pressable
-          onPress={() => handleFollowToggle(item.id, item.isPrivate)}
+          onPress={() => handleFollowToggle(item.id, item.privacy)}
           style={isFollowing ? styles.unfollowButton : styles.followButton}
         >
-          <Text style={styles.followButtonText}>{isFollowing ? 'Unfollow' : item.isPrivate ? 'Request to Follow' : 'Follow'}</Text>
+          <Text style={styles.followButtonText}>{isFollowing ? 'Unfollow' : item.privacy ? 'Request to Follow' : 'Follow'}</Text>
         </Pressable>
       </View>
     );
