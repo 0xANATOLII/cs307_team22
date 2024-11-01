@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Image, Text,TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Image, Alert, Text,TouchableOpacity, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaFrameContext, SafeAreaView } from 'react-native-safe-area-context';
 import BottomNav from './BottomNav';
-import ModalPopup from './Profile/Popup';
 import styles from '../styles'; 
 import { MaterialIcons } from '@expo/vector-icons';
 import { LocationContext } from './Components/locationContext';
-
-
 
 export default function MapPage({
   isMiniMap = false,  // Control if this is a mini map or full map
@@ -37,46 +34,58 @@ export default function MapPage({
   const [min,setMin] = useState(-1);
   const [closestMarker, setClosestMarker] = useState(null);
   const [closestMarkers, setClosestMarkers] = useState([]);
-  /*const markers = [
-    {
-      coordinate: { latitude: 40.427281343904106, longitude: -86.9140668660199 },
-      icon: require('../assets/belltower.jpg'),  
-      title: 'Bell Tower',
-    },
-    {
-      coordinate: { latitude: 40.4273728685978, longitude: -86.91316931431314 },
-      icon: require('../assets/walk.png'),  // Another local image
-      title: 'WALC',
-    },
-    {
-      coordinate: { latitude: 40.4286566476374, longitude:-86.91356232247014 },
-      icon: require('../assets/efountain.jpg'),  // Another local image
-      title: 'Engineering fountain',
-    },
-    {
-      coordinate: { latitude: 40.4312239799775, longitude: -86.91588249175554 },
-      icon: require('../assets/neil.png'),  
-      title: 'Neil statue',
-    },
-    {
-      coordinate: { latitude: 40.4250502093892, longitude: -86.91111546181843 },
-      icon: require('../assets/pmu.png'),  // Another local image
-      title: 'PMU',
-    }
-  ];
-  */
+  const [isWithinRadius, setIsWithinRadius] = useState(false);
+  const [isPromptVisible, setIsPromptVisible] = useState(false); 
+  const RADIUS_THRESHOLD = 0.03; //100 meters 
+  
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
+    let proximityInterval = null;
+  
+    const startLocationChecks = async () => {
+      try {
+        // Ask for location permissions once
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setErrorMsg('Permission to access location was denied');
+          return;
+        }
+  
+        // Get initial location
+        let currentLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.BestForNavigation
+        });
+        setLocation(currentLocation);
+  
+        // Set up regular location checks
+        proximityInterval = setInterval(async () => {
+          try {
+            // Get updated location
+            const newLocation = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.BestForNavigation
+            });
+            console.log("Location updated via interval:", newLocation); // Debug log
+            setLocation(newLocation);
+            checkProximity(newLocation.coords);
+          } catch (error) {
+            console.error("Error getting location:", error);
+          }
+        }, 3000); // Check every 10 seconds
+  
+      } catch (error) {
+        console.error("Error setting up location checks:", error);
+        setErrorMsg('Error setting up location tracking');
       }
-
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-    })();
+    };
+  
+    startLocationChecks();
+  
+    // Cleanup function
+    return () => {
+      if (proximityInterval) {
+        clearInterval(proximityInterval);
+      }
+    };
   }, []);
 
 
@@ -97,20 +106,6 @@ export default function MapPage({
       navigation.navigate(screenName, { username: route.params.username });
     }
   };
-
-  useEffect(() => {
-    if (location) {
-      const closest = markers.reduce((prev, curr) => {
-        const prevDistance = getDistance(location.coords, prev.coordinate);
-        const currDistance = getDistance(location.coords, curr.coordinate);
-        return prevDistance < currDistance ? prev : curr;
-      }, markers[0]);
-
-
-      // Find the closest marker
-      setClosestMarker(closest);
-    }
-  }, [location]);
 
   useEffect(() => {
     if (location) {
@@ -146,8 +141,60 @@ export default function MapPage({
     return R * c; // Distance in km
   };
 
-  const degreesToRadians = (degrees) => degrees * (Math.PI / 180);
+  const degreesToRadians = (degrees) => {
+    return degrees * (Math.PI / 180);
+  };
 
+  // Check if user is within radius of any monument
+  //CODE FOR DETECTING BADGE PROXIMITY
+  const checkProximity = (userLoc) => {
+    if (isPromptVisible) {
+      return;
+    }
+
+    let closestMonument = null;
+    let closestDistance = Infinity;
+  
+    markers.forEach(monument => {
+      const distance = getDistance(userLoc, monument.coordinate);
+      if (distance <= RADIUS_THRESHOLD && distance < closestDistance) {
+        closestDistance = distance;
+        closestMonument = monument;
+      }
+    });
+  
+    const withinRadius = (closestMonument !== null);
+    setIsWithinRadius(withinRadius);
+  
+    if (withinRadius) {
+      setIsPromptVisible(true);
+      Alert.alert(
+        "You can earn a Badge!",
+        `You're within range of ${closestMonument.title}. Do you want to create a badge or cancel?`,
+        [
+          { 
+            text: "Create Badge", 
+            onPress: () => {
+              Alert.alert("Creating Badge", closestMonument.title)
+              setIsPromptVisible(false);
+            }
+          },
+          {
+            text: "Cancel",
+            onPress: () => {
+              setIsPromptVisible(false); // Reset after user responds
+            },
+            style: "cancel"
+          }
+        ],
+        {
+          onDismiss: () => {
+            setIsPromptVisible(false); 
+          }
+        }
+      );
+    }
+  };
 
   // Display an error message if location permission is denied
 
@@ -180,38 +227,36 @@ export default function MapPage({
     > 
 
 
-      <TouchableOpacity style={styles_btn.topRightButton} onPress={() => alert('Right Button Pressed')}>
-       
-       <Text>Back</Text>
+        <TouchableOpacity style={styles_btn.topRightButton} onPress={() => alert('Right Button Pressed')}>
+        
+        <Text>Back</Text>
 
-      {/* <MaterialIcons name="more-vert" size={24} color="red" />*/}
-      </TouchableOpacity>
-   
-      
-      <MapView
-        style={{ flex: 1 }}
-        initialRegion={{
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: isMiniMap ? 0.005 : 0.0922,  // More zoomed-in for mini map
-          longitudeDelta: isMiniMap ? 0.005 : 0.0421,
-        }}
-        zoomEnabled={zoomEnabled}
-        scrollEnabled={scrollEnabled}
-      >
-        <Marker coordinate={{ latitude: location.coords.latitude, longitude: location.coords.longitude }} title="Your Location">
-          <Image source={require('../assets/user-icon.png')} style={{ width: 30, height: 30 }} />
-        </Marker>
-
-        {markers.map((marker, index) => (
-          <Marker key={index} coordinate={marker.coordinate} title={marker.title}>
-            <Image source={marker.icon} style={closestMarker && closestMarker.title === marker.title ? { width: 30, height: 30, backgroundColor: 'red' } : { width: 30, height: 30 }} />
+        {/* <MaterialIcons name="more-vert" size={24} color="red" />*/}
+        </TouchableOpacity>
+    
+        
+        <MapView
+          style={{ flex: 1 }}
+          initialRegion={{
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            latitudeDelta: isMiniMap ? 0.005 : 0.0922,  // More zoomed-in for mini map
+            longitudeDelta: isMiniMap ? 0.005 : 0.0421,
+          }}
+          zoomEnabled={zoomEnabled}
+          scrollEnabled={scrollEnabled}
+        >
+          <Marker coordinate={{ latitude: location.coords.latitude, longitude: location.coords.longitude }} title="Your Location">
+            <Image source={require('../assets/user-icon.png')} style={{ width: 30, height: 30 }} />
           </Marker>
-        ))}
-      </MapView>
-      {isMiniMap && closestMarker && (
-  <Text>{closestMarker.title}</Text>
-)}
+
+          {markers.map((marker, index) => (
+            <Marker key={index} coordinate={marker.coordinate} title={marker.title}>
+              <Image source={marker.icon} style={closestMarker && closestMarker.title === marker.title ? { width: 30, height: 30, backgroundColor: 'red' } : { width: 30, height: 30 }} />
+            </Marker>
+          ))}
+        </MapView>
+        {isMiniMap && closestMarker && (<Text>{closestMarker.title}</Text>)}
 
    
 
