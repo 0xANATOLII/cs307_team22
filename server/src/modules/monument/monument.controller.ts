@@ -23,7 +23,7 @@ export class MonumentController {
   }
   @Get(':name')
   findOneByName(@Param('name') name: string) {
-    return this.monumentService.findByName(+id);
+    return this.monumentService.findByName(name);
   }
 
   @Patch(':id')

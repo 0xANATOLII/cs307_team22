@@ -16,6 +16,7 @@ const BottomNav = ({ navigation, route, closestMarkers, userLocation, currentScr
 
   // Array of navigation items
   const navItems = [
+    { screen: 'CameraRoll', label: 'Camera', icon: 'camera' },
     { screen: 'BadgeFeed', label: 'Badges', icon: 'chat' },
     { screen: 'Monument', label: 'Monuments', icon: 'star' },
     { screen: 'Map', label: 'Map', icon: 'map' },

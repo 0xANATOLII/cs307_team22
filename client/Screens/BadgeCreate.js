@@ -7,7 +7,7 @@ import MapPage from './MapPage';
 import { LocationContext } from './Components/locationContext';
 
 
-export default function CameraPage() {
+export default function CameraPage({route, navigation}) {
 
 
 const { closestMon, location, setClosestMon, setLocation } = useContext(LocationContext)
@@ -20,7 +20,7 @@ const [description, setDescription] = useState('');
 
 const screenHeight = Dimensions.get('window').height;
  // const [secFacing, setSecFacing] = useState('front');
-  const navigation = useNavigation(); // Use navigation to go back
+  //const navigation = useNavigation(); // Use navigation to go back
   const [photo, setPhoto] = useState(null);
   const [photof, setPhotof] = useState(null);
   const cameraRef = useRef(null);
@@ -67,7 +67,8 @@ const screenHeight = Dimensions.get('window').height;
   };
 
   const back_n = ()=>{
-    navigation.navigate('Home');
+    
+    navigation.navigate('Map', { username: route.params.username });
   }
   //Post mode
 
@@ -96,7 +97,7 @@ return (
     <Text style={post_styles.label}>Location:</Text>
 
 
-    <MapPage isMiniMap={true} >
+    <MapPage route={route} navigation={navigation} isMiniMap={true} >
     </MapPage>
 
    

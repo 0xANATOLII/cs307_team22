@@ -16,13 +16,11 @@ export default function MapPage({
   mapHeight = 200,    // Height of the map
   mapWidth = '100%',  // Width of the map
   zoomEnabled = true, // Control zooming
-  scrollEnabled = true // Control scrolling
+  scrollEnabled = true,  // Control scrolling
+   route, navigation 
 }) {
   //const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-
-  const [closestMarker, setClosestMarker] = useState(null);
-
   const { closestMon, location, setClosestMon, setLocation} = useContext(LocationContext)
 
   
@@ -39,7 +37,7 @@ export default function MapPage({
   const [min,setMin] = useState(-1);
   const [closestMarker, setClosestMarker] = useState(null);
   const [closestMarkers, setClosestMarkers] = useState([]);
-  const markers = [
+  /*const markers = [
     {
       coordinate: { latitude: 40.427281343904106, longitude: -86.9140668660199 },
       icon: require('../assets/belltower.jpg'),  
@@ -66,7 +64,7 @@ export default function MapPage({
       title: 'PMU',
     }
   ];
-  
+  */
 
   useEffect(() => {
     (async () => {
@@ -83,6 +81,9 @@ export default function MapPage({
 
 
   const { username } = route.params;
+
+
+
   const navigateToScreen = (screenName) => {
     // If navigating to Monument screen, pass the closestMarkers
     if (screenName === 'Monument') {
@@ -167,11 +168,17 @@ export default function MapPage({
   }
 
   return (
-    <View style={[
+
+
+    <View 
+    
+    style={[
       isMiniMap 
-        ? { height: mapHeight, width: mapWidth, borderRadius: 15, overflow: 'hidden' } 
-        : styles.map
-    ]}>
+        ? { height: mapHeight, width:"100%" ,borderRadius: 15, overflow: 'hidden' } 
+        : styles.safeArea
+    ]}
+    > 
+
 
       <TouchableOpacity style={styles_btn.topRightButton} onPress={() => alert('Right Button Pressed')}>
        
@@ -206,18 +213,24 @@ export default function MapPage({
   <Text>{closestMarker.title}</Text>
 )}
 
-    </View>
+   
 
       {/* Bottom Navigation Bar */}
-      <BottomNav 
-        route={route}
-        navigation={navigation} 
-        username={username}
-        closestMarkers={closestMarkers}
-        userLocation={location.coords}
-        currentScreen={"Map"}
-      />
-    </SafeAreaView>
+
+ {!isMiniMap && (
+  <BottomNav 
+  route={route}
+  navigation={navigation} 
+  username={username}
+  closestMarkers={closestMarkers}
+  userLocation={location.coords}
+  currentScreen={"Map"}
+/>
+)}
+     
+
+
+    </View>
 
   );
 }
