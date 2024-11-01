@@ -10,8 +10,6 @@ export default function MonumentScreen({ route, navigation }) {
   const [userLocation, setUserLocation] = useState(null);
   const { username } = route.params;
   const [loading, setLoading] = useState(true);
- // const [isWithinRadius, setIsWithinRadius] = useState(false);  USE FOR BADGE
-//const RADIUS_THRESHOLD = 0.01; 10 meters in kilometers USE FOR BADGE
 
   // Same markers array as MapPage
   const markers = [
@@ -60,35 +58,6 @@ export default function MonumentScreen({ route, navigation }) {
   const degreesToRadians = (degrees) => {
     return degrees * (Math.PI / 180);
   };
-
-  // Check if user is within radius of any monument
-  //CODE FOR DETECTING BADGE PROXIMITY
-  /*
-  const checkProximity = (userLoc) => {
-    const isNear = monuments.some(monument => {
-      const distance = getDistance(userLoc, monument.coordinate);
-      return distance <= RADIUS_THRESHOLD;
-    });
-    setIsWithinRadius(isNear);
-    
-    if (!isNear) {
-      Alert.alert(
-        "Too Far",
-        "You're not within range of any monuments. Please move closer or refresh the page.",
-        [
-          { 
-            text: "Refresh", 
-            onPress: () => calculateNearbyMonuments(userLoc)
-          },
-          {
-            text: "OK",
-            style: "cancel"
-          }
-        ]
-      );
-    }
-  };
-  */
 
   // Calculate nearby monuments
   const calculateNearbyMonuments = (userLoc) => {
