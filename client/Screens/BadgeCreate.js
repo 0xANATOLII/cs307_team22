@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import MapPage from './MapPage';
 import { LocationContext } from './Components/locationContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 export default function CameraPage({route, navigation}) {
@@ -26,15 +27,17 @@ const screenHeight = Dimensions.get('window').height;
   const cameraRef = useRef(null);
   const cameraRef_f = useRef(null);
   if (!permission) {
-    return <View />;
+    return <SafeAreaView style={styles.safeArea}></SafeAreaView>;
   }
 
   if (!permission.granted) {
     return (
-      <View style={styles.container}>
-        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
-        <Button onPress={requestPermission} title="grant permission" />
-      </View>
+      <SafeAreaView style={styles.safeArea}>
+        <View>
+          <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
+          <Button onPress={requestPermission} title="grant permission" />
+        </View>
+      </SafeAreaView>
     );
   }
 
