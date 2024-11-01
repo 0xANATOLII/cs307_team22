@@ -126,8 +126,7 @@ export default function FriendsPage({ route, navigation }) {
     try {
       if (followingUsers.includes(targetUserId)) {
         // Unfollow the user if already following
-        await axios.post(`${Config.API_URL}/user/${targetUserId}/unfollow`, { userId, targetUserId });
-        setFollowingUsers(followingUsers.filter(id => id !== targetUserId));
+        await axios.post(`${Config.API_URL}/user/${userId}/unfollow`, { userId, targetUserId });
         alert('Unfollowed successfully.');
       } else {
         // Follow or send a request based on privacy
@@ -140,7 +139,7 @@ export default function FriendsPage({ route, navigation }) {
           alert('Followed successfully.');
         }
       }
-      fetchFriendData(); // Refresh friend data
+      fetchFollowingUsers(); // Refresh friend data
     } catch (error) {
       console.error('Error following/unfollowing user:', error);
     }
@@ -148,8 +147,11 @@ export default function FriendsPage({ route, navigation }) {
 
   // Render Recommended User or Search Result Item
   const renderUserItem = ({ item }) => {
-    console.log(item.id);
+    console.log("item", item);
+    console.log("item id:",item.id);
+    console.log("item privacy", item.isPrivate);
     const isFollowing = followingUsers.includes(item.id); // Check if already following
+    console.log("isFollowing:", isFollowing);
 
     return (
       <View style={styles.userItemContainer}>

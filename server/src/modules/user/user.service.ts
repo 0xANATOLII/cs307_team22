@@ -261,21 +261,22 @@ export class UserService {
   async unfollowUser(userId: string, targetUserId: string): Promise<User> {
     const user = await this.userModel.findById(userId);
     const targetUser = await this.userModel.findById(targetUserId);
-
+  
     if (!user || !targetUser) {
       throw new NotFoundException('User not found');
     }
-
+    
     // Remove targetUserId from user's following list
-    user.following = user.following.filter(id => id.toString() !== targetUserId);
+    user.following = user.following.filter(id => id !== targetUserId);
     await user.save();
-
+    
     // Remove userId from targetUser's followers list
-    targetUser.followers = targetUser.followers.filter(id => id.toString() !== userId);
+    targetUser.followers = targetUser.followers.filter(id => id !== userId);
     await targetUser.save();
-
+    
     return user;
   }
+  
 
   async getFollowing(userId: string): Promise<string[]> {
     const user = await this.userModel.findById(userId).select('following').exec();
