@@ -21,6 +21,10 @@ export class MonumentController {
   findOne(@Param('id') id: string) {
     return this.monumentService.findOne(+id);
   }
+  @Get(':name')
+  findOneByName(@Param('name') name: string) {
+    return this.monumentService.findByName(+id);
+  }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateMonumentDto: UpdateMonumentDto) {

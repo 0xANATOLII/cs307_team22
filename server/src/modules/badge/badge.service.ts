@@ -15,8 +15,40 @@ export class BadgeService {
 
   // Create a new badge
   async create(createBadgeDto: CreateBadgeDto): Promise<Badge> {
+
+    try{
+    const user_= this.userModel.findOne({where:{id:createBadgeDto.userId}})
+
+    if(!user_)
+      throw new BadRequestException("This user doesnt exist !"); 
+
+    console.log(createBadgeDto)
+    const newBadge =  new this.badgeModel({
+
+      name: createBadgeDto.name,
+      picture:createBadgeDto.picture,
+      picturef:createBadgeDto.picturef,
+      location:createBadgeDto.location,
+      userId: createBadgeDto.userId,
+      monumentId:null,
+      comments: [],
+      likes:[]
+
+    })
+
+    const savedBadge = await newBadge.save();
+
+    return savedBadge
+
+
+  }catch(e){
+    throw new BadRequestException(e);
+  }
+
+
+
     // Find the user by their username instead of by _id
-    const user = await this.userModel.findOne({ username: createBadgeDto.username }).exec();
+    /*const user = await this.userModel.findOne({ username: createBadgeDto.username }).exec();
     
     if (!user) {
       throw new NotFoundException('User not found');
@@ -26,12 +58,13 @@ export class BadgeService {
     const newBadge = new this.badgeModel({
       name: createBadgeDto.name,
       picture: createBadgeDto.picture,
+      picturef: createBadgeDto.picturef,
       location: createBadgeDto.location,
       userId: user._id,  // Use the ObjectId from the user document
       monumentId: createBadgeDto.monumentId || 'home',  // Use default monumentId if not provided
     });
 
-    return await newBadge.save();
+    return await newBadge.save();*/
   }
 
   // Fetch all badges

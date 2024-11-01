@@ -11,6 +11,7 @@ import MapPage from './Screens/MapPage';
 import Config from "./config.js";
 import NearbyMonumentScreen from './Screens/NearbyMonumentScreen';
 import CameraPage from './Screens/BadgeCreate';
+import { LocationProvider } from './Screens/Components/locationContext';
 
 
 const Stack = createStackNavigator();
@@ -32,43 +33,46 @@ const linking = {
 
 export default function App() {
   return (
-    <NavigationContainer linking={linking}>
-      <Stack.Navigator initialRouteName="Home" screenOptions={{
-        headerShown: false,
-        animationEnabled: false,
-        gestureEnabled: false,
-      }}>
-        <Stack.Screen name="Home" component={HomePage} />
-        <Stack.Screen name="Registration" component={RegistrationScreen} />
-        <Stack.Screen 
-          name="ForgotPassword" 
-          component={ForgotPasswordScreen} 
-          options={{ title: 'Forgot Password' }} // Display title with spaces
-        />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="Monument" component={NearbyMonumentScreen} />
-        <Stack.Screen 
-          name="ResetPassword" 
-          component={ResetPasswordScreen} 
-          options={{ title: 'Reset Password' }} 
-        />
-        <Stack.Screen 
-          name="BadgeFeed" 
-          component={BadgeFeedScreen} 
-          options={{ title: 'Badge Feed' }} 
-         />
-        <Stack.Screen 
-          name="Map"
-          component={MapPage}
-          options={{title: 'Map'}}
-        />
 
-        <Stack.Screen 
-          name="CameraRoll"
-          component={CameraPage}
-          options={{title: 'Camera'}}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <LocationProvider>
+      <NavigationContainer linking={linking}>
+        <Stack.Navigator initialRouteName="Home" screenOptions={{
+          headerShown: false,
+          animationEnabled: false,
+          gestureEnabled: false,
+        }}>
+          <Stack.Screen name="Home" component={HomePage} />
+          <Stack.Screen name="Registration" component={RegistrationScreen} />
+          <Stack.Screen 
+            name="ForgotPassword" 
+            component={ForgotPasswordScreen} 
+            options={{ title: 'Forgot Password' }} // Display title with spaces
+          />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="Monument" component={NearbyMonumentScreen} />
+          <Stack.Screen 
+            name="ResetPassword" 
+            component={ResetPasswordScreen} 
+            options={{ title: 'Reset Password' }} 
+          />
+          <Stack.Screen 
+            name="BadgeFeed" 
+            component={BadgeFeedScreen} 
+            options={{ title: 'Badge Feed' }} 
+          />
+          <Stack.Screen 
+            name="Map"
+            component={MapPage}
+            options={{title: 'Map'}}
+          />
+
+          <Stack.Screen 
+            name="CameraRoll"
+            component={CameraPage}
+            options={{title: 'Camera'}}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </LocationProvider>
   );
 }
