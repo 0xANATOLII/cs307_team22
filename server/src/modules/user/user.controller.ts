@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedExceptio
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { TogglePrivacyDto } from './dto/toggle-privacy.dto';
 import { UserDocument } from './user.model';
 import { Types } from 'mongoose';
 
@@ -60,6 +59,8 @@ export class UserController {
     @Body() body: { username: string; description: string },
   ) {
     const { username, description } = body;
+    this.logger.log(username)
+
     if (!description || !username) {
       throw new BadRequestException('Username and description are required');
     }
@@ -72,16 +73,21 @@ export class UserController {
     return { message: 'Description updated successfully', description: updatedUser.description };
   }
 
-   @Patch('updatePrivacy')
-   async updatePrivacy(
-       @Body() togglePrivacyDto: TogglePrivacyDto,
-   ) {
-       const updatedUser = await this.userService.updatePrivacy(togglePrivacyDto.userId, togglePrivacyDto.isPrivate);
-       return {
-           message: 'Privacy setting updated',
-           privacy: updatedUser.privacy,
-       };
-   }
+  @Patch('updatePrivacy')
+  async updatePrivacy(
+    @Body() body: { username: string; privacy: boolean },
+
+  ){
+    const { username, privacy } = body;
+
+    this.logger.log(username)
+    this.logger.log(privacy)
+    const updatedUser = await this.userService.updatePrivacy(username, privacy);
+    if (!updatedUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return { message: 'Privacy setting updated successfully' };
+  }
 
   @Post('requestPasswordReset')
   async requestPasswordReset(@Body() body: { email: string }) {
@@ -123,10 +129,7 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
-  }
+ 
 
   @Delete(':id')
   remove(@Param('id') id: string) {
