@@ -146,6 +146,7 @@ export class UserController {
     return users.map((user: any) => ({
       id: user._id.toString(), // Use '_id' as defined in the User interface
       username: user.username,
+      privacy: user.privacy,
     }));
   }
 
@@ -153,5 +154,42 @@ export class UserController {
   async getUserId(@Param('username') username: string) {
     const userId = await this.userService.getUserIdByUsername(username);
     return { userId };
+  }
+
+  @Post('request')
+  async sendFollowRequest(
+    @Body('userId') userId: string,
+    @Body('targetUserId') targetUserId: string
+  ) {
+    return this.userService.sendFollowRequest(userId, targetUserId);
+  }
+
+  @Post('accept')
+  async acceptFollowRequest(
+    @Body('userId') userId: string,
+    @Body('targetUserId') targetUserId: string
+  ) {
+    return this.userService.acceptFollowRequest(userId, targetUserId);
+  }
+
+  @Post('reject')
+  async rejectFollowRequest(
+    @Body('userId') userId: string,
+    @Body('targetUserId') targetUserId: string
+  ) {
+    return this.userService.rejectFollowRequest(userId, targetUserId);
+  }
+
+  @Post(':userId/unfollow')
+  async unfollowUser(
+    @Param('userId') userId: string,
+    @Body('targetUserId') targetUserId: string,
+  ) {
+    return this.userService.unfollowUser(userId, targetUserId);
+  }
+  
+  @Get(':userId/following')
+  async getFollowing(@Param('userId') userId: string) {
+    return await this.userService.getFollowing(userId);
   }
 }

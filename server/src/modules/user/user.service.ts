@@ -217,4 +217,74 @@ export class UserService {
     }
     return user._id.toString();
   }
+
+  async sendFollowRequest(userId: string, targetUserId: string): Promise<any> {
+    const targetUser = await this.userModel.findById(targetUserId);
+    if (!targetUser) throw new NotFoundException('Target user not found');
+  
+    // Add userId to target user's follow requests
+    if (!targetUser.followRequests.includes(userId)) {
+      targetUser.followRequests.push(userId);
+      await targetUser.save();
+    }
+    return { message: 'Follow request sent successfully' };
+  }
+
+  async acceptFollowRequest(userId: string, targetUserId: string): Promise<any> {
+    const user = await this.userModel.findById(userId);
+    const targetUser = await this.userModel.findById(targetUserId);
+    if (!user || !targetUser) throw new NotFoundException('User not found');
+  
+    // Add each other as friends
+    if (!user.following.includes(targetUserId)) user.following.push(targetUserId);
+    if (!targetUser.followers.includes(userId)) targetUser.followers.push(userId);
+
+    // Remove from follow requests
+    user.followRequests = user.followRequests.filter(req => req !== targetUserId);
+    await user.save();
+    await targetUser.save();
+  
+    return { message: 'Follow request accepted' };
+  }
+
+  async rejectFollowRequest(userId: string, targetUserId: string): Promise<any> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+  
+    // Remove the request without adding as friends
+    user.followRequests = user.followRequests.filter(req => req !== targetUserId);
+    await user.save();
+  
+    return { message: 'Follow request rejected' };
+  }
+  
+  async unfollowUser(userId: string, targetUserId: string): Promise<User> {
+    const user = await this.userModel.findById(userId);
+    const targetUser = await this.userModel.findById(targetUserId);
+  
+    if (!user || !targetUser) {
+      throw new NotFoundException('User not found');
+    }
+    
+    // Remove targetUserId from user's following list
+    user.following = user.following.filter(id => id !== targetUserId);
+    await user.save();
+    
+    // Remove userId from targetUser's followers list
+    targetUser.followers = targetUser.followers.filter(id => id !== userId);
+    await targetUser.save();
+    
+    return user;
+  }
+  
+
+  async getFollowing(userId: string): Promise<string[]> {
+    const user = await this.userModel.findById(userId).select('following').exec();
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user.following; // Returns array of user IDs being followed as strings
+  }
 }

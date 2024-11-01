@@ -493,6 +493,39 @@ export default StyleSheet.create({
     marginVertical: 10,
     color: '#333',
   },
+  userItemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  usernameText: {
+    fontSize: 16,
+    flex: 1,  // Allow the username text to take up available space
+  },
+  followButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 6,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+  },
+  followButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  unfollowButton: {
+    backgroundColor: '#FF3B30', // Red for "Unfollow" button
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
   
 });
 

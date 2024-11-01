@@ -38,6 +38,15 @@ pfp?:string
 @Prop({ default: false }) // Default value can be set to false
 privacy?: boolean; // Optional field
 
+@Prop({ type: [String], default: [] })
+following: string[];
+
+@Prop({ type: [String], default: [] })
+followers: string[];
+
+@Prop({ type: [String], default: [] })
+followRequests: string[];
+
 }
 
 

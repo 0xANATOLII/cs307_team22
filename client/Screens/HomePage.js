@@ -90,6 +90,31 @@ export default function HomePage({ navigation }) {
           <Text style={styles.buttonText}>Forgot Password?</Text>
         </Pressable>
       </View>
+
+      <View style={styles.button}>
+        <Pressable
+          onPress={() => navigation.navigate('CameraRoll')}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && { backgroundColor: '#555' }
+          ]}
+        >
+          <Text style={styles.buttonText}>Camera</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.button}>
+        <Pressable
+          onPress={() => navigation.navigate('Map')}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && { backgroundColor: '#555' }
+          ]}
+        >
+          <Text style={styles.buttonText}>Map</Text>
+        </Pressable>
+      </View>
+
     </View>
   );
 }

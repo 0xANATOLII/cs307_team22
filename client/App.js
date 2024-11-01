@@ -10,7 +10,11 @@ import BadgeFeedScreen from './Screens/BadgeFeedScreen';
 import MapPage from './Screens/MapPage';
 import Config from "./config.js";
 import NearbyMonumentScreen from './Screens/NearbyMonumentScreen';
+import CameraPage from './Screens/BadgeCreate';
+import { LocationProvider } from './Screens/Components/locationContext';
+
 import FriendsScreen from './Screens/FriendsScreen';
+
 
 
 const Stack = createStackNavigator();
@@ -33,6 +37,7 @@ const linking = {
 
 export default function App() {
   return (
+ <LocationProvider>
     <NavigationContainer linking={linking}>
       <Stack.Navigator initialRouteName="Home" screenOptions={{
         headerShown: false,
@@ -68,7 +73,13 @@ export default function App() {
           component={FriendsScreen}
           options={{title: 'Friends'}}
         />
-      </Stack.Navigator>
-    </NavigationContainer>
+        <Stack.Screen 
+            name="CameraRoll"
+            component={CameraPage}
+            options={{title: 'Camera'}}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </LocationProvider>
   );
 }
