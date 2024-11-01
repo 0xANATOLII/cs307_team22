@@ -141,7 +141,6 @@ export class UserController {
     if (!query) {
       throw new BadRequestException('Query is required');
     }
-    this.logger.log("Query:", query);
     const users = await this.userService.searchUsers(query);
     return users.map((user: any) => ({
       id: user._id.toString(), // Use '_id' as defined in the User interface
@@ -150,9 +149,8 @@ export class UserController {
     }));
   }
 
-  @Get('recommended')
-  async getRecommendedUsers() {
-    this.logger.log('Fetching recommended users');
+  @Get(':userId/recommended')
+  async getRecommendedUsers(@Param('userId') userId: string) {
     const users = await this.userService.getRecommendedUsers();
 
     return users.map((user: any) => ({
@@ -160,6 +158,18 @@ export class UserController {
       username: user.username,
       privacy: user.privacy,
     }));
+  }
+
+  @Get(':userId/requests')
+  async getFollowRequests(@Param('userId') userId: string) {  
+    
+    const followRequests = await this.userService.getFollowRequests(userId);
+    this.logger.log(followRequests); 
+    if (!followRequests || followRequests.length === 0) {
+      return []; // Return an empty array if no follow requests
+    }
+  
+    return followRequests;
   }
 
   @Get('id/:username')

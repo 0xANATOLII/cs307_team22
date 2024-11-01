@@ -46,15 +46,23 @@ export default function FriendsPage({ route, navigation }) {
   const fetchFriendData = async () => {
     try {
       setLoading(true);
-      const requestsResponse = await axios.get(`${Config.API_URL}/user/requests/${userId}`);
-      setFriendRequests(requestsResponse.data);
-
-      if (!searchQuery) {
-        const recommendationsResponse = await axios.get(`${Config.API_URL}/user/recommended`);
-        setRecommendedUsers(recommendationsResponse.data);
+      const requestsResponse = await axios.get(`${Config.API_URL}/user/${userId}/requests`);
+      if (requestsResponse.data.length === 0) {
+        setFriendRequests([]); // Set empty array if no requests
+      } else {
+        setFriendRequests(requestsResponse.data); // Otherwise, set fetched data
+        console.log(requestsResponse.data)
+      }
+    console.log("trying to see search queery");
+      if (searchQuery.trim() === "") {
+        const recommendationsResponse = await axios.get(`${Config.API_URL}/user/${userId}/recommended`);
+        const filteredRecommendations = recommendationsResponse.data.filter(user => user.id !== userId); // Exclude current user
+        setRecommendedUsers(filteredRecommendations);
+      } else {
+        setRecommendedUsers([]); // Clear recommended users when searching
       }
     } catch (error) {
-      console.error('Error fetching friend data:', error);
+        console.error('Error fetching friend data:', error);
     } finally {
       setLoading(false);
     }
@@ -65,48 +73,74 @@ export default function FriendsPage({ route, navigation }) {
       fetchFriendData();
       fetchFollowingUsers();
     }
-  }, [userId, searchQuery]);
+  }, [userId]);
 
   // Search users based on query
   const handleSearch = async () => {
     try {
       setLoading(true);
       console.log("search query:", searchQuery);
-      const response = await axios.get(`${Config.API_URL}/user/search/${searchQuery}`);
-      const filteredResults = response.data.filter(user => user.username !== username);
-      setSearchResults(filteredResults);
-      setRecommendedUsers([]); // Clear recommended users when searching
+  
+      if (searchQuery.trim() === "") {
+        // If search query is empty, show recommended users instead
+        console.log("empoty search!");
+        const recommendationsResponse = await axios.get(`${Config.API_URL}/user/${userId}/recommended`);
+        setRecommendedUsers(recommendationsResponse.data);
+        setSearchResults([]); // Clear search results
+
+      } else {
+        // Perform the search if there is a valid query
+        const response = await axios.get(`${Config.API_URL}/user/search/${searchQuery}`);
+        const filteredResults = response.data.filter(user => user.username !== username);
+        setSearchResults(filteredResults);
+        setRecommendedUsers([]); // Clear recommended users when searching
+      }
     } catch (error) {
-      console.error('Error searching users:', error);
+      console.error("Error searching users:", error);
     } finally {
       setLoading(false);
     }
   };
+  
 
   // Accept or Reject a Friend Request
   const handleRequest = async (requestId, action) => {
     try {
-      await axios.post(`${Config.API_URL}/friends/${action}/${requestId}`);
-      fetchFriendData();
+      if (action === 'accept') {
+        await axios.post(`${Config.API_URL}/user/accept`, { userId, targetUserId: requestId });
+        alert('Friend request accepted.');
+        setFriendRequests(friendRequests.filter(request => request._id !== requestId));
+      } else if (action === 'reject') {
+        await axios.post(`${Config.API_URL}/user/reject`, { userId, targetUserId: requestId });
+        alert('Friend request rejected.');
+        setFriendRequests(friendRequests.filter(request => request._id !== requestId));
+      } else {
+        console.error('Invalid action specified');
+      }
+      fetchFriendData(); // Refresh friend requests after the action
     } catch (error) {
-      console.error(`Error ${action} friend request:`, error);
+      console.error(`Error handling friend request: ${action}`, error);
     }
   };
+  
 
   // Render Friend Request Item
   const renderFriendRequest = ({ item }) => (
-    <View style={styles.requestContainer}>
-      <Text>{item.username} has sent you a follow request.</Text>
-      <View style={styles.requestActions}>
-        <Pressable onPress={() => handleRequest(item._id, 'accept')} style={styles.acceptButton}>
-          <Text>Accept</Text>
+    <View style={[styles.requestContainer, { flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 8, backgroundColor: '#f8f9fa', marginVertical: 6 }]}>
+      <Text style={[styles.requestText, { fontSize: 16, color: '#333', flex: 1, marginRight: 10 }]}>
+        {item.username} has sent you a follow request.
+      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Pressable onPress={() => handleRequest(item.id, 'accept')} style={[styles.acceptButton, { backgroundColor: '#28a745', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6, marginRight: 8 }]}>
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Accept</Text>
         </Pressable>
-        <Pressable onPress={() => handleRequest(item._id, 'reject')} style={styles.rejectButton}>
-          <Text>Reject</Text>
+        <Pressable onPress={() => handleRequest(item.id, 'reject')} style={[styles.rejectButton, { backgroundColor: '#dc3545', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6 }]}>
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Reject</Text>
         </Pressable>
       </View>
     </View>
   );
+  
 
   // Follow and unfollow toggling
   const handleFollowToggle = async (targetUserId, isPrivate) => {

@@ -289,8 +289,28 @@ export class UserService {
   }
 
   async getRecommendedUsers(): Promise<Omit<User, 'password'>[]> {
-    // Example criteria for recommendations
-    const users = await this.userModel.find({ isActive: true }).limit(10).exec(); // Modify criteria as needed
+    const users = await this.userModel.find().select('-password').limit(30).exec();
     return users;
+  }
+
+
+  async getFollowRequests(userId: string): Promise<{ id: string; username: string; privacy: boolean }[]> {
+    const user = await this.userModel.findById(userId).exec();
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Retrieve details for each user in followRequests
+    const followRequests = await this.userModel
+      .find({ _id: { $in: user.followRequests } })
+      .select('username privacy')
+      .exec();
+    // Map to the desired response structure
+    return followRequests.map(followRequest => ({
+      id: followRequest._id.toString(),
+      username: followRequest.username,
+      privacy: followRequest.privacy,
+    }));
   }
 }
