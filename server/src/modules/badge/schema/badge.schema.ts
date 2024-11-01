@@ -10,6 +10,8 @@ export class Badge {
 
   @Prop()
   picture: string;
+  @Prop()
+  picturef: string;
 
   @Prop()
   location: string;
