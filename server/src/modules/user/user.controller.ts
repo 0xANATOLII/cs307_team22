@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException, BadRequestException, NotFoundException, Query, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException, BadRequestException, NotFoundException, Query, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,6 +8,7 @@ import { Types } from 'mongoose';
 
 @Controller('user')
 export class UserController {
+  private readonly logger = new Logger(UserController.name);
   constructor(private readonly userService: UserService) {}
 
   @Post('register')
@@ -132,15 +133,15 @@ export class UserController {
     return this.userService.remove(id);
   }
 
-  @Get('search')
-  async searchUsers(@Query('query') query: string) {
+  @Get('search/:query')
+  async searchUsers(@Param('query') query: string) {
     if (!query) {
       throw new BadRequestException('Query is required');
     }
-
+    this.logger.log("Query:", query);
     const users = await this.userService.searchUsers(query);
     return users.map((user: any) => ({
-      id: user._id, // Use '_id' as defined in the User interface
+      id: user._id.toString(), // Use '_id' as defined in the User interface
       username: user.username,
     }));
   }

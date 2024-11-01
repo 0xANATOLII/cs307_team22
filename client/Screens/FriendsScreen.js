@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, FlatList, ActivityIndicator, Alert, TextInput } from 'react-native';
+import { View, Text, TextInput, Pressable, FlatList, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import styles from '../styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,9 +11,9 @@ export default function FriendsPage({ route, navigation }) {
   const [userId, setUserId] = useState(null);
   const [friendRequests, setFriendRequests] = useState([]);
   const [recommendedUsers, setRecommendedUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
 
   // Fetch User ID
   useEffect(() => {
@@ -36,11 +36,9 @@ export default function FriendsPage({ route, navigation }) {
   const fetchFriendData = async () => {
     try {
       setLoading(true);
-      // Fetch pending friend requests
       const requestsResponse = await axios.get(`${Config.API_URL}/friends/requests/${userId}`);
       setFriendRequests(requestsResponse.data);
 
-      // Fetch recommended users based on badge count
       const recommendationsResponse = await axios.get(`${Config.API_URL}/users/recommended`);
       setRecommendedUsers(recommendationsResponse.data);
     } catch (error) {
@@ -54,11 +52,25 @@ export default function FriendsPage({ route, navigation }) {
     if (userId) fetchFriendData();
   }, [userId]);
 
+  // Search users based on query
+  const handleSearch = async () => {
+    try {
+      setLoading(true);
+      console.log("search query:", searchQuery);
+      const response = await axios.get(`${Config.API_URL}/user/search/${searchQuery}`);
+      setSearchResults(response.data);
+    } catch (error) {
+      console.error('Error searching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Accept or Reject a Friend Request
   const handleRequest = async (requestId, action) => {
     try {
       await axios.post(`${Config.API_URL}/friends/${action}/${requestId}`);
-      fetchFriendData(); // Refresh data after accepting/rejecting
+      fetchFriendData();
     } catch (error) {
       console.error(`Error ${action} friend request:`, error);
     }
@@ -68,30 +80,15 @@ export default function FriendsPage({ route, navigation }) {
   const handleFollowRequest = async (targetUserId, isPrivate) => {
     try {
       if (isPrivate) {
-        // Send follow request if user profile is private
         await axios.post(`${Config.API_URL}/friends/request`, { userId, targetUserId });
-        Alert.alert('Request Sent', 'Your follow request has been sent.');
+        alert('Follow request sent.');
       } else {
-        // Auto-follow if profile is public
         await axios.post(`${Config.API_URL}/friends/accept`, { userId, targetUserId });
-        Alert.alert('Followed', 'You are now following this user.');
+        alert('Followed successfully.');
       }
-      fetchFriendData(); // Refresh friend data
+      fetchFriendData();
     } catch (error) {
       console.error('Error sending follow request:', error);
-    }
-  };
-
-  // Handle User Search
-  const handleSearch = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${Config.API_URL}/users/search?query=${searchQuery}`);
-      setSearchResults(response.data);
-    } catch (error) {
-      console.error('Error searching users:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -100,39 +97,21 @@ export default function FriendsPage({ route, navigation }) {
     <View style={styles.requestContainer}>
       <Text>{item.username} has sent you a follow request.</Text>
       <View style={styles.requestActions}>
-        <Pressable onPress={() => handleRequest(item._id, 'accept')}>
-          <Text style={styles.acceptButton}>Accept</Text>
+        <Pressable onPress={() => handleRequest(item._id, 'accept')} style={styles.acceptButton}>
+          <Text>Accept</Text>
         </Pressable>
-        <Pressable onPress={() => handleRequest(item._id, 'reject')}>
-          <Text style={styles.rejectButton}>Reject</Text>
+        <Pressable onPress={() => handleRequest(item._id, 'reject')} style={styles.rejectButton}>
+          <Text>Reject</Text>
         </Pressable>
       </View>
     </View>
   );
 
-  // Render Recommended User Item
-  const renderRecommendedUser = ({ item }) => (
+  // Render Recommended User or Search Result Item
+  const renderUserItem = ({ item }) => (
     <View style={styles.recommendContainer}>
       <Text>{item.username}</Text>
-      <Text>Badges: {item.badgeCount}</Text>
-      <Pressable
-        onPress={() => handleFollowRequest(item.userId, item.isPrivate)}
-        style={styles.followButton}
-      >
-        <Text>{item.isPrivate ? 'Request to Follow' : 'Follow'}</Text>
-      </Pressable>
-    </View>
-  );
-
-  // Render Search Result Item
-  const renderSearchResult = ({ item }) => (
-    <View style={styles.searchResultContainer}>
-      <Text>{item.username}</Text>
-      <Text>Badges: {item.badgeCount}</Text>
-      <Pressable
-        onPress={() => handleFollowRequest(item.userId, item.isPrivate)}
-        style={styles.followButton}
-      >
+      <Pressable onPress={() => handleFollowRequest(item.id, item.isPrivate)} style={styles.followButton}>
         <Text>{item.isPrivate ? 'Request to Follow' : 'Follow'}</Text>
       </Pressable>
     </View>
@@ -140,66 +119,50 @@ export default function FriendsPage({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search for users..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          <Pressable style={styles.searchButton} onPress={handleSearch}>
-            <Text style={styles.searchButtonText}>Search</Text>
-          </Pressable>
-        </View>
-
-        {/* Search Results */}
-        {searchResults.length > 0 && (
-          <>
-            <Text style={styles.header}>Search Results</Text>
-            <FlatList
-              data={searchResults}
-              keyExtractor={(item) => item.userId}
-              renderItem={renderSearchResult}
-            />
-          </>
-        )}
+      <View style={styles.BScontainer}>
+        {/* Search Input */}
+        <TextInput
+          style={styles.BSinput}
+          placeholder="Search users"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <Pressable style={styles.BScreateButton} onPress={handleSearch}>
+          <Text style={styles.BScreateButtonText}>Search</Text>
+        </Pressable>
 
         {/* Friend Requests */}
-        <Text style={styles.header}>Friend Requests</Text>
+        <Text style={styles.BSsectionHeader}>Friend Requests</Text>
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
-        ) : friendRequests.length > 0 ? (
+        ) : friendRequests.length === 0 ? (
+          <Text style={styles.BSnoBadgesText}>No friend requests</Text>
+        ) : (
           <FlatList
             data={friendRequests}
             keyExtractor={(item) => item._id}
             renderItem={renderFriendRequest}
           />
-        ) : (
-          <Text>No friend requests</Text>
         )}
 
-        {/* Recommended Users */}
-        <Text style={styles.header}>Recommended Users</Text>
+        {/* Recommended Users or Search Results */}
+        <Text style={styles.BSsectionHeader}>
+          {searchQuery ? 'Search Results' : 'Recommended Users'}
+        </Text>
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
-        ) : recommendedUsers.length > 0 ? (
-          <FlatList
-            data={recommendedUsers}
-            keyExtractor={(item) => item.userId}
-            renderItem={renderRecommendedUser}
-          />
+        ) : (searchQuery ? searchResults : recommendedUsers).length === 0 ? (
+          <Text style={styles.BSnoBadgesText}>No users found</Text>
         ) : (
-          <Text>No recommended users</Text>
+          <FlatList
+            data={searchQuery ? searchResults : recommendedUsers}
+            keyExtractor={(item) => item.id}
+            renderItem={renderUserItem}
+          />
         )}
       </View>
 
-      <BottomNav 
-        route={route}
-        navigation={navigation} 
-        username={username} 
-      />
+      <BottomNav route={route} navigation={navigation} username={username} currentScreen="Friends" />
     </SafeAreaView>
   );
 }

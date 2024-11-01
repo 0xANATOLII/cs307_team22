@@ -395,7 +395,8 @@ export default StyleSheet.create({
   },
   BSnoBadgesText: {
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 10,
+    marginBottom: 10,
     fontSize: 18,
     color: '#777',
   },
@@ -486,5 +487,12 @@ export default StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+  BSsectionHeader: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginVertical: 10,
+    color: '#333',
+  },
+  
 });
 

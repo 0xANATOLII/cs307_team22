@@ -116,8 +116,6 @@ export default function MonumentScreen({ route, navigation }) {
         // Try to get passed markers and location first
         const passedMarkers = route.params?.closestMarkers;
         const passedLocation = route.params?.userLocation;
-        console.log("Passed markers:", passedMarkers);
-        console.log("Passed location:", passedLocation);
 
         if (passedMarkers && passedLocation) {
             setMonuments(passedMarkers);
