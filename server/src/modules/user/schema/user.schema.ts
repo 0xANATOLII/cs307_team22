@@ -30,9 +30,8 @@ resetPasswordExpires?:Date
 resetPasswordToken?:string
 
 
-//profile picture
-@Prop()
-pfp?:string
+@Prop({ type: String })
+pfp?: string | null; // Explicitly allow null if needed, e.g., for empty profile pictures
 
 // Add the privacy field here
 @Prop({ default: false }) // Default value can be set to false

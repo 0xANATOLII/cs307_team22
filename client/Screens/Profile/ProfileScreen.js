@@ -6,6 +6,10 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Config from "../../config.js";
 import BottomNav from '../BottomNav';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
+
 
 export default function ProfileScreen({ route, navigation }) {
   const { username } = route.params;
@@ -15,7 +19,6 @@ export default function ProfileScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
   const [isUploadModalVisible, setIsUploadModalVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null); 
   const [profileInfo, setProfileInfo] = useState({
     username: username,
     pfp: null,
@@ -42,7 +45,7 @@ export default function ProfileScreen({ route, navigation }) {
           setProfileInfo({
             userId: data._id,
             username: data.username,
-            pfp: data.pfp ? { uri: data.pfp } : require('./default.png'),
+            pfp: data.pfp || './default.png',
             desc: data.desc || '',
             achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
             profileHistory: ['Change 1','Change 2'],
@@ -199,13 +202,67 @@ export default function ProfileScreen({ route, navigation }) {
       setIsUploadModalVisible(false);
     }
   };
+
+  const imageFromPhone = async () => {
+    // No permissions request is necessary for launching the image library
+   // setIsUploadModalVisible(false)
+
+   let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    quality: 1, // Start with high quality
+  });
+
+
+  
+    const compressedImage = await ImageManipulator.manipulateAsync(
+      result.assets[0].uri,
+      [{ resize: { width: 800 } }], // Adjust width as needed
+      { compress: 0.3, format: ImageManipulator.SaveFormat.JPEG } // Adjust compression level
+    );
+
+    // Convert to Base64 and store in database
+    const base64 = await FileSystem.readAsStringAsync(compressedImage.uri, { encoding: 'base64' });
+    const pic = `data:image/jpeg;base64,${base64}`;
+  
+    const response = await fetch(`${Config.API_URL}/user/updatePfp`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, pfp: pic }),
+    });
+    
+    const responseText = await response.text();
+    console.log('Server response:', responseText);
+    
+    if (response.ok) {
+      setProfileInfo((prev) => ({ ...prev, pfp: pic }));
+      Alert.alert('Success', 'Profile pic updated successfully!');
+    } else {
+      Alert.alert('Error', `Failed to update profile pic: ${responseText}`);
+    }
+
+
+  
+    
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.profileContainer}>
           {/* Profile Picture Upload */}
-          <Pressable onPress={() => {}}>
-            <Image source={profileInfo.pfp || require('./default.png')} style={styles.profilePhoto} />
+          <Pressable onPress={() => imageFromPhone()}
+            >
+            <Image
+              source={
+                profileInfo.pfp
+                  ? { uri: profileInfo.pfp }  // Directly use data.pfp as it already includes the Base64 prefix
+                  : require('./default.png')
+              }
+              style={styles.profilePhoto}
+            />
           </Pressable>
   
          {/* Username */}
@@ -339,32 +396,7 @@ export default function ProfileScreen({ route, navigation }) {
             </View>
       </Modal>
 
-      {/* Modal for confirming profile image upload */}
-      <Modal
-            transparent={true}
-            visible={isUploadModalVisible}
-            onRequestClose={() => setIsUploadModalVisible(false)}
-            animationType="fade" // Add fade animation for a smoother appearance
-          >
-            <View style={styles.modalBackdrop}>
-              <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Confirm Profile Picture</Text>
-                
-                {/* Preview of the selected image */}
-                <Image source={selectedImage} style={styles.modalImagePreview} />
-                
-                <View style={styles.modalButtons}>
-                  <Pressable style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setIsUploadModalVisible(false)}>
-                    <Text style={styles.modalButtonText}>Cancel</Text>
-                  </Pressable>
-
-                  <Pressable style={[styles.modalButton, styles.modalConfirmButton]} onPress={handleUploadImage}>
-                    <Text style={styles.modalButtonText}>Confirm</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-      </Modal>
+   
       {/* Delete Account Confirmation Modal */}
       <Modal
         animationType="fade"
