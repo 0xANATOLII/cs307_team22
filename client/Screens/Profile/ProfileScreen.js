@@ -8,6 +8,7 @@ import Config from "../../config.js";
 import BottomNav from '../BottomNav';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 
 export default function ProfileScreen({ route, navigation }) {
@@ -44,7 +45,7 @@ export default function ProfileScreen({ route, navigation }) {
           setProfileInfo({
             userId: data._id,
             username: data.username,
-            pfp: data.pfp ? { uri: data.pfp } : require('./default.png'),
+            pfp: data.pfp || './default.png',
             desc: data.desc || '',
             achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
             profileHistory: ['Change 1','Change 2'],
@@ -206,17 +207,24 @@ export default function ProfileScreen({ route, navigation }) {
     // No permissions request is necessary for launching the image library
    // setIsUploadModalVisible(false)
 
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+   let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    quality: 1, // Start with high quality
+  });
 
-    console.log(result);
-    const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, { encoding: 'base64' });
 
-    const pic = `data:image/jpeg;base64,${base64}`
+  
+    const compressedImage = await ImageManipulator.manipulateAsync(
+      result.assets[0].uri,
+      [{ resize: { width: 800 } }], // Adjust width as needed
+      { compress: 0.3, format: ImageManipulator.SaveFormat.JPEG } // Adjust compression level
+    );
+
+    // Convert to Base64 and store in database
+    const base64 = await FileSystem.readAsStringAsync(compressedImage.uri, { encoding: 'base64' });
+    const pic = `data:image/jpeg;base64,${base64}`;
+  
     const response = await fetch(`${Config.API_URL}/user/updatePfp`, {
       method: 'PATCH',
       headers: {
