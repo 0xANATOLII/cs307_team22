@@ -119,6 +119,20 @@ export class UserService {
     return user;
   }
 
+  async updatePfp(username: string, pfp: string): Promise<User> {
+    const user = await this.userModel.findOneAndUpdate(
+      { username },
+      { pfp },
+      { new: true }, // Return the updated document
+    );
+
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+
+    return user;
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return await this.userModel.findOne({ email }).exec();
   }

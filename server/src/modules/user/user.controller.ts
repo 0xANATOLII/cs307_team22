@@ -73,6 +73,25 @@ export class UserController {
     return { message: 'Description updated successfully', description: updatedUser.description };
   }
 
+  @Patch('updatePfp')
+  async updatePfp(
+    @Body() body: { username: string; pfp: string },
+  ) {
+    const { username, pfp } = body;
+    this.logger.log(username)
+
+    if (!pfp || !username) {
+      throw new BadRequestException('profile pic and description are required');
+    }
+
+    const updatedUser = await this.userService.updatePfp(username, pfp);
+    if (!updatedUser) {
+      throw new NotFoundException('User not foundddd');
+    }
+
+    return { message: 'Profile pic updated successfully' };
+  }
+
   @Patch('updatePrivacy')
   async updatePrivacy(
     @Body() body: { username: string; privacy: boolean },
