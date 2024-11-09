@@ -4,9 +4,12 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { SafeAreaFrameContext, SafeAreaView } from 'react-native-safe-area-context';
 import BottomNav from './BottomNav';
+import Config from "../config.js";
 import styles from '../styles'; 
 import { MaterialIcons } from '@expo/vector-icons';
 import { LocationContext } from './Components/locationContext';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 export default function MapPage({
   isMiniMap = false,  // Control if this is a mini map or full map
@@ -16,6 +19,53 @@ export default function MapPage({
   scrollEnabled = true,  // Control scrolling
    route, navigation 
 }) {
+  const defaultImageUri = Image.resolveAssetSource(require('./Profile/default.png')).uri;
+
+  const [loading, setLoading] = useState(true);
+
+  const [profileInfo, setProfileInfo] = useState({
+    username: username,
+    pfp: null 
+  });
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfileData = async () => {
+        try {
+          const response = await fetch(`${Config.API_URL}/user/profile/${username}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+  
+          if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            setProfileInfo({
+              userId: data._id,
+              username: data.username,
+              privacy: data.privacy,
+              pfp: data.pfp || defaultImageUri,
+            });
+          } else {
+            Alert.alert('Error', 'Failed to load profile data.');
+          }
+        } catch (error) {
+          Alert.alert('Error', 'Unable to fetch profile data.');
+          console.log(error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchProfileData();
+  
+      // Optional cleanup function if needed
+      return () => {
+        setLoading(true); // Reset loading state if necessary
+      };
+    }, [username]) // Add username to the dependency array if it can change
+  );
   //const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const { closestMon, location, setClosestMon, setLocation} = useContext(LocationContext)
@@ -250,7 +300,14 @@ export default function MapPage({
           scrollEnabled={scrollEnabled}
         >
           <Marker coordinate={{ latitude: location.coords.latitude, longitude: location.coords.longitude }} title="Your Location">
-            <Image source={require('../assets/user-icon.png')} style={{ width: 30, height: 30 }} />
+            <Image
+              source={
+                profileInfo.pfp
+                  ? { uri: profileInfo.pfp }  // Base64 or remote URL
+                  : { uri: defaultImageUri }  // Local fallback URI
+              }
+              style={styles.mapProfilePhoto}
+            />
           </Marker>
 
           {markers.map((marker, index) => (
