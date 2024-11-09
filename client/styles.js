@@ -87,6 +87,11 @@ export default StyleSheet.create({
     borderRadius: 75,
     marginBottom: 10,
   },
+  mapProfilePhoto: {
+    width: 40,
+    height: 40,
+    borderRadius: 40,
+  },
   section: {
     backgroundColor: '#ffffff',
     marginTop: 20,

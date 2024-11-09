@@ -12,6 +12,8 @@ import * as ImageManipulator from 'expo-image-manipulator';
 
 
 export default function ProfileScreen({ route, navigation }) {
+  const defaultImageUri = Image.resolveAssetSource(require('./default.png')).uri;
+  
   const { username } = route.params;
   const [isUsernameModalVisible, setIsUsernameModalVisible] = useState(false);
   const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
@@ -21,7 +23,7 @@ export default function ProfileScreen({ route, navigation }) {
   const [isUploadModalVisible, setIsUploadModalVisible] = useState(false);
   const [profileInfo, setProfileInfo] = useState({
     username: username,
-    pfp: null,
+    pfp: defaultImageUri,
     desc: '',
     achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
     profileHistory: ['Change 1','Change 2'],
@@ -45,8 +47,9 @@ export default function ProfileScreen({ route, navigation }) {
           setProfileInfo({
             userId: data._id,
             username: data.username,
-            pfp: data.pfp || './default.png',
+            pfp: data.pfp || defaultImageUri,
             desc: data.desc || '',
+            privacy: data.privacy,
             achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
             profileHistory: ['Change 1','Change 2'],
           });
@@ -58,6 +61,7 @@ export default function ProfileScreen({ route, navigation }) {
       } finally {
         setLoading(false);
       }
+      console.log(profileInfo.pfp);
     };
 
     fetchProfileData();
@@ -187,21 +191,7 @@ export default function ProfileScreen({ route, navigation }) {
     navigation.navigate('Home');
   };
 
-  const handleUploadImage = async () => {
-    try {
-      // Simulate the upload process and store the selected image in profileInfo
-      setProfileInfo((prev) => ({ ...prev, pfp: { uri: selectedImage.uri } }));
-      
-      // Display success message
-      Alert.alert('Success', 'Profile picture updated successfully!');
-    } catch (error) {
-      // Handle any unexpected errors
-      Alert.alert('Error', 'An error occurred while updating the profile picture.');
-    } finally {
-      // Close the upload modal
-      setIsUploadModalVisible(false);
-    }
-  };
+
 
   const imageFromPhone = async () => {
     // No permissions request is necessary for launching the image library
@@ -240,7 +230,7 @@ export default function ProfileScreen({ route, navigation }) {
       setProfileInfo((prev) => ({ ...prev, pfp: pic }));
       Alert.alert('Success', 'Profile pic updated successfully!');
     } else {
-      Alert.alert('Error', `Failed to update profile pic: ${responseText}`);
+      Alert.alert('Errorr', `Failed to update profile pic: ${responseText}`);
     }
 
 
@@ -258,8 +248,8 @@ export default function ProfileScreen({ route, navigation }) {
             <Image
               source={
                 profileInfo.pfp
-                  ? { uri: profileInfo.pfp }  // Directly use data.pfp as it already includes the Base64 prefix
-                  : require('./default.png')
+                  ? { uri: profileInfo.pfp }  // Base64 or remote URL
+                  : { uri: defaultImageUri }  // Local fallback URI
               }
               style={styles.profilePhoto}
             />
