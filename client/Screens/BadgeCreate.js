@@ -1,30 +1,24 @@
-import { Camera,CameraView,useCameraPermissions } from 'expo-camera'; // Use Camera instead of CameraView
+import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
 import { useContext, useRef, useState } from 'react';
-import { Button, StyleSheet, Text,TextInput, TouchableOpacity, View,Image ,Dimensions, ScrollView} from 'react-native';
-import { useNavigation } from '@react-navigation/native'; 
+import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View, Image, Dimensions, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import MapPage from './MapPage';
 import { LocationContext } from './Components/locationContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
-
-export default function CameraPage({route, navigation}) {
-
-const { closestMon, location, setClosestMon, setLocation } = useContext(LocationContext)
-
-const [permission, requestPermission] = useCameraPermissions();
-
-const [facing, setFacing] = useState('back');
-const [facing_f, setFacing_f] = useState('front');
-const [description, setDescription] = useState('');
-
-const screenHeight = Dimensions.get('window').height;
- // const [secFacing, setSecFacing] = useState('front');
-  //const navigation = useNavigation(); // Use navigation to go back
+export default function CameraPage({ route, navigation }) {
+  const { closestMon, location, setClosestMon, setLocation } = useContext(LocationContext);
+  const [permission, requestPermission] = useCameraPermissions();
+  const [facing, setFacing] = useState('back');
+  const [facing_f, setFacing_f] = useState('front');
+  const [description, setDescription] = useState('');
   const [photo, setPhoto] = useState(null);
   const [photof, setPhotof] = useState(null);
+  const [activePhoto, setActivePhoto] = useState(0);
   const cameraRef = useRef(null);
   const cameraRef_f = useRef(null);
+
   if (!permission) {
     return <SafeAreaView style={styles.safeArea}></SafeAreaView>;
   }
@@ -32,9 +26,14 @@ const screenHeight = Dimensions.get('window').height;
   if (!permission.granted) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <View>
-          <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
-          <Button onPress={requestPermission} title="grant permission" />
+        <View style={styles.permissionContainer}>
+          <Text style={styles.permissionText}>We need your permission to show the camera</Text>
+          <TouchableOpacity 
+            style={styles.permissionButton}
+            onPress={requestPermission}
+          >
+            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -43,10 +42,10 @@ const screenHeight = Dimensions.get('window').height;
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
+
   function toggleCameraFacingf() {
     setFacing_f(current => (current === 'front' ? 'back' : 'front'));
   }
-
 
   const takePicture = async () => {
     if (cameraRef.current) {
@@ -55,207 +54,343 @@ const screenHeight = Dimensions.get('window').height;
     }
   };
 
-
   const takePicturef = async () => {
-    if ( cameraRef_f.current) {
+    if (cameraRef_f.current) {
       const photo_f = await cameraRef_f.current.takePictureAsync();
       setPhotof(photo_f);
     }
   };
 
-  const back_n = ()=>{
+  const back_n = () => {
     navigation.navigate('Map', { username: route.params.username });
-  }
-  //Post mode
+  };
 
-
-if(photo && photof)
-return (
- <ScrollView contentContainerStyle={post_styles.container}>
-
-    <Image 
-    source={{ uri: photo.uri }}  style={[post_styles.image, { height: screenHeight * 0.9 }]}
-      resizeMode="cover"/>
-
-    <Image 
-    source={{ uri: photof.uri }}  style={[post_styles.image, { height: screenHeight * 0.9 }]}
-      resizeMode="cover"/>
-
-    <Text style={post_styles.label}>Description:</Text>
-    <TextInput
-      style={post_styles.descriptionInput}
-      placeholder="Write your description here..."
-      value={description}
-      onChangeText={setDescription}
-      multiline
-    />
-
-    <Text style={post_styles.label}>Location:</Text>
-
-
-    <MapPage route={route} navigation={navigation} isMiniMap={true} >
-    </MapPage>
-
-   
-
-
-    
-    <TouchableOpacity style={styles.captureButton} onPress={()=>{alert("POST");}} >
-    <Text style={styles.monumentText}>POST</Text>
-    </TouchableOpacity>
-    
-    <TouchableOpacity style={styles.captureButton} onPress={()=>{ setPhoto(null), setPhotof(null)}} >
-    <Text style={styles.monumentText}>Retake</Text>
-    </TouchableOpacity>
-
-    <TouchableOpacity style={styles.captureButton} onPress={back_n} >
-    <Text style={styles.monumentText}>Cancel</Text>
-    </TouchableOpacity>
-    
-  </ScrollView>
-);
-
-if(photo)
+  if (photo && photof) {
     return (
-
-        <View style={styles.container}>
-
-        <CameraView style={styles.camera} facing={facing_f} ref={cameraRef_f} >
-            <View style={styles.cameraControls}>
-            
-            <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacingf}>
-                <MaterialIcons name="flip-camera-ios" size={40} color="white" />
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.captureButton} onPress={takePicturef} />
+      <View style={styles.container}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          bounces={false}
+        >
+          <View style={styles.carouselContainer}>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              scrollEventThrottle={16}
+              bounces={false}
+            >
+              <View style={styles.slideContainer}>
+                <Image 
+                  source={{ uri: photo.uri }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              </View>
+              <View style={styles.slideContainer}>
+                <Image 
+                  source={{ uri: photof.uri }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              </View>
+            </ScrollView>
+            <View style={styles.indicatorContainer}>
+              <View style={[styles.indicator, activePhoto === 0 && styles.activeIndicator]} />
+              <View style={[styles.indicator, activePhoto === 1 && styles.activeIndicator]} />
             </View>
-        </CameraView>
-       
+          </View>
 
+          <View style={styles.contentContainer}>
+            <Text style={styles.label}>Description</Text>
+            <TextInput
+              style={styles.descriptionInput}
+              placeholder="Write your description here..."
+              placeholderTextColor="rgba(255, 255, 255, 0.5)"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+            />
 
-    </View>
+            <Text style={styles.label}>Location</Text>
+            <View style={styles.mapContainer}>
+              <MapPage route={route} navigation={navigation} isMiniMap={true} />
+            </View>
 
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.button, styles.postButton]}
+                onPress={() => alert("POST")}
+              >
+                <LinearGradient
+                  colors={['#FFD700', '#FFA500']}
+                  style={styles.gradientButton}
+                >
+                  <Text style={styles.postButtonText}>Post</Text>
+                </LinearGradient>
+              </TouchableOpacity>
 
-    )
-if(!photo && !photof)
-  return (
-            <View style={styles.container}>
-
-
-
-            <CameraView style={styles.camera} facing={facing} ref={cameraRef} >
-                <View style={styles.cameraControls}>
-                
-                <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
-                    <MaterialIcons name="flip-camera-ios" size={40} color="white" />
+              <View style={styles.secondaryButtons}>
+                <TouchableOpacity
+                  style={[styles.button, styles.secondaryButton]}
+                  onPress={() => { setPhoto(null); setPhotof(null); }}
+                >
+                  <Text style={styles.secondaryButtonText}>Retake</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.captureButton} onPress={takePicture} />
-                </View>
-            </CameraView>
-           
 
+                <TouchableOpacity
+                  style={[styles.button, styles.secondaryButton]}
+                  onPress={back_n}
+                >
+                  <Text style={styles.secondaryButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
 
+  else if (photo) {
+    return (
+      <View style={styles.container}>
+        <CameraView style={styles.camera} facing={facing_f} ref={cameraRef_f}>
+          <View style={styles.cameraOverlay}>
+            <View style={styles.cameraControls}>
+              <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacingf}>
+                <MaterialIcons name="flip-camera-ios" size={40} color="#FFD700" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.captureButton} onPress={takePicturef}>
+                <View style={styles.captureButtonInner} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </CameraView>
+      </View>
+    );
+  }
+
+  else if (photof) {
+    return (
+      <View style={styles.container}>
+        <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+          <View style={styles.cameraOverlay}>
+            <View style={styles.cameraControls}>
+              <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacingf}>
+                <MaterialIcons name="flip-camera-ios" size={40} color="#FFD700" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.captureButton} onPress={takePicturef}>
+                <View style={styles.captureButtonInner} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </CameraView>
+      </View>
+    );
+  }
+
+  else(!photo && !photof)
+  return (
+    <View style={styles.container}>
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+        <View style={styles.cameraOverlay}>
+          <View style={styles.cameraControls}>
+            <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+              <MaterialIcons name="flip-camera-ios" size={40} color="#FFD700" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+              <View style={styles.captureButtonInner} />
+            </TouchableOpacity>
+          </View>
         </View>
-
+      </CameraView>
+    </View>
   );
-    }
-
+}
 
 const styles = StyleSheet.create({
-        container: {
-          flex: 1,
-          backgroundColor: 'black',
-        },
-        camera: {
-          flex: 1,
-          justifyContent: 'flex-end',
-        },
-        cameraControls: {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          paddingHorizontal: 20,
-          paddingBottom: 30,
-        },
-        captureButton: {
-          alignSelf: 'center',
-          backgroundColor: 'white',
-          width: 70,
-          height: 70,
-          borderRadius: 35,
-          borderColor: 'white',
-          borderWidth: 5,
-          marginBottom: 20,
-        },
-        flipButton: {
-          alignSelf: 'flex-start',
-          marginBottom: 20,
-        },
-        retakeButton: {
-          position: 'absolute',
-          bottom: 30,
-          alignSelf: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          paddingVertical: 10,
-          paddingHorizontal: 20,
-          borderRadius: 20,
-        },
-        permissionButton: {
-          backgroundColor: '#1E90FF',
-          padding: 15,
-          borderRadius: 10,
-          marginTop: 20,
-        },
-        text: {
-          color: 'white',
-          fontSize: 18,
-          textAlign: 'center',
-        },
-      });
-
-const post_styles = StyleSheet.create({
-        container: {
-          flexGrow: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 10,
-          backgroundColor: 'white',
-        },
-        image: {
-          width: '100%',
-          marginBottom: 20,
-          borderRadius: 15,
-
-        },
-        label: {
-          fontSize: 18,
-          fontWeight: 'bold',
-          marginTop: 10,
-          marginBottom: 5,
-          alignSelf: 'flex-start',
-        },
-        descriptionInput: {
-          width: '100%',
-          height: 100,
-          borderColor: 'gray',
-          borderWidth: 1,
-          borderRadius: 10,
-          padding: 10,
-          textAlignVertical: 'top',
-          marginBottom: 20,
-          backgroundColor: '#f9f9f9',
-        },
-        map: {
-          width: '100%',
-          marginTop: 10,
-          marginBottom: 20,
-          borderRadius: 15,
-        },
-        monumentText: {
-          fontSize: 24,
-          fontWeight: 'bold',
-          color: 'black',
-          textAlign: 'center',
-          marginTop: 10,
-        },
-      });
+  container: {
+    flex: 1,
+    paddingTop: 50,
+    backgroundColor: '#121212',
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#121212',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  permissionContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  permissionText: {
+    color: 'white',
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  permissionButton: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+  },
+  permissionButtonText: {
+    color: '#121212',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  carouselContainer: {
+    height: Dimensions.get('window').height * 0.9,
+    position: 'relative',
+    marginBottom: 20,
+  },
+  slideContainer: {
+    width: Dimensions.get('window').width,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageContainer: {
+    width: '100%',
+    height: '100%',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 215, 0, 0.5)',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  activeImage: {
+    borderColor: '#FFD700',
+    borderWidth: 3,
+  },
+  image: {
+    width: '95%',
+    height: '100%',
+    borderRadius: 12,
+  },
+  indicatorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    position: 'absolute',
+    bottom: 30,
+    width: '100%',
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    marginHorizontal: 4,
+  },
+  activeIndicator: {
+    backgroundColor: '#FFD700',
+  },
+  contentContainer: {
+    padding: 20,
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFD700',
+    marginBottom: 10,
+  },
+  descriptionInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    padding: 15,
+    color: 'white',
+    marginBottom: 20,
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  mapContainer: {
+    height: 200,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    gap: 15,
+  },
+  button: {
+    borderRadius: 25,
+    overflow: 'hidden',
+  },
+  postButton: {
+    marginBottom: 10,
+  },
+  gradientButton: {
+    padding: 15,
+    alignItems: 'center',
+  },
+  postButtonText: {
+    color: '#121212',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  secondaryButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  secondaryButton: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 15,
+    alignItems: 'center',
+    borderRadius: 25,
+  },
+  secondaryButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  camera: {
+    flex: 1,
+    backgroundColor: '#121212',
+  },
+  cameraOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  cameraText: {
+    color: '#FFD700',
+    fontSize: 24,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 40,
+  },
+  cameraControls: {
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  flipButton: {
+    padding: 10,
+  },
+  captureButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  captureButtonInner: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FFD700',
+  },
+});
