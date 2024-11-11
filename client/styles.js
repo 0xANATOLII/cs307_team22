@@ -228,21 +228,6 @@ export default StyleSheet.create({
     marginBottom: 20,
   },
   
-  // Style for the buttons container
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  
-  // General button style
-  modalButton: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  
   // Cancel button specific style
   modalCancelButton: {
     backgroundColor: '#d9534f', // Red for cancel button
