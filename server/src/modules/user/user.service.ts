@@ -10,6 +10,7 @@ import { MailService } from '../mail/mail.service';
 import { Types } from 'mongoose';
 import { BadgeDocument } from '../badge/schema/badge.schema';
 import { Badge } from '../badge/schema/badge.schema'; 
+import { BADHINTS } from 'dns';
 
 
 @Injectable()
@@ -332,13 +333,13 @@ export class UserService {
   }
 
 
-  async getBadgesByUser(userId:string){
-    
-    if(! await this.userModel.find({id:userId})){
+  async getBadgesByUser(username:string){
+    const user = await this.userModel.findOne({username:username})
+    if(! user){
       throw new BadRequestException("This account doesnt exists !")
     }
 
-    const userBadges =  this.badgeModel.find({ userId: userId }).exec();  
+    const userBadges =  await this.badgeModel.find({ userId: user.id }).exec();  
     if (!userBadges){
       return "No badges Yet!";
     }else{
@@ -347,6 +348,27 @@ export class UserService {
   }
 
 
+  async getBadgeByLink(username:string,badgeId:string){
 
+    const user = await this.userModel.findOne({username:username});
+    if(!user)
+      throw new BadRequestException("This user doesnt exist!")
+    if(user.privacy)
+      throw new BadRequestException("This user is private. Became they friend to see the badge!")
+
+    console.log(badgeId)
+    const badge = await this.badgeModel.findOne({_id:badgeId})
+    
+    
+    if(!badge)
+      throw new BadRequestException("This badge doesnt exist !")    
+    console.log("Given : "+username)
+    console.log("Got : "+badge)
+    if(badge.userId!=user.id)
+      throw new BadRequestException("Invalid link")
+
+    return badge
+
+  }
 
 }
