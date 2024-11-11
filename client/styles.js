@@ -531,6 +531,24 @@ export default StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
   },
+  followContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 15,
+  },
+  followCount: {
+    alignItems: 'center',
+    marginHorizontal: 20,
+  },
+  followCountNumber: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  followCountLabel: {
+    fontSize: 14,
+    color: '#888',
+  },
+  
   
 });
 

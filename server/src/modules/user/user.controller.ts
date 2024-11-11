@@ -51,6 +51,8 @@ export class UserController {
       pfp: user.pfp,
       desc: user.description || 'No description available',
       privacy: user.privacy,
+      followers: user.followers,
+      following: user.following,
     };
   }
 

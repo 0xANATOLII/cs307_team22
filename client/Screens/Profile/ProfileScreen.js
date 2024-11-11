@@ -6,6 +6,7 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Config from "../../config.js";
 import BottomNav from '../BottomNav';
+import ListPopup from './ListPopup';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -21,10 +22,14 @@ export default function ProfileScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
   const [isUploadModalVisible, setIsUploadModalVisible] = useState(false);
+  const [isFollowersModalVisible, setIsFollowersModalVisible] = useState(false);
+  const [isFollowingModalVisible, setIsFollowingModalVisible] = useState(false);
   const [profileInfo, setProfileInfo] = useState({
     username: username,
     pfp: defaultImageUri,
     desc: '',
+    followers: 0,
+    following: 0,
     achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
     profileHistory: ['Change 1','Change 2'],
   });
@@ -50,6 +55,8 @@ export default function ProfileScreen({ route, navigation }) {
             pfp: data.pfp || defaultImageUri,
             desc: data.desc || '',
             privacy: data.privacy,
+            followers: data.followers || 0,
+            following: data.following || 0,
             achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
             profileHistory: ['Change 1','Change 2'],
           });
@@ -61,11 +68,16 @@ export default function ProfileScreen({ route, navigation }) {
       } finally {
         setLoading(false);
       }
-      console.log(profileInfo.pfp);
+      //console.log(profileInfo.pfp);
     };
 
     fetchProfileData();
   }, []);
+
+  const renderFollowerItem = ({ item }) => (
+    <Text style={styles.modalItemText}>{item}</Text>
+  ); 
+
 
   const handleSaveDescription = async (newDescription) => {
     try {
@@ -263,6 +275,48 @@ export default function ProfileScreen({ route, navigation }) {
             >
               <Text style={styles.buttonText}>Edit Username</Text>
           </Pressable>
+
+          {/* Followers and Following Section */}
+          <View style={styles.followContainer}>
+            <View style={styles.followCount}>
+              <Text style={styles.followCountLabel}>Followers</Text>
+              {profileInfo.followers.length > 0 ? (
+                <Pressable onPress={() => setIsFollowersModalVisible(true)}>
+                  <Text style={styles.followCountNumber}>{profileInfo.followers.length}</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.followCountNumber}>0</Text>
+              )}
+            </View>
+
+            <View style={styles.followCount}>
+              <Text style={styles.followCountLabel}>Following</Text>
+              {profileInfo.following.length > 0 ? (
+                <Pressable onPress={() => setIsFollowingModalVisible(true)}>
+                  <Text style={styles.followCountNumber}>{profileInfo.following.length}</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.followCountNumber}>0</Text>
+              )}
+            </View>
+          </View>
+
+          {/* Followers List Popup */}
+          <ListPopup
+            title="Followers"
+            visible={isFollowersModalVisible}
+            data={profileInfo.followers}
+            onClose={() => setIsFollowersModalVisible(false)}
+          />
+
+          {/* Following List Popup */}
+          <ListPopup
+            title="Following"
+            visible={isFollowingModalVisible}
+            data={profileInfo.following}
+            onClose={() => setIsFollowingModalVisible(false)}
+          />
+
   
           {/* Description Section */}
           <View style={styles.section}>
