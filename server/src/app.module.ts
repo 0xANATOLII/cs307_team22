@@ -17,6 +17,7 @@ import { MailModule } from './modules/mail/mail.module';
     UserModule,
     MailModule,
     BadgeModule,
+
     MonumentModule,
     AuthModule, // Import AuthModule for authentication
   ],

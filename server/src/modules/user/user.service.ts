@@ -8,13 +8,16 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
 import { MailService } from '../mail/mail.service';
 import { Types } from 'mongoose';
-
+import { BadgeDocument } from '../badge/schema/badge.schema';
+import { Badge } from '../badge/schema/badge.schema'; 
 
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
   private mailService: MailService,
+  @InjectModel(Badge.name) private badgeModel: Model<BadgeDocument>,
+  
 ) {}
 
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
@@ -327,4 +330,23 @@ export class UserService {
       privacy: followRequest.privacy,
     }));
   }
+
+
+  async getBadgesByUser(userId:string){
+    
+    if(! await this.userModel.find({id:userId})){
+      throw new BadRequestException("This account doesnt exists !")
+    }
+
+    const userBadges =  this.badgeModel.find({ userId: userId }).exec();  
+    if (!userBadges){
+      return "No badges Yet!";
+    }else{
+      return userBadges;
+    }
+  }
+
+
+
+
 }

@@ -233,4 +233,15 @@ export class UserController {
   async getFollowing(@Param('userId') userId: string) {
     return await this.userService.getFollowing(userId);
   }
+
+
+  @Get("/badges/:userId")
+  async getbadgesByUser(@Param('userId') userId: string){
+
+    return this.userService.getBadgesByUser(userId)
+ 
+
+
+  }
+
 }
