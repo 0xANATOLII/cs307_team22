@@ -531,6 +531,201 @@ export default StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
   },
+
+
+
+
+
+
+
+
+
+
+
+  //Revamped UI (use these as much as possible)
+  QQcontainer: {
+    flex: 1,
+    paddingTop: 50,
+    backgroundColor: '#121212',
+  },
+  QQsafeArea: {
+    flex: 1,
+    backgroundColor: '#121212',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  QQpermissionContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  QQpermissionText: {
+    color: 'white',
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  QQpermissionButton: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+  },
+  QQpermissionButtonText: {
+    color: '#121212',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  QQscrollContent: {
+    flexGrow: 1,
+  },
+  QQcarouselContainer: {
+    height: Dimensions.get('window').height * 0.9,
+    position: 'relative',
+    marginBottom: 20,
+  },
+  QQslideContainer: {
+    width: Dimensions.get('window').width,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  QQimageContainer: {
+    width: '100%',
+    height: '100%',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 215, 0, 0.5)',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  QQactiveImage: {
+    borderColor: '#FFD700',
+    borderWidth: 3,
+  },
+  QQimage: {
+    width: '95%',
+    height: '100%',
+    borderRadius: 12,
+  },
+  QQindicatorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    position: 'absolute',
+    bottom: 30,
+    width: '100%',
+  },
+  QQindicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    marginHorizontal: 4,
+  },
+  QQactiveIndicator: {
+    backgroundColor: '#FFD700',
+  },
+  contentContainer: {
+    padding: 20,
+  },
+  QQlabel: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFD700',
+    marginBottom: 10,
+  },
+  QQdescriptionInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    padding: 15,
+    color: 'white',
+    marginBottom: 20,
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  QQmapContainer: {
+    height: 200,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  QQbuttonContainer: {
+    gap: 15,
+  },
+  QQbutton: {
+    borderRadius: 25,
+    overflow: 'hidden',
+  },
+  QQpostButton: {
+    marginBottom: 10,
+  },
+  QQgradientButton: {
+    padding: 15,
+    alignItems: 'center',
+  },
+  QQpostButtonText: {
+    color: '#121212',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  QQsecondaryButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  QQsecondaryButton: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 15,
+    alignItems: 'center',
+    borderRadius: 25,
+  },
+  QQsecondaryButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  QQcamera: {
+    flex: 1,
+    backgroundColor: '#121212',
+  },
+  QQcameraOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  QQcameraText: {
+    color: '#FFD700',
+    fontSize: 24,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 40,
+  },
+  QQcameraControls: {
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  QQflipButton: {
+    padding: 10,
+  },
+  QQcaptureButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  QQcaptureButtonInner: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FFD700',
+  },
   
 });
 
