@@ -191,8 +191,6 @@ export default function ProfileScreen({ route, navigation }) {
     navigation.navigate('Home');
   };
 
-
-
   const imageFromPhone = async () => {
     // No permissions request is necessary for launching the image library
    // setIsUploadModalVisible(false)
