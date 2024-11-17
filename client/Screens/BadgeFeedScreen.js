@@ -1,27 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, FlatList, TextInput, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TextInput, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import BadgeCommentSection from './BadgeCommentSection';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
+import GradientButton from './Components/GradientButton';
 import Config from '../config';
 import BottomNav from './BottomNav';
-import { colors, gradients, commonStyles, spacing, borderRadius, typography } from './theme';
-
-// Reusable button components
-const GradientButton = ({ onPress, title, style }) => (
-  <TouchableOpacity style={[commonStyles.buttonBase, style]} onPress={onPress}>
-    <LinearGradient 
-      colors={gradients.primary} 
-      style={{ ...commonStyles.primaryButton, padding: spacing.md}}
-      start={{ x: 0, y: 0 }} 
-      end={{ x: 1, y: 0 }}
-    >
-      <Text style={commonStyles.primaryButtonText}>{title}</Text>
-    </LinearGradient>
-  </TouchableOpacity>
-);
+import { colors, commonStyles, spacing, borderRadius, typography } from './theme';
 
 const SecondaryButton = ({ onPress, title, style }) => (
   <TouchableOpacity 
@@ -200,7 +186,8 @@ export default function BadgeFeedScreen({ route, navigation }) {
           <GradientButton
             onPress={() => handleBadgeLikeToggle(item._id)}
             title={isLiked ? 'Unlike' : 'Like'}
-            style={styles.actionButton}
+            outerstyle={styles.actionButton}
+            innerstyle={styles.actionButtonInner}
           />
           
           <SecondaryButton
@@ -211,7 +198,12 @@ export default function BadgeFeedScreen({ route, navigation }) {
         </View>
   
         {visibleComments[item._id] && (
-          <BadgeCommentSection key={item._id} badgeId={item._id} username={username} />
+          <BadgeCommentSection 
+            badgeId={item._id}
+            username={username}
+            visible={visibleComments[item._id]}
+            onClose={() => toggleCommentsVisibility(item._id)}
+          />
         )}
   
         {item.userId?.username === username && (
@@ -255,7 +247,8 @@ export default function BadgeFeedScreen({ route, navigation }) {
           <GradientButton
             onPress={handleCreateBadge}
             title="Create Badge"
-            style={styles.createButton}
+            outerstyle={styles.createButton}
+            innerstyle={styles.actionButtonInner}
           />
         </View>
 
@@ -298,7 +291,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   createButton: {
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
   },
   badgeList: {
     padding: spacing.md,
@@ -329,6 +322,9 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
     marginHorizontal: spacing.xs,
+  },
+  actionButtonInner: {
+    padding: spacing.md,
   },
   likeView: {
     position: 'absolute',

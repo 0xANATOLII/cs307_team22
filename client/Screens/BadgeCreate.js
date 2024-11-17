@@ -5,16 +5,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import MapPage from './MapPage';
 import { LocationContext } from './Components/locationContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
+import GradientButton from './Components/GradientButton';
 import { colors, gradients, commonStyles, spacing, borderRadius, typography } from './theme';
-
-const GradientButton = ({ onPress, title }) => (
-  <TouchableOpacity style={commonStyles.buttonBase} onPress={onPress}>
-    <LinearGradient colors={gradients.primary} style={{ ...commonStyles.primaryButton, padding: spacing.lg,}}>
-      <Text style={commonStyles.primaryButtonText}>{title}</Text>
-    </LinearGradient>
-  </TouchableOpacity>
-);
 
 export default function CameraPage({ route, navigation }) {
   const { closestMon, location, setClosestMon, setLocation } = useContext(LocationContext);
@@ -130,6 +122,7 @@ export default function CameraPage({ route, navigation }) {
               <GradientButton 
                 title="Post"
                 onPress={() => alert("POST")}
+                innerstyle={{padding: spacing.lg}}
               />
 
               <View style={styles.secondaryButtons}>
