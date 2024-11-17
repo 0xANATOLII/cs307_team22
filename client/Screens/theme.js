@@ -69,7 +69,6 @@ export const colors = {
     input: {
       backgroundColor: colors.surface,
       borderRadius: borderRadius.md,
-      padding: spacing.lg,
       color: colors.textPrimary,
       fontSize: typography.sizes.md,
     },
@@ -80,7 +79,6 @@ export const colors = {
       overflow: 'hidden',
     },
     primaryButton: {
-      padding: spacing.lg,
       alignItems: 'center',
     },
     primaryButtonText: {
@@ -90,7 +88,6 @@ export const colors = {
     },
     secondaryButton: {
       backgroundColor: colors.surface,
-      padding: spacing.lg,
       alignItems: 'center',
       borderRadius: borderRadius.lg,
     },

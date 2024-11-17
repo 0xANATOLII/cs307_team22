@@ -8,10 +8,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, gradients, commonStyles, spacing, borderRadius, typography } from './theme';
 
-// Reusable button component for the app
 const GradientButton = ({ onPress, title }) => (
   <TouchableOpacity style={commonStyles.buttonBase} onPress={onPress}>
-    <LinearGradient colors={gradients.primary} style={commonStyles.primaryButton}>
+    <LinearGradient colors={gradients.primary} style={{ ...commonStyles.primaryButton, padding: spacing.lg,}}>
       <Text style={commonStyles.primaryButtonText}>{title}</Text>
     </LinearGradient>
   </TouchableOpacity>
@@ -135,14 +134,14 @@ export default function CameraPage({ route, navigation }) {
 
               <View style={styles.secondaryButtons}>
                 <TouchableOpacity
-                  style={[commonStyles.buttonBase, commonStyles.secondaryButton, { flex: 1 }]}
+                  style={[commonStyles.buttonBase, commonStyles.secondaryButton, { flex: 1, padding: spacing.lg}]}
                   onPress={() => { setPhoto(null); setPhotof(null); }}
                 >
                   <Text style={commonStyles.secondaryButtonText}>Retake</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[commonStyles.buttonBase, commonStyles.secondaryButton, { flex: 1 }]}
+                  style={[commonStyles.buttonBase, commonStyles.secondaryButton, { flex: 1, padding: spacing.lg,}]}
                   onPress={back_n}
                 >
                   <Text style={commonStyles.secondaryButtonText}>Cancel</Text>
@@ -218,6 +217,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   carouselContainer: {
+    paddingTop: 50,
     height: Dimensions.get('window').height * 0.9,
     position: 'relative',
     marginBottom: spacing.lg,
@@ -251,6 +251,7 @@ const styles = StyleSheet.create({
   descriptionInput: {
     height: 100,
     textAlignVertical: 'top',
+    padding: spacing.lg,
     marginBottom: spacing.lg,
   },
   mapContainer: {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, FlatList, StyleSheet, Alert } from 'react-native';
 import Config from '../config';
+//NEED TO UPDATE UI
 
 export default function BadgeCommentSection({ badgeId, username}) {
   const [comments, setComments] = useState([]);
