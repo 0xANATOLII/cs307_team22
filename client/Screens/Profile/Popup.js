@@ -15,7 +15,6 @@ const charLimit = 250;
 export default function ModalPopup({ editable, visible, onClose, onSave, modifyField }) {
   const [text, setText] = useState(editable || '');
 
-
   const handleSave = () => {
     onSave(text); // Send the updated text back to ProfileScreen
     onClose(); // Close the modal

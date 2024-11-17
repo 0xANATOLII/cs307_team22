@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, Alert, Pressable, ActivityIndicator} from 'react-native';
+import { View, Text, FlatList, Image, Alert, StyleSheet, ActivityIndicator} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
-import styles from '../styles';
 import BottomNav from './BottomNav';
+import { colors, commonStyles, spacing, typography, borderRadius } from './theme';
 
 export default function MonumentScreen({ route, navigation }) {
   const [monuments, setMonuments] = useState([]);
@@ -110,26 +110,26 @@ export default function MonumentScreen({ route, navigation }) {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safeArea, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading nearby monuments...</Text>
+      <SafeAreaView style={[commonStyles.safeArea, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Loading nearby monuments...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <Text style={styles.monumentHeader}>Nearby Monuments</Text>
+    <SafeAreaView style={commonStyles.safeArea}>
+      <Text style={styles.header}>Nearby Monuments</Text>
       
       <FlatList
         data={monuments}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <View style={[styles.monumentCard, styles.monumentCardInactive]}>
-            <Image source={item.icon} style={styles.monumentIcon} />
-            <View style={styles.monumentInfo}>
-              <Text style={styles.monumentTitle}>{item.title}</Text>
-              <Text style={styles.monumentDistance}>
+          <View style={styles.card}>
+            <Image source={item.icon} style={styles.icon} />
+            <View style={styles.infoContainer}>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.distance}>
                 Distance: {(item.distance * 1000).toFixed(0)}m away
               </Text>
             </View>
@@ -148,3 +148,51 @@ export default function MonumentScreen({ route, navigation }) {
   );
 }
 
+const styles = StyleSheet.create({
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: colors.textPrimary,
+    fontSize: typography.sizes.md,
+    marginTop: spacing.md,
+  },
+  header: {
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    color: colors.primary,
+    textAlign: 'center',
+    marginVertical: spacing.lg,
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  icon: {
+    width: 60,
+    height: 60,
+    borderRadius: borderRadius.sm,
+    marginRight: spacing.md,
+  },
+  infoContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.semibold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  distance: {
+    fontSize: typography.sizes.md,
+    color: colors.textSecondary,
+  }
+});

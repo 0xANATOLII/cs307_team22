@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, FlatList, TextInput, ActivityIndicator} from 'react-native';
+import { View, Text, FlatList, TextInput, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
-import BadgeCommentSection from './BadgeCommentSection'; // Adjust path as needed
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; //Import NavBar Icons
-import styles from '../styles';
+import BadgeCommentSection from './BadgeCommentSection';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import GradientButton from './Components/GradientButton';
 import Config from '../config';
 import BottomNav from './BottomNav';
+import { colors, commonStyles, spacing, borderRadius, typography } from './theme';
+
+const SecondaryButton = ({ onPress, title, style }) => (
+  <TouchableOpacity 
+    style={[commonStyles.buttonBase, commonStyles.secondaryButton, {padding: spacing.md}]} 
+    onPress={onPress}
+  >
+    <Text style={commonStyles.secondaryButtonText}>{title}</Text>
+  </TouchableOpacity>
+);
 
 
 export default function BadgeFeedScreen({ route, navigation }) {
@@ -155,90 +165,186 @@ export default function BadgeFeedScreen({ route, navigation }) {
     const isLiked = item.likes && item.likes.some((like) => like.userId === userId);
   
     return (
-      <View style={styles.BSbadgeContainer}>
-        <Text style={styles.BSbadgeTitle}>{item.name}</Text>
-        <Text style={styles.BSbadgeSubtitle}>
+      <View style={styles.badgeCard}>
+        <Text style={styles.badgeTitle}>{item.name}</Text>
+        <Text style={styles.badgeCreator}>
           Created by: {item.username || 'Unknown'}
         </Text>
+
+        <View style={styles.likeView}>
+          <Text style={styles.likeCount}>
+              {item.likes ? item.likes.length : 0}
+          </Text>
+          <MaterialIcons 
+                name={isLiked ? 'favorite': 'favorite-border'} 
+                size={30} 
+                color={isLiked ? colors.primary : colors.inactive} 
+          />
+        </View>
   
-        <View style={styles.buttonRow}>
-          <Pressable onPress={() => handleBadgeLikeToggle(item._id)} style={styles.likeButton}>
-            <Text style={styles.likeButtonText}>{isLiked ? 'Unlike' : 'Like'}</Text>
-          </Pressable>
-          <Text style={styles.likeCount}>Likes: {item.likes ? item.likes.length : 0}</Text>
-  
-          <Pressable style={styles.BScommentToggleButton} onPress={() => toggleCommentsVisibility(item._id)}>
-            <Text style={styles.BScommentToggleText}>
-              {visibleComments[item._id] ? 'Hide Comments' : 'See Comments'}
-            </Text>
-          </Pressable>
+        <View style={styles.badgeActions}>
+          <GradientButton
+            onPress={() => handleBadgeLikeToggle(item._id)}
+            title={isLiked ? 'Unlike' : 'Like'}
+            outerstyle={styles.actionButton}
+            innerstyle={styles.actionButtonInner}
+          />
+          
+          <SecondaryButton
+            onPress={() => toggleCommentsVisibility(item._id)}
+            title={visibleComments[item._id] ? 'Hide Comments' : 'Show Comments'}
+            style={styles.actionButton}
+          />
         </View>
   
         {visibleComments[item._id] && (
-          <BadgeCommentSection key={item._id} badgeId={item._id} username={username} />
+          <BadgeCommentSection 
+            badgeId={item._id}
+            username={username}
+            visible={visibleComments[item._id]}
+            onClose={() => toggleCommentsVisibility(item._id)}
+          />
         )}
   
         {item.userId?.username === username && (
-          <Pressable style={styles.BSdeleteButton} onPress={() => handleBadgeDelete(item._id)}>
-            <Text style={styles.BSdeleteButtonText}>Delete Badge</Text>
-          </Pressable>
+          <SecondaryButton
+            onPress={() => handleBadgeDelete(item._id)}
+            title="Delete Badge"
+            style={styles.deleteButton}
+          />
         )}
       </View>
     );
   };
   
-  
-  
-  
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.BScontainer}>
+    <SafeAreaView style={commonStyles.safeArea}>
+      <View style={commonStyles.container}>
         {/* Badge Creation Form */}
-        <View style={styles.BScreateBadgeContainer}>
+        <View style={styles.createBadgeForm}>
+          <Text style={commonStyles.label}>Create New Badge</Text>
           <TextInput
-            style={styles.BSinput}
+            style={[commonStyles.input, styles.formInput]}
             placeholder="Badge Name"
+            placeholderTextColor={colors.textSecondary}
             value={newBadge.name}
             onChangeText={(text) => setNewBadge({ ...newBadge, name: text })}
           />
           <TextInput
-            style={styles.BSinput}
+            style={[commonStyles.input, styles.formInput]}
             placeholder="Picture URL"
+            placeholderTextColor={colors.textSecondary}
             value={newBadge.picture}
             onChangeText={(text) => setNewBadge({ ...newBadge, picture: text })}
           />
           <TextInput
-            style={styles.BSinput}
+            style={[commonStyles.input, styles.formInput]}
             placeholder="Location"
+            placeholderTextColor={colors.textSecondary}
             value={newBadge.location}
             onChangeText={(text) => setNewBadge({ ...newBadge, location: text })}
           />
-          <Pressable style={styles.BScreateButton} onPress={handleCreateBadge}>
-            <Text style={styles.BScreateButtonText}>Create Badge</Text>
-          </Pressable>
+          <GradientButton
+            onPress={handleCreateBadge}
+            title="Create Badge"
+            outerstyle={styles.createButton}
+            innerstyle={styles.actionButtonInner}
+          />
         </View>
 
-        {/* List of badges or "No badges" message */}
+        {/* Badge List */}
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color={colors.primary} />
         ) : badges.length === 0 ? (
-          <Text style={styles.BSnoBadgesText}>No badges available</Text>
+          <Text style={styles.emptyMessage}>No badges available</Text>
         ) : (
           <FlatList
             data={badges}
             keyExtractor={(item, index) => item._id ? item._id : index.toString()}
             renderItem={renderBadge}
+            contentContainerStyle={styles.badgeList}
           />
         )}
       </View>
 
-      {/* Bottom Navigation Bar */}
       <BottomNav 
         route={route}
         navigation={navigation} 
         username={username} 
-        currentScreen={"BadgeFeed"}
+        currentScreen="BadgeFeed"
       />
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  createBadgeForm: {
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  formInput: {
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  createButton: {
+    marginTop: spacing.sm,
+  },
+  badgeList: {
+    padding: spacing.md,
+    gap: spacing.md,
+  },
+  badgeCard: {
+    ...commonStyles.card,
+    position: 'relative',
+    marginBottom: spacing.sm,
+  },
+  badgeTitle: {
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  badgeCreator: {
+    fontSize: typography.sizes.md,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
+  },
+  badgeActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
+  },
+  actionButton: {
+    flex: 1,
+    marginHorizontal: spacing.xs,
+  },
+  actionButtonInner: {
+    padding: spacing.md,
+  },
+  likeView: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  likeCount: {
+    fontSize: typography.sizes.md,
+    color: colors.textPrimary,
+    fontWeight: typography.weights.medium,
+  },
+  deleteButton: {
+    marginTop: spacing.md,
+  },
+  emptyMessage: {
+    fontSize: typography.sizes.lg,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    padding: spacing.xl,
+  },
+});

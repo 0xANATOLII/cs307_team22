@@ -228,21 +228,6 @@ export default StyleSheet.create({
     marginBottom: 20,
   },
   
-  // Style for the buttons container
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  
-  // General button style
-  modalButton: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  
   // Cancel button specific style
   modalCancelButton: {
     backgroundColor: '#d9534f', // Red for cancel button
@@ -264,43 +249,7 @@ export default StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    paddingBottom: Platform.OS === 'ios' ? 20 : 0,  //PLATFORM DEPENDENT
-    zIndex: 1000,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 8,
-  },
-  navText: {
-    fontSize: 12,
-    marginTop: 4,
-    color: '#666',
-  },
-  navTextActive: {
-    color: '#007AFF',
-  },
+  
   map: {
     width: '100%',
     height: '100%',
