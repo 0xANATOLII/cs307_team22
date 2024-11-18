@@ -106,8 +106,8 @@ export default function FriendsPage({ route, navigation }) {
   // Accept or Reject a Friend Request
   const handleRequest = async (requestId, action) => {
     try {
-      if (action === 'accept') {
-        await axios.post(`${Config.API_URL}/user/accept`, { userId, targetUserId: requestId });
+      if (action === 'acceptRequest') {
+        await axios.post(`${Config.API_URL}/user/acceptRequest`, { userId, targetUserId: requestId });
         alert('Friend request accepted.');
         setFriendRequests(friendRequests.filter(request => request._id !== requestId));
       } else if (action === 'reject') {
@@ -131,7 +131,7 @@ export default function FriendsPage({ route, navigation }) {
         {item.username} has sent you a follow request.
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Pressable onPress={() => handleRequest(item.id, 'accept')} style={[styles.acceptButton, { backgroundColor: '#28a745', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6, marginRight: 8 }]}>
+        <Pressable onPress={() => handleRequest(item.id, 'acceptRequest')} style={[styles.acceptButton, { backgroundColor: '#28a745', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6, marginRight: 8 }]}>
           <Text style={{ color: '#fff', fontWeight: 'bold' }}>Accept</Text>
         </Pressable>
         <Pressable onPress={() => handleRequest(item.id, 'reject')} style={[styles.rejectButton, { backgroundColor: '#dc3545', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6 }]}>
@@ -153,7 +153,7 @@ export default function FriendsPage({ route, navigation }) {
           await axios.post(`${Config.API_URL}/user/request`, { userId, targetUserId });
           alert('Follow request sent.');
         } else {
-          await axios.post(`${Config.API_URL}/user/accept`, { userId, targetUserId });
+          await axios.post(`${Config.API_URL}/user/follow`, { userId, targetUserId });
           setFollowingUsers([...followingUsers, targetUserId]);
           alert('Followed successfully.');
         }

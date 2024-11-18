@@ -1,5 +1,5 @@
 const Config = {
-    API_URL: 'https://ddee-128-210-106-51.ngrok-free.app',
+    API_URL: 'https://577b-195-252-220-61.ngrok-free.app',
     // You can add other global variables here if needed
   };
   

@@ -17,31 +17,27 @@ export default StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#000000',
     marginBottom: 5,
-    zIndex: -1,
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#000000',
     marginTop: 10,
     marginBottom: 5,
-    zIndex: -1,
     textAlign: 'center',
   },
   text: {
     fontSize: 14,
     color: 'black',
     marginBottom: 30,
-    zIndex: -1,
     textAlign: 'center',
   },
   sectionText: {
     fontSize: 18,
     color: 'black',
     marginBottom: 30,
-    zIndex: -1,
     textAlign: 'center',
   },
   errorText: {

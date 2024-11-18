@@ -40,7 +40,7 @@ export default function MapPage({
   
           if (response.ok) {
             const data = await response.json();
-            console.log(data);
+            //console.log(data);
             setProfileInfo({
               userId: data._id,
               username: data.username,
