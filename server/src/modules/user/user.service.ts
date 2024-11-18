@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -250,8 +250,8 @@ export class UserService {
     if (!user || !targetUser) throw new NotFoundException('User not found');
   
     // Add each other as friends
-    if (!user.following.includes(targetUserId)) user.following.push(targetUserId);
-    if (!targetUser.followers.includes(userId)) targetUser.followers.push(userId);
+    if (!user.followers.includes(targetUserId)) user.followers.push(targetUserId);
+    if (!targetUser.following.includes(userId)) targetUser.following.push(userId);
 
     // Remove from follow requests
     user.followRequests = user.followRequests.filter(req => req !== targetUserId);
@@ -270,6 +270,23 @@ export class UserService {
     await user.save();
   
     return { message: 'Follow request rejected' };
+  }
+
+  async followUser(userId: string, targetUserId: string): Promise<any> {
+    const user = await this.userModel.findById(userId);
+    const targetUser = await this.userModel.findById(targetUserId);
+    if (!user || !targetUser) throw new NotFoundException('User not found');
+  
+    // Add each other as friends
+    if (!user.following.includes(targetUserId)) user.following.push(targetUserId);
+    if (!targetUser.followers.includes(userId)) targetUser.followers.push(userId);
+
+    // Remove from follow requests
+    user.followRequests = user.followRequests.filter(req => req !== targetUserId);
+    await user.save();
+    await targetUser.save();
+  
+    return { message: 'User followed' };
   }
   
   async unfollowUser(userId: string, targetUserId: string): Promise<User> {
@@ -327,4 +344,26 @@ export class UserService {
       privacy: followRequest.privacy,
     }));
   }
+
+  async getPFPandName(userId: string): Promise<{ username: string; pfp: string }> {
+
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new NotFoundException('Invalid user ID format');
+    }
+
+    try {
+      const user = await this.userModel
+        .findById(userId, 'username pfp') // Select only the fields you need
+        .exec();
+
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+
+      return { username: user.username, pfp: user.pfp };
+    } catch (error) {
+      throw error;
+    }
+  }
+  
 }

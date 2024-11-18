@@ -16,6 +16,7 @@ export default function ProfileScreen({ route, navigation }) {
   const defaultImageUri = Image.resolveAssetSource(require('./default.png')).uri;
   
   const { username } = route.params;
+  const [userId, setUserId] = useState(null);
   const [isUsernameModalVisible, setIsUsernameModalVisible] = useState(false);
   const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
@@ -30,54 +31,87 @@ export default function ProfileScreen({ route, navigation }) {
     desc: '',
     followers: 0,
     following: 0,
-    achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
+    badges: [],
     profileHistory: ['Change 1','Change 2'],
   });
   const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] = useState(false);
   const [password, setPassword] = useState('');  // New state variable for password input
   const [isPasswordConfirmVisible, setIsPasswordConfirmVisible] = useState(false);  // Controls visibility of password input
+  const [recentBadges, setRecentBadges] = useState([]);
 
   useEffect(() => {
-    const fetchProfileData = async () => {
+    const fetchUserId = async () => {
       try {
-        const response = await fetch(`${Config.API_URL}/user/profile/${username}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
+        const response = await fetch(`${Config.API_URL}/user/id/${username}`);
         if (response.ok) {
           const data = await response.json();
+          setUserId(data.userId); // Set the fetched user ID
+        } else {
+          console.error('Failed to fetch user ID');
+        }
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+
+    fetchUserId();
+  }, [username]);
+
+  useEffect(() => {
+    if (!userId) return; // Only fetch if userId is available
+
+    const fetchProfileData = async () => {
+      try {
+        console.log('Fetching profile data for username:', username);
+        const response = await fetch(`${Config.API_URL}/user/profile/${username}`);
+        if (response.ok) {
+          const data = await response.json();
+
+          const followersDetails = await fetchUserDetails(data.followers || []);
+          const followingDetails = await fetchUserDetails(data.following || []);
+
           setIsPrivate(data.privacy)
           setProfileInfo({
-            userId: data._id,
             username: data.username,
             pfp: data.pfp || defaultImageUri,
             desc: data.desc || '',
-            privacy: data.privacy,
-            followers: data.followers || 0,
-            following: data.following || 0,
-            achievementList: [['Achievement 1','Description of Achievement'],['Achievement 2','Description of Achievement']],
-            profileHistory: ['Change 1','Change 2'],
+            followers: followersDetails,
+            following: followingDetails,
+            badges: data.badges,
+            profileHistory: data.profileHistory || [],
           });
+          //console.log('Profile data fetched:', data);
+
+          // Fetch recent badges after profile data is loaded
+          fetchRecentBadges(userId);
         } else {
-          Alert.alert('Error', 'Failed to load profile data.');
+          console.error('Failed to load profile data');
         }
       } catch (error) {
-        Alert.alert('Error', 'Unable to fetch profile data.');
+        console.error('Error fetching profile data:', error);
       } finally {
         setLoading(false);
       }
-      //console.log(profileInfo.pfp);
+    };
+
+    const fetchRecentBadges = async (userId) => {
+      try {
+        console.log('Fetching recent badges for userId:', userId);
+        const response = await fetch(`${Config.API_URL}/badge/recent/${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setRecentBadges(data.recentBadges || []);
+          console.log('Recent badges fetched:', data.recentBadges);
+        } else {
+          console.error('Error fetching recent badges');
+        }
+      } catch (error) {
+        console.error('Error fetching recent badges:', error);
+      }
     };
 
     fetchProfileData();
-  }, []);
-
-  const renderFollowerItem = ({ item }) => (
-    <Text style={styles.modalItemText}>{item}</Text>
-  ); 
+  }, [userId]); // Runs when userId is set
 
 
   const handleSaveDescription = async (newDescription) => {
@@ -143,6 +177,40 @@ export default function ProfileScreen({ route, navigation }) {
     }
   };
 
+  const fetchUserDetails = async (userIds) => {
+    try {
+  
+      // Check if the userIds array is empty
+      if (!userIds || userIds.length === 0) {
+        console.log('No user IDs provided, skipping fetch');
+        return [];
+      }
+  
+      const userDetails = []; // Array to store user details
+  
+      for (const userId of userIds) {
+        
+        try {
+          const response = await fetch(`${Config.API_URL}/user/details/${userId}`);
+          const data = await response.json();
+  
+          if (response.ok) {
+            userDetails.push(data); // Add user details to the array
+          } else {
+            console.error(`Failed to fetch details for user ID ${userId}. Server response: ${JSON.stringify(data)}`);
+          }
+        } catch (error) {
+          console.error(`Error fetching details for user ID ${userId}:`, error);
+        }
+      }
+
+      return userDetails; // Return the array of user details
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      return [];
+    }
+  };
+  
 
   const togglePrivacy = async () => {
     const newPrivacySetting = !isPrivate;
@@ -158,8 +226,8 @@ export default function ProfileScreen({ route, navigation }) {
       setIsPrivate(!isPrivate)
       const data = await response.json();
   
-      console.log('Response status:', response.status); // Log status
-      console.log('Response data:', data); // Log data
+      //console.log('Response status:', response.status); // Log status
+      //console.log('Response data:', data); // Log data
   
       if (response.ok) {
         console.log('Privacy updated:', data.message);
@@ -344,17 +412,21 @@ export default function ProfileScreen({ route, navigation }) {
               </View>
           </View>
   
-          {/* Achievements Section */}
+          {/* Badges Section */}
           <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Achievements</Text>
-              <View style={styles.achievementList}>
-                {profileInfo.achievementList.map((achievement, index) => (
-                  <View key={index} style={styles.achievement}>
-                    <Text style={styles.achievementTitle}>{achievement[0]}</Text>
-                    <Text style={styles.sectionText}>{achievement[1]}</Text>
+            <Text style={styles.sectionTitle}>Recent Badges</Text>
+            {recentBadges.length > 0 ? (
+              <View style={styles.badgesContainer}>
+                {recentBadges.map((badge, index) => (
+                  <View key={index} style={styles.badge}>
+                    <Text style={styles.badgeTitle}>{badge.title}</Text>
+                    <Text style={styles.badgeDescription}>{badge.description}</Text>
                   </View>
                 ))}
               </View>
+            ) : (
+              <Text style={styles.sectionText}>No recent badges</Text>
+            )}
           </View>
   
           {/* Profile History Section */}

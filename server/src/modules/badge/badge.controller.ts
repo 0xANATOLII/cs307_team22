@@ -222,5 +222,20 @@ async create(@Body() createBadgeDto: CreateBadgeDto) {
     }
   }
 
+  @Get('recent/:userId')
+async getRecentBadges(@Param('userId') userId: string) {
+  this.logger.log(`Received request to fetch recent badges for user ID: ${userId}`);
+
+  try {
+    const recentBadges = await this.badgeService.findRecentBadgesByUserId(userId);
+    this.logger.log(`Successfully fetched ${recentBadges.length} recent badge(s) for user ID: ${userId}`);
+    return { recentBadges };
+  } catch (error) {
+    this.logger.error(`Error fetching recent badges for user ID: ${userId} - ${error.message}`, error.stack);
+    throw error; // Re-throw the error to ensure proper error handling in the application
+  }
+}
+
+
 
 }

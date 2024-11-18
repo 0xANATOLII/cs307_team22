@@ -207,7 +207,7 @@ export class UserController {
     return this.userService.sendFollowRequest(userId, targetUserId);
   }
 
-  @Post('accept')
+  @Post('acceptRequest')
   async acceptFollowRequest(
     @Body('userId') userId: string,
     @Body('targetUserId') targetUserId: string
@@ -230,9 +230,40 @@ export class UserController {
   ) {
     return this.userService.unfollowUser(userId, targetUserId);
   }
+
+  @Post('follow')
+  async followUser(
+    @Body('userId') userId: string,
+    @Body('targetUserId') targetUserId: string,
+  ) {
+    return this.userService.followUser(userId, targetUserId);
+  }
   
   @Get(':userId/following')
   async getFollowing(@Param('userId') userId: string) {
     return await this.userService.getFollowing(userId);
   }
+
+  @Get('/details/:userId')
+  async getUserDetails(@Param('userId') userId: string) {
+    this.logger.log(`Received request for user details with userId: ${userId}`);
+
+    if (!userId) {
+      this.logger.error(`Missing 'userId' `);
+      throw new BadRequestException('User ID is required');
+    }
+
+    try {
+      this.logger.log(`Parsed user IDs: ${JSON.stringify(userId)}`);
+
+      // Fetch user details if IDs are valid
+      const user = await this.userService.getPFPandName(userId);
+
+      return { user };
+    } catch (error) {
+      this.logger.error(`Failed to fetch user details: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
 }

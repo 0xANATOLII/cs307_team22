@@ -46,6 +46,12 @@ followers: string[];
 @Prop({ type: [String], default: [] })
 followRequests: string[];
 
+@Prop({ type: [String], default: [] })
+wishlist: string[];
+
+@Prop({ type: [String], default: [] })
+badgeIds: string[];
+
 }
 
 

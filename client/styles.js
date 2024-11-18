@@ -17,31 +17,27 @@ export default StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#000000',
     marginBottom: 5,
-    zIndex: -1,
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#000000',
     marginTop: 10,
     marginBottom: 5,
-    zIndex: -1,
     textAlign: 'center',
   },
   text: {
     fontSize: 14,
     color: 'black',
     marginBottom: 30,
-    zIndex: -1,
     textAlign: 'center',
   },
   sectionText: {
     fontSize: 18,
     color: 'black',
     marginBottom: 30,
-    zIndex: -1,
     textAlign: 'center',
   },
   errorText: {
@@ -292,68 +288,6 @@ export default StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
-
-  BScontainer: {
-    flex: 1,
-    padding: 20,
-  },
-  BSbadgeContainer: {
-    padding: 10,
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 5,
-  },
-  BSbadgeTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  BSbadgeSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 10,
-  },
-  BScommentToggleButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-  },
-  BScommentToggleText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  BScreateBadgeContainer: {
-    marginBottom: 20,
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    elevation: 3,
-  },
-  BSinput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
-  BScreateButton: {
-    backgroundColor: '#28a745',
-    padding: 10,
-    borderRadius: 5,
-  },
-  BScreateButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  BSnoBadgesText: {
-    textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-    fontSize: 18,
-    color: '#777',
-  },
   buttonRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -374,17 +308,6 @@ export default StyleSheet.create({
   likeCount: {
     color: '#888',
     marginRight: 10,
-  },
-  BScommentToggleButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  BScommentToggleText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
   monumentHeader: {
     fontSize: 24,
@@ -440,12 +363,6 @@ export default StyleSheet.create({
   refreshbuttonText: {
     color: 'white',
     fontWeight: 'bold',
-  },
-  BSsectionHeader: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    color: '#333',
   },
   userItemContainer: {
     flexDirection: 'row',
