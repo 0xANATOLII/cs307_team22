@@ -70,6 +70,7 @@ export default function ProfileScreen({ route, navigation }) {
           const followersDetails = await fetchUserDetails(data.followers || []);
           const followingDetails = await fetchUserDetails(data.following || []);
 
+          setIsPrivate(data.privacy)
           setProfileInfo({
             username: data.username,
             pfp: data.pfp || defaultImageUri,
