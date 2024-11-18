@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Pressable, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, FlatList, ActivityIndicator } from 'react-native';
 import axios from 'axios';
-import styles from '../styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Config from '../config';
 import BottomNav from './BottomNav';
+import { colors, commonStyles, typography, spacing, borderRadius } from './theme';
+import GradientButton from './Components/GradientButton';
 
 export default function FriendsPage({ route, navigation }) {
   const { username } = route.params;
@@ -126,16 +127,22 @@ export default function FriendsPage({ route, navigation }) {
 
   // Render Friend Request Item
   const renderFriendRequest = ({ item }) => (
-    <View style={[styles.requestContainer, { flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 8, backgroundColor: '#f8f9fa', marginVertical: 6 }]}>
-      <Text style={[styles.requestText, { fontSize: 16, color: '#333', flex: 1, marginRight: 10 }]}>
+    <View style={styles.requestContainer}>
+      <Text style={styles.requestText}>
         {item.username} has sent you a follow request.
       </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Pressable onPress={() => handleRequest(item.id, 'acceptRequest')} style={[styles.acceptButton, { backgroundColor: '#28a745', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6, marginRight: 8 }]}>
-          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Accept</Text>
+      <View style={styles.requestButtonsContainer}>
+        <Pressable 
+          onPress={() => handleRequest(item.id, 'acceptRequest')} 
+          style={styles.acceptButton}
+        >
+          <Text style={styles.acceptButtonText}>Accept</Text>
         </Pressable>
-        <Pressable onPress={() => handleRequest(item.id, 'reject')} style={[styles.rejectButton, { backgroundColor: '#dc3545', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6 }]}>
-          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Reject</Text>
+        <Pressable 
+          onPress={() => handleRequest(item.id, 'reject')} 
+          style={styles.rejectButton}
+        >
+          <Text style={styles.rejectButtonText}>Reject</Text>
         </Pressable>
       </View>
     </View>
@@ -166,7 +173,7 @@ export default function FriendsPage({ route, navigation }) {
 
   // Render Recommended User or Search Result Item
   const renderUserItem = ({ item }) => {
-    const isFollowing = followingUsers.includes(item.id); // Check if already following
+    const isFollowing = followingUsers.includes(item.id);
 
     return (
       <View style={styles.userItemContainer}>
@@ -175,32 +182,38 @@ export default function FriendsPage({ route, navigation }) {
           onPress={() => handleFollowToggle(item.id, item.privacy)}
           style={isFollowing ? styles.unfollowButton : styles.followButton}
         >
-          <Text style={styles.followButtonText}>{isFollowing ? 'Unfollow' : item.privacy ? 'Request to Follow' : 'Follow'}</Text>
+          <Text style={isFollowing ? styles.unfollowButtonText : styles.followButtonText}>
+            {isFollowing ? 'Unfollow' : item.privacy ? 'Request to Follow' : 'Follow'}
+          </Text>
         </Pressable>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.BScontainer}>
-        {/* Search Input */}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <TextInput
-          style={styles.BSinput}
+          style={styles.searchInput}
           placeholder="Search users"
+          placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <Pressable style={styles.BScreateButton} onPress={handleSearch}>
-          <Text style={styles.BScreateButtonText}>Search</Text>
-        </Pressable>
 
-        {/* Friend Requests */}
-        <Text style={styles.BSsectionHeader}>Friend Requests</Text>
+        <GradientButton
+          onPress={handleSearch}
+          title={'Search'}
+          outerstyle={styles.searchButtonContainer}
+          innerstyle={{padding: spacing.sm}}
+        />
+
+        <Text style={styles.sectionHeader}>Friend Requests</Text>
+        
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color={colors.primary} />
         ) : friendRequests.length === 0 ? (
-          <Text style={styles.BSnoBadgesText}>No friend requests</Text>
+          <Text style={styles.noContentText}>No friend requests</Text>
         ) : (
           <FlatList
             data={friendRequests}
@@ -209,14 +222,14 @@ export default function FriendsPage({ route, navigation }) {
           />
         )}
 
-        {/* Recommended Users or Search Results */}
-        <Text style={styles.BSsectionHeader}>
+        <Text style={styles.sectionHeaderWithTopMargin}>
           {searchQuery ? 'Search Results' : 'Recommended Users'}
         </Text>
+        
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color={colors.primary} />
         ) : (searchQuery ? searchResults : recommendedUsers).length === 0 ? (
-          <Text style={styles.BSnoBadgesText}>No users found</Text>
+          <Text style={styles.noContentText}>No users found</Text>
         ) : (
           <FlatList
             data={searchQuery ? searchResults : recommendedUsers}
@@ -230,3 +243,139 @@ export default function FriendsPage({ route, navigation }) {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    ...commonStyles.container,
+    padding: spacing.md,
+  },
+  
+  searchInput: {
+    backgroundColor: colors.surface,
+    color: colors.textPrimary,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  
+  searchButtonContainer: {
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.lg,
+  },
+  
+  sectionHeader: {
+    color: colors.primary,
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.semibold,
+    marginBottom: spacing.md,
+  },
+  
+  sectionHeaderWithTopMargin: {
+    color: colors.primary,
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.semibold,
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  
+  noContentText: {
+    color: colors.textSecondary,
+    fontSize: typography.sizes.md,
+  },
+  
+  requestContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surface,
+    marginVertical: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  
+  requestText: {
+    fontSize: typography.sizes.md,
+    color: colors.textPrimary,
+    flex: 1,
+    marginRight: spacing.md,
+  },
+  
+  requestButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  
+  acceptButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.sm,
+    marginRight: spacing.sm,
+  },
+  
+  acceptButtonText: {
+    color: colors.background,
+    fontWeight: typography.weights.semibold,
+  },
+  
+  rejectButton: {
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  
+  rejectButtonText: {
+    color: colors.textPrimary,
+    fontWeight: typography.weights.semibold,
+  },
+  
+  userItemContainer: {
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  
+  usernameText: {
+    color: colors.textPrimary,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.medium,
+  },
+  
+  followButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.sm,
+  },
+  
+  unfollowButton: {
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  
+  followButtonText: {
+    color: colors.background,
+    fontWeight: typography.weights.semibold,
+  },
+  
+  unfollowButtonText: {
+    color: colors.textPrimary,
+    fontWeight: typography.weights.semibold,
+  },
+});
