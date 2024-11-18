@@ -21,7 +21,9 @@ const RegistrationScreen = () => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(password);
   };
-
+  const cancelRegister = async () => {
+    navigation.navigate('Home')
+  }
   const handleRegister = async () => {
     if (!validatePasswordStrength(password)) {
       alert("Password needs to be at least 8 characters long, include a number, lowercase/uppercase letter, and a special character.");
@@ -116,6 +118,12 @@ const RegistrationScreen = () => {
         <GradientButton 
           onPress={handleRegister}
           title={"Register"}
+          outerstyle={styles.button}
+          innerstyle={styles.buttonInner}
+        />
+        <GradientButton 
+          onPress={cancelRegister}
+          title={"Cancel"}
           outerstyle={styles.button}
           innerstyle={styles.buttonInner}
         />
