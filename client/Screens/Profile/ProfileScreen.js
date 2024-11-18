@@ -49,6 +49,7 @@ export default function ProfileScreen({ route, navigation }) {
 
         if (response.ok) {
           const data = await response.json();
+          setIsPrivate(data.privacy)
           setProfileInfo({
             userId: data._id,
             username: data.username,
