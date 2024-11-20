@@ -1,0 +1,73 @@
+
+    * DONT REMOVE*
+    *PLACEHOLDER UNTIL I CAN FIGURE HOW TO RETRIEVE THIS DATA WITHIN VIEWPROFILE*
+    
+    
+             {/* Followers and Following Section */}
+             <View style={styles.followContainer}>
+             <View style={styles.followCount}>
+               <Text style={styles.followCountLabel}>Followers</Text>
+               {user.followers.length > 0 ? (
+                 <Pressable onPress={() => setIsFollowersModalVisible(true)}>
+                   <Text style={styles.followCountNumber}>{user.followers.length}</Text>
+                 </Pressable>
+               ) : (
+                 <Text style={styles.followCountNumber}>0</Text>
+               )}
+             </View>
+   
+             <View style={styles.followCount}>
+               <Text style={styles.followCountLabel}>Following</Text>
+               {user.following.length > 0 ? (
+                 <Pressable onPress={() => setIsFollowingModalVisible(true)}>
+                   <Text style={styles.followCountNumber}>{user.following.length}</Text>
+                 </Pressable>
+               ) : (
+                 <Text style={styles.followCountNumber}>0</Text>
+               )}
+             </View>
+           </View>
+   
+           {/* Followers List Popup */}
+           <ListPopup
+             title="Followers"
+             visible={isFollowersModalVisible}
+             data={user.followers}
+             navigation={navigation}
+             onClose={() => setIsFollowersModalVisible(false)}
+           />
+   
+           {/* Following List Popup */}
+           <ListPopup
+             title="Following"
+             visible={isFollowingModalVisible}
+             data={user.following}
+             navigation={navigation}
+             onClose={() => setIsFollowingModalVisible(false)}
+           />
+   
+           {/* Description Section */}
+           <View style={styles.section}>
+             <Text style={styles.sectionTitle}>Description</Text>
+             <Text style={styles.sectionText}>{user.desc}</Text>
+
+           </View>
+   
+
+   
+           {/* Badges Section */}
+           <View style={styles.section}>
+             <Text style={styles.sectionTitle}>Recent Badges</Text>
+             {recentBadges.length > 0 ? (
+               <View style={styles.badgesContainer}>
+                 {recentBadges.map((badge, index) => (
+                   <View key={index} style={styles.badge}>
+                     <Text style={styles.badgeTitle}>{badge.title}</Text>
+                     <Text style={styles.badgeDescription}>{badge.description}</Text>
+                   </View>
+                 ))}
+               </View>
+             ) : (
+               <Text style={styles.sectionText}>No recent badges</Text>
+             )}
+           </View>
