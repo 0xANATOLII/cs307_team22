@@ -14,7 +14,7 @@ import CameraPage from './Screens/BadgeCreate';
 import { LocationProvider } from './Screens/Components/locationContext';
 
 import FriendsScreen from './Screens/FriendsScreen';
-
+import ViewProfile from './Screens/Profile/ViewProfile';
 
 
 const Stack = createStackNavigator();
@@ -31,6 +31,7 @@ const linking = {
       BeBoiler: 'navigation',
       BadgeFeed: 'badge-feed',
       FriendsScreen: 'friends',
+      ViewProfile: 'ViewProfile'
     },
   },
 };
@@ -78,6 +79,11 @@ export default function App() {
             component={CameraPage}
             options={{title: 'Camera'}}
           />
+        <Stack.Screen 
+          name="ViewProfile"
+          component={ViewProfile}
+          options={{title: 'Viewing Profile'}}
+        />
         </Stack.Navigator>
       </NavigationContainer>
     </LocationProvider>

@@ -3,8 +3,12 @@ import { View, Text, Modal, TouchableOpacity, FlatList, StyleSheet, Dimensions, 
 
 const { height, width } = Dimensions.get('window');
 
-export default function ListPopup({ title, visible, data, onClose }) {
+export default function ListPopup({ title, visible, data, onClose, navigation, route }) {
   const defaultImageUri = Image.resolveAssetSource(require('./default.png')).uri;
+  const handleUserPress = (user) => {
+    console.log(user);
+    navigation.navigate("ViewProfile", { user });
+  };
   return (
     <Modal
       animationType="slide"
@@ -17,14 +21,17 @@ export default function ListPopup({ title, visible, data, onClose }) {
           <Text style={styles.modalText}>{title}</Text>
           <FlatList
             data={data}
-            renderItem={({ item, index }) => (
-              <View style={styles.listItemContainer}>
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.listItemContainer}
+                onPress={() => handleUserPress(item.user)}
+              >
                 <Image 
                   source={{ uri: item.user.pfp || defaultImageUri }} // Fallback to placeholder if no profile picture
                   style={styles.profilePicture} 
                 />
                 <Text style={styles.listItemText}>{item.user.username || "no user name found"}</Text>
-              </View>
+              </TouchableOpacity>
             )}
             keyExtractor={(item, index) => index.toString()}
           />
@@ -36,6 +43,8 @@ export default function ListPopup({ title, visible, data, onClose }) {
     </Modal>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   centeredView: {

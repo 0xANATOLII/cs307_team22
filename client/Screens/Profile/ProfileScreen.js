@@ -373,6 +373,7 @@ export default function ProfileScreen({ route, navigation }) {
             title="Followers"
             visible={isFollowersModalVisible}
             data={profileInfo.followers}
+            navigation={navigation}
             onClose={() => setIsFollowersModalVisible(false)}
           />
 
@@ -381,6 +382,7 @@ export default function ProfileScreen({ route, navigation }) {
             title="Following"
             visible={isFollowingModalVisible}
             data={profileInfo.following}
+            navigation={navigation}
             onClose={() => setIsFollowingModalVisible(false)}
           />
 
