@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMonumentDto } from './dto/create-monument.dto';
 import { UpdateMonumentDto } from './dto/update-monument.dto';
 import { Monument, MonumentDocument } from './schema/monument.schema';
@@ -8,11 +8,10 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class MonumentService {
-
-
   constructor(
     @InjectModel(Monument.name) private monumentModule: Model<MonumentDocument>,
   ){}
+
   create(createMonumentDto: CreateMonumentDto) {
 
     try{
@@ -39,8 +38,14 @@ export class MonumentService {
     return this.monumentModule.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} monument`;
+  async findOne(id: string): Promise<Monument> {
+    const monument = await this.monumentModule.findById(id).exec();
+
+    if (!monument) {
+      throw new NotFoundException(`Monument with ID ${id} not found`);
+    }
+
+    return monument;
   }
 
   async findByName(name:string){

@@ -19,7 +19,8 @@ export class MonumentController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.monumentService.findOne(+id);
+    console.log(id);
+    return this.monumentService.findOne(id);
   }
   @Get(':name')
   findOneByName(@Param('name') name: string) {

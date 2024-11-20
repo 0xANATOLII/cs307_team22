@@ -428,6 +428,27 @@ export default StyleSheet.create({
     color: '#FFFFFF', // White text for contrast
     fontWeight: 'bold', // Bold text for emphasis
   },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  icon: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 16,
+  },
+  infoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  
   
 });
 
