@@ -90,6 +90,17 @@ export default function HomePage({ navigation }) {
           <Text style={styles.buttonText}>Forgot Password?</Text>
         </Pressable>
       </View>
+      <View style={styles.button}>
+        <Pressable
+          onPress={() => navigation.navigate('BadgePage',{acusername:"tolik",acbadgeId:"6733d11184a3595f9b53efec"})}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && { backgroundColor: '#555' }
+          ]}
+        >
+          <Text style={styles.buttonText}>BadgePage</Text>
+        </Pressable>
+      </View>
 
      
 
