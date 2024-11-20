@@ -76,7 +76,8 @@ export default function MapPage({
     { coordinate: { latitude: 40.4273728685978, longitude: -86.91316931431314 }, icon: require('../assets/walk.png'), title: 'WALC' },
     { coordinate: { latitude: 40.4286566476374, longitude: -86.91356232247014 }, icon: require('../assets/efountain.jpg'), title: 'Engineering fountain' },
     { coordinate: { latitude: 40.4312239799775, longitude: -86.91588249175554 }, icon: require('../assets/neil.png'), title: 'Neil statue' },
-    { coordinate: { latitude: 40.4250502093892, longitude: -86.91111546181843 }, icon: require('../assets/pmu.png'), title: 'PMU' }
+    { coordinate: { latitude: 40.4250502093892, longitude: -86.91111546181843 }, icon: require('../assets/pmu.png'), title: 'PMU' },
+    { coordinate: { latitude: 40.42914198367059, longitude: -86.90702203252353 }, icon: require('../assets/purduepete.png'), title: 'Lutz House' }
   ];
 
   // Request location permission and fetch current location

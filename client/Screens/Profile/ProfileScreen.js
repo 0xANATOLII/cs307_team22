@@ -433,7 +433,7 @@ export default function ProfileScreen({ route, navigation }) {
   
           {/* Profile History Section */}
           <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Profile History</Text>
+              <Text style={styles.sectionTitle}>Monument Wishlist</Text>
               <View style={styles.achievementList}>
                 {profileInfo.profileHistory.map((historyItem, index) => (
                   <View key={index} style={styles.achievement}>

@@ -266,4 +266,26 @@ export class UserController {
     }
   }
 
+  @Post('wishlist')
+  async addToWishlist(
+    @Body('username') username: string,
+    @Body('monument') monument: { _id: string; [key: string]: any },
+  ) {
+    console.log('addToWishlist called with:', { username, monument });
+    return await this.userService.addToWishlistByUsername(username, monument);
+  }
+
+  @Get(':username/wishlist')
+  async getWishlist(@Param('username') username: string) {
+    return await this.userService.getWishlistByUsername(username);
+  }
+
+  @Post('wishlist/remove')
+  async removeFromWishlist(
+    @Body('username') username: string,
+    @Body('monument') monumentId: string,
+  ) {
+    return await this.userService.removeFromWishlistByUsername(username, monumentId);
+  }
+
 }

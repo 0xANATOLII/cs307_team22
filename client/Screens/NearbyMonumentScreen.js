@@ -1,46 +1,72 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, Alert, StyleSheet, ActivityIndicator} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import BottomNav from './BottomNav';
+import { useFocusEffect } from '@react-navigation/native';
 import { colors, commonStyles, spacing, typography, borderRadius } from './theme';
+import axios from 'axios';
+import Config from '../config';
 
 export default function MonumentScreen({ route, navigation }) {
   const [monuments, setMonuments] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
+  const [wishlist, setWishlist] = useState([]);
   const { username } = route.params;
   const [loading, setLoading] = useState(true);
 
-  // Same markers array as MapPage
-  const markers = [
-    {
-      coordinate: { latitude: 40.427281343904106, longitude: -86.9140668660199 },
-      icon: require('../assets/belltower.jpg'),  
-      title: 'Bell Tower',
-    },
-    {
-      coordinate: { latitude: 40.4273728685978, longitude: -86.91316931431314 },
-      icon: require('../assets/walk.png'),
-      title: 'WALC',
-    },
-    {
-      coordinate: { latitude: 40.4286566476374, longitude:-86.91356232247014 },
-      icon: require('../assets/efountain.jpg'),
-      title: 'Engineering fountain',
-    },
-    {
-      coordinate: { latitude: 40.4312239799775, longitude: -86.91588249175554 },
-      icon: require('../assets/neil.png'),  
-      title: 'Neil statue',
-    },
-    {
-      coordinate: { latitude: 40.4250502093892, longitude: -86.91111546181843 },
-      icon: require('../assets/pmu.png'),
-      title: 'PMU',
-    }
-  ];
+  const fetchUserLocation = async () => {
+    try {
+      console.log("Requesting location permissions...");
+      const { status } = await Location.requestForegroundPermissionsAsync();
 
-  // Distance calculation function (Haversine formula)
+      if (status !== 'granted') {
+        Alert.alert('Permission denied', 'Location permission is required');
+        return null;
+      }
+
+      console.log("Fetching user location...");
+      const location = await Location.getCurrentPositionAsync({});
+      if (location && location.coords) {
+        console.log("User location fetched successfully:", location.coords);
+        return location.coords;
+      } else {
+        console.warn("No coordinates returned from location.");
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching user location:', error);
+      return null;
+    }
+  };
+
+  const fetchMonuments = async (currentLocation) => {
+    try {
+      const response = await axios.get(`${Config.API_URL}/monument`);
+      const fetchedMonuments = response.data;
+      console.log("Fetched Monuments from Backend:", fetchedMonuments);
+
+      const formattedMonuments = fetchedMonuments.map(monument => {
+        const latitude = monument.location.coordinates[1];
+        const longitude = monument.location.coordinates[0];
+
+        return {
+          ...monument,
+          coordinate: { latitude, longitude },
+          distance: currentLocation
+            ? getDistance(currentLocation, { latitude, longitude })
+            : null,
+        };
+      });
+
+      const sortedMonuments = formattedMonuments.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+      setMonuments(sortedMonuments);
+    } catch (error) {
+      console.error('Error fetching monuments:', error);
+      Alert.alert('Error', 'Failed to fetch monuments. Please try again later.');
+    }
+  };
+
   const getDistance = (coords1, coords2) => {
     const R = 6371; // Radius of Earth in km
     const dLat = degreesToRadians(coords2.latitude - coords1.latitude);
@@ -59,54 +85,81 @@ export default function MonumentScreen({ route, navigation }) {
     return degrees * (Math.PI / 180);
   };
 
-  // Calculate nearby monuments
-  const calculateNearbyMonuments = (userLoc) => {
-    const markersWithDistances = markers.map(marker => ({
-      ...marker,
-      distance: getDistance(userLoc, marker.coordinate)
-    }));
-
-    const closest = markersWithDistances
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 3);
-
-    setMonuments(closest);
+  const getImageSource = (iconPath) => {
+    switch (iconPath) {
+      case '../assets/belltower.jpg':
+        return require('../assets/belltower.jpg');
+      case '../assets/walk.png':
+        return require('../assets/walk.png');
+      case '../assets/efountain.jpg':
+        return require('../assets/efountain.jpg');
+      case '../assets/purduepete.png':
+        return require('../assets/purduepete.png');
+      case '../assets/neil.png':
+        return require('../assets/neil.png');
+      case '../assets/pmu.png':
+        return require('../assets/pmu.png');
+    }
   };
 
-  useEffect(() => {
-    const initializeLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission denied', 'Location permission is required');
-        return;
-      }
-
-      try {
-        // Try to get passed markers and location first
-        const passedMarkers = route.params?.closestMarkers;
-        const passedLocation = route.params?.userLocation;
-
-        if (passedMarkers && passedLocation) {
-            setMonuments(passedMarkers);
-            setUserLocation(passedLocation);
+  useFocusEffect(
+    React.useCallback(() => {
+      const initializeData = async () => {
+        setLoading(true);
+        const location = await fetchUserLocation();
+        if (location) {
+          setUserLocation(location);
+          await fetchMonuments(location);
         } else {
-          // If no passed data, calculate everything
-          let location = await Location.getCurrentPositionAsync({});
-          setUserLocation(location.coords);
-          calculateNearbyMonuments(location.coords);
+          await fetchMonuments(null); // Fetch monuments without distance if location is unavailable
         }
+        fetchWishlist(username);
+        setLoading(false);
+      };
+
+      initializeData();
+    }, [])
+  );
+
+    const fetchWishlist = async (username) => {
+      try {
+        const response = await axios.get(`${Config.API_URL}/user/${username}/wishlist`);
+        console.log('Wishlist:', response.data);
+        setWishlist(response.data);
       } catch (error) {
-        console.error('Error initializing:', error);
-        // Handle error case by getting current location
-        let location = await Location.getCurrentPositionAsync({});
-        setUserLocation(location.coords);
-        calculateNearbyMonuments(location.coords);
-        
+        console.error('Error fetching wishlist:', error.response?.data || error.message);
       }
-      setLoading(false);
     };
-    initializeLocation();
-  }, []);
+
+  const addToWishlist = async (monument) => {
+    try {
+      const response = await axios.post(`${Config.API_URL}/user/wishlist`, {
+        username,
+        monument,
+      });
+
+      Alert.alert('Success', `${monument.title} added to your wishlist.`);
+      setWishlist(prev => [...prev, monument._id]); // Update local wishlist
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again later.');
+    }
+  };
+
+  const removeFromWishlist = async (monument) => {
+    try {
+      const response = await axios.post(`${Config.API_URL}/user/wishlist/remove`, {
+        username,
+        monument: monument._id,
+      });
+  
+      Alert.alert('Success', `${monument.title} removed from your wishlist.`);
+      setWishlist(prev => prev.filter(id => id !== monument._id)); // Update local wishlist
+    } catch (error) {
+      console.error('Error removing from wishlist:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again later.');
+    }
+  };
 
   if (loading) {
     return (
@@ -120,30 +173,39 @@ export default function MonumentScreen({ route, navigation }) {
   return (
     <SafeAreaView style={commonStyles.safeArea}>
       <Text style={styles.header}>Nearby Monuments</Text>
-      
       <FlatList
         data={monuments}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={item.icon} style={styles.icon} />
-            <View style={styles.infoContainer}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.distance}>
-                Distance: {(item.distance * 1000).toFixed(0)}m away
-              </Text>
+        renderItem={({ item }) => {
+          const isInWishlist = wishlist.includes(item._id);
+          return (
+            <View style={styles.card}>
+              <Image source={ getImageSource(item.icon) } style={styles.icon} />
+              <View style={styles.infoContainer}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.distance}>
+                  Distance: {item.distance ? `${(item.distance * 1000).toFixed(0)}m away` : 'Unknown'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={isInWishlist ? styles.inWishlistButton : styles.wishlistButton}
+                onPress={() => {
+                  if (isInWishlist) {
+                    removeFromWishlist(item); // Remove if already in wishlist
+                  } else {
+                    addToWishlist(item); // Add if not in wishlist
+                  }
+                }}
+              >
+                <Text style={styles.wishlistButtonText}>
+                  {isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}
+                </Text>
+              </TouchableOpacity>
             </View>
-          </View>
-        )}
+          );
+        }}
       />
-
-      {/* Bottom Navigation Bar */}
-      <BottomNav 
-        route={route}
-        navigation={navigation} 
-        username={username}
-        currentScreen={"Monument"}
-      />
+      <BottomNav route={route} navigation={navigation} username={username} currentScreen={"Monument"} />
     </SafeAreaView>
   );
 }
@@ -194,5 +256,25 @@ const styles = StyleSheet.create({
   distance: {
     fontSize: typography.sizes.md,
     color: colors.textSecondary,
-  }
+  },
+  wishlistButton: {
+    backgroundColor: colors.border, // Similar to the follow button
+    paddingVertical: 6, // Same padding as followButton
+    paddingHorizontal: 10, // Same horizontal padding as followButton
+    borderRadius: 5, // Rounded edges
+    alignItems: 'right', // Center text horizontally
+    justifyContent: 'right', // Center text vertically
+    marginLeft: 1, // Slight margin for separation
+    marginRight: 4, // Align neatly to the right within the card
+  },
+  inWishlistButton: {
+    backgroundColor: '#FF3B30',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  wishlistButtonText: {
+    color: '#FFFFFF', // White text for contrast
+    fontWeight: 'bold', // Bold text for emphasis
+  },
 });

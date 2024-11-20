@@ -365,5 +365,59 @@ export class UserService {
       throw error;
     }
   }
+
+  async addToWishlistByUsername(username: string, monument: { _id: string; [key: string]: any }): Promise<string[]> {
+    const userId = await this.getUserIdByUsername(username);
   
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    console.log("mon id:", monument._id)
+    const monumentId = monument._id;
+  
+    if (user.wishlist.includes(monumentId)) {
+      throw new ConflictException('Monument already in wishlist');
+    }
+  
+    user.wishlist.push(monumentId);
+    await user.save();
+  
+    return user.wishlist;
+  }
+
+  async getWishlistByUsername(username: string): Promise<string[]> {
+    const userId = await this.getUserIdByUsername(username);
+  
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+  
+    return user.wishlist;
+  }
+  async removeFromWishlistByUsername(username: string, monumentId: string): Promise<string[]> {
+    // Fetch the user ID by their username
+    const userId = await this.getUserIdByUsername(username);
+  
+    // Fetch the user from the database
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+  
+    // Check if the monument is in the wishlist
+    if (!user.wishlist.includes(monumentId)) {
+      throw new ConflictException('Monument is not in the wishlist');
+    }
+  
+    // Remove the monument from the wishlist
+    user.wishlist = user.wishlist.filter(id => id !== monumentId);
+  
+    // Save the updated user
+    await user.save();
+  
+    // Return the updated wishlist
+    return user.wishlist;
+  }  
 }

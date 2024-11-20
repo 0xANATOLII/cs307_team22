@@ -414,7 +414,20 @@ export default StyleSheet.create({
     fontSize: 14,
     color: '#888',
   },
-  
+  wishlistButton: {
+    backgroundColor: '#007AFF', // Similar to the follow button
+    paddingVertical: 6, // Same padding as followButton
+    paddingHorizontal: 15, // Same horizontal padding as followButton
+    borderRadius: 5, // Rounded edges
+    alignItems: 'center', // Center text horizontally
+    justifyContent: 'center', // Center text vertically
+    marginLeft: 10, // Slight margin for separation
+    marginRight: 16, // Align neatly to the right within the card
+  },
+  wishlistButtonText: {
+    color: '#FFFFFF', // White text for contrast
+    fontWeight: 'bold', // Bold text for emphasis
+  },
   
 });
 
