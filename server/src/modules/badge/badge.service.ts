@@ -239,5 +239,27 @@ export class BadgeService {
     }
     return updatedBadge;
   }
+
+  async findRecentBadgesByUserId(userId: string): Promise<Badge[]> {
+    if (!Types.ObjectId.isValid(userId)) {
+      this.logger.warn(`Invalid user ID format: ${userId}`);
+      throw new BadRequestException('Invalid user ID format');
+    }
+  
+    try {
+      this.logger.log(`Fetching recent badges for user ID: ${userId}`);
+      const recentBadges = await this.badgeModel
+        .find({ userId: new Types.ObjectId(userId) })
+        .sort({ dateCreated: -1 }) // Sort by most recent first
+        .limit(2) // Limit to 2 badges
+        .exec();
+  
+      return recentBadges;
+    } catch (error) {
+      this.logger.error(`Error fetching recent badges for user ${userId}: ${error.message}`, error.stack);
+      throw new BadRequestException('Failed to fetch recent badges');
+    }
+  }
+  
   
 }

@@ -17,31 +17,27 @@ export default StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#000000',
     marginBottom: 5,
-    zIndex: -1,
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#000000',
     marginTop: 10,
     marginBottom: 5,
-    zIndex: -1,
     textAlign: 'center',
   },
   text: {
     fontSize: 14,
     color: 'black',
     marginBottom: 30,
-    zIndex: -1,
     textAlign: 'center',
   },
   sectionText: {
     fontSize: 18,
     color: 'black',
     marginBottom: 30,
-    zIndex: -1,
     textAlign: 'center',
   },
   errorText: {
@@ -228,21 +224,6 @@ export default StyleSheet.create({
     marginBottom: 20,
   },
   
-  // Style for the buttons container
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  
-  // General button style
-  modalButton: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  
   // Cancel button specific style
   modalCancelButton: {
     backgroundColor: '#d9534f', // Red for cancel button
@@ -264,43 +245,7 @@ export default StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    paddingBottom: Platform.OS === 'ios' ? 20 : 0,  //PLATFORM DEPENDENT
-    zIndex: 1000,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 8,
-  },
-  navText: {
-    fontSize: 12,
-    marginTop: 4,
-    color: '#666',
-  },
-  navTextActive: {
-    color: '#007AFF',
-  },
+  
   map: {
     width: '100%',
     height: '100%',
@@ -343,68 +288,6 @@ export default StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
-
-  BScontainer: {
-    flex: 1,
-    padding: 20,
-  },
-  BSbadgeContainer: {
-    padding: 10,
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 5,
-  },
-  BSbadgeTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  BSbadgeSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 10,
-  },
-  BScommentToggleButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-  },
-  BScommentToggleText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  BScreateBadgeContainer: {
-    marginBottom: 20,
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    elevation: 3,
-  },
-  BSinput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
-  BScreateButton: {
-    backgroundColor: '#28a745',
-    padding: 10,
-    borderRadius: 5,
-  },
-  BScreateButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  BSnoBadgesText: {
-    textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-    fontSize: 18,
-    color: '#777',
-  },
   buttonRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -425,17 +308,6 @@ export default StyleSheet.create({
   likeCount: {
     color: '#888',
     marginRight: 10,
-  },
-  BScommentToggleButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  BScommentToggleText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
   monumentHeader: {
     fontSize: 24,
@@ -491,12 +363,6 @@ export default StyleSheet.create({
   refreshbuttonText: {
     color: 'white',
     fontWeight: 'bold',
-  },
-  BSsectionHeader: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    color: '#333',
   },
   userItemContainer: {
     flexDirection: 'row',

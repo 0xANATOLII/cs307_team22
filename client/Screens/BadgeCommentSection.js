@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Pressable, FlatList, StyleSheet, Alert } from 'react-native';
+import {View,Text,TextInput,Modal,TouchableOpacity,StyleSheet,Dimensions,Pressable,FlatList} from 'react-native';
 import Config from '../config';
+import { colors, typography, spacing, borderRadius } from './theme';
 
-export default function BadgeCommentSection({ badgeId, username}) {
+const { height, width } = Dimensions.get('window');
+
+export default function BadgeCommentSection({ badgeId, username, visible, onClose }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [userId, setUserId] = useState(null);
 
-  // Fetch comments for the specific badge
+  // Existing fetch comments logic
   const fetchComments = async () => {
     try {
       const response = await fetch(`${Config.API_URL}/badge/${badgeId}/comments`, {
@@ -37,7 +40,7 @@ export default function BadgeCommentSection({ badgeId, username}) {
         const response = await fetch(`${Config.API_URL}/user/id/${username}`);
         if (response.ok) {
           const data = await response.json();
-          setUserId(data.userId);  // Assuming response includes userId as { userId: '...'}
+          setUserId(data.userId);
         } else {
           console.error('Failed to fetch user ID');
         }
@@ -49,8 +52,7 @@ export default function BadgeCommentSection({ badgeId, username}) {
     fetchUserId();
   }, [username]);
 
-
-  // Submit new comment
+  // Existing comment submission logic
   const handleCommentSubmit = async () => {
     if (newComment.length > 200) {
       alert('Error: Comment exceeds character limit of 200.');
@@ -82,13 +84,13 @@ export default function BadgeCommentSection({ badgeId, username}) {
       } else {
         alert('Error Failed to submit comment');
       }
-    await fetchComments();
+      await fetchComments();
     } catch (error) {
       alert('Error An error occurred while submitting the comment');
     }
   };
 
-  // Delete comment
+  // Existing delete comment logic
   const handleCommentDelete = async (commentId) => {
     try {
       const response = await fetch(`${Config.API_URL}/badge/${badgeId}/comment/${commentId}`, {
@@ -111,92 +113,169 @@ export default function BadgeCommentSection({ badgeId, username}) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Comments</Text>
-      
-      {/* Comment List */}
-      <FlatList
-        data={comments}
-        keyExtractor={(item, index) => (item._id ? item._id.toString() : `comment-${index}`)}
-        renderItem={({ item }) => (
-          <View style={styles.comment}>
-            <Text style={styles.commentUser}>{item.username || 'Unknown'}</Text>
-            <Text style={styles.commentText}>{item.commentText || 'No content'}</Text>
-            {item.username === username && (
-              <Pressable onPress={() => handleCommentDelete(item._id)}>
-                <Text style={styles.deleteButton}>Delete</Text>
-              </Pressable>
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={styles.centeredView}>
+        <Pressable style={styles.blurredBackground} onPress={onClose} />
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>Comments</Text>
+          
+          <FlatList
+            data={comments}
+            style={styles.commentList}
+            keyExtractor={(item, index) => (item._id ? item._id.toString() : `comment-${index}`)}
+            renderItem={({ item }) => (
+              <View style={styles.comment}>
+                <Text style={styles.commentUser}>{item.username || 'Unknown'}</Text>
+                <Text style={styles.commentText}>{item.commentText || 'No content'}</Text>
+                {item.username === username && (
+                  <TouchableOpacity onPress={() => handleCommentDelete(item._id)}>
+                    <Text style={styles.deleteButton}>Delete</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             )}
+          />
+
+          <View style={styles.inputSection}>
+            <TextInput
+              style={styles.input}
+              value={newComment}
+              onChangeText={setNewComment}
+              placeholder="Add a comment..."
+              placeholderTextColor={colors.textSecondary}
+              maxLength={200}
+            />
+            <Text style={styles.charLimit}>
+              {`${newComment.length}/200 characters`}
+            </Text>
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.button, styles.closeButton]}
+                onPress={onClose}
+              >
+                <Text style={styles.buttonText}>Close</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.submitButton]}
+                onPress={handleCommentSubmit}
+              >
+                <Text style={styles.buttonText}>Submit</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        )}
-      />
-
-
-      {/* Comment Input */}
-      <TextInput
-        style={styles.input}
-        value={newComment}
-        onChangeText={setNewComment}
-        placeholder="Add a comment..."
-        maxLength={200}
-      />
-      <Text style={styles.charLimit}>Character limit: {newComment.length}/200</Text>
-
-      {/* Submit Button */}
-      <Pressable style={styles.submitButton} onPress={handleCommentSubmit}>
-        <Text style={styles.submitButtonText}>Submit</Text>
-      </Pressable>
-    </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 15,
-    backgroundColor: '#fff',
+  centeredView: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  blurredBackground: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: borderRadius.lg,
+    borderTopRightRadius: borderRadius.lg,
+    padding: spacing.xl,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    height: height * 0.8,
+    width: width,
+  },
+  modalText: {
+    marginBottom: spacing.md,
+    textAlign: 'center',
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    color: colors.textPrimary,
+  },
+  commentList: {
+    width: '100%',
     flex: 1,
   },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
   comment: {
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 5,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   commentUser: {
-    fontWeight: 'bold',
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+    color: colors.primary,
   },
   commentText: {
-    marginTop: 5,
+    fontSize: typography.sizes.md,
+    color: colors.textPrimary,
+    marginTop: spacing.xs,
   },
   deleteButton: {
-    color: '#ff0000',
-    marginTop: 5,
+    color: '#FF6347',
+    marginTop: spacing.xs,
+    fontSize: typography.sizes.sm,
+  },
+  inputSection: {
+    width: '100%',
+    marginTop: spacing.md,
   },
   input: {
-    borderColor: '#ccc',
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    color: colors.textPrimary,
     borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
+    borderColor: colors.border,
+    fontSize: typography.sizes.md,
   },
   charLimit: {
     textAlign: 'right',
-    color: '#888',
-    marginBottom: 10,
+    color: colors.textSecondary,
+    fontSize: typography.sizes.sm,
+    marginTop: spacing.xs,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing.md,
+  },
+  button: {
+    flex: 1,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginHorizontal: spacing.xs,
+    elevation: 2,
+  },
+  closeButton: {
+    backgroundColor: '#FF6347',
   },
   submitButton: {
     backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
   },
-  submitButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  buttonText: {
+    color: colors.textPrimary,
+    fontWeight: typography.weights.bold,
+    textAlign: 'center',
+    fontSize: typography.sizes.md,
   },
 });

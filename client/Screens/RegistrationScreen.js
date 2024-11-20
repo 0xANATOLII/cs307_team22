@@ -1,20 +1,19 @@
-// screens/RegistrationScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable } from 'react-native';
-import styles from '../styles'; 
-import Config from "../config.js";
+import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { colors, spacing, typography, commonStyles } from './theme';
+import GradientButton from './Components/GradientButton';
+import Config from "../config";
 
-export default function RegistrationScreen() {
+const RegistrationScreen = () => {
   const navigation = useNavigation();
-
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // Simple email regex pattern
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   };
 
@@ -22,112 +21,150 @@ export default function RegistrationScreen() {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(password);
   };
-
-  
+  const cancelRegister = async () => {
+    navigation.navigate('Home')
+  }
   const handleRegister = async () => {
-    // Check if password is strong enough
     if (!validatePasswordStrength(password)) {
-      alert("Password need to be at least 8 characters long, include a number, lowercase/uppercase letter, and a special character.")
+      alert("Password needs to be at least 8 characters long, include a number, lowercase/uppercase letter, and a special character.");
       return;
     }
 
-    // Check if passwords match
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-    //Check if valid email
+
     if (!validateEmail(email)) {
       alert("Invalid email format!");
       return;
     }
+
     try {
-      // send payload to backend
       const payload = {
         username: username,
         email: email,
         password: password,
       };
-    const response = await fetch(`${Config.API_URL}/user/register`, { // this http may not be valid for you, run ngrok http 3000 to get new url
-      method: 'POST',  
-      headers: {
-        'Content-Type': 'application/json',  
-      },
-      body: JSON.stringify(payload),  // Convert the payload object to a JSON string
-    });
 
-    const data = await response.json();  // Parse the response as JSON
+      const response = await fetch(`${Config.API_URL}/user/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    // Check if the registration was successful
-    if (response.ok) {
-      alert('Registration Successful');
-      // Redirect or navigate to another screen (e.g., Login screen)
-      navigation.navigate('Home');
-    } else {
-      // If the backend returns an error (e.g., email already exists), display it
-      if (data.message === 'Email already in use') {
-        alert('Registration Failed: Email already in use.');
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Registration Successful');
+        navigation.navigate('Home');
       } else {
-        alert('Registration Failed: ' + (data.message || 'Unknown error'));
+        if (data.message === 'Email already in use') {
+          alert('Registration Failed: Email already in use.');
+        } else {
+          alert('Registration Failed: ' + (data.message || 'Unknown error'));
+        }
       }
+    } catch (error) {
+      alert('Registration Failed: ' + error.message);
     }
-  } catch (error) {
-    // Handle any network or other errors
-    alert('Registration Failed: ' + error.message);
-  }
-    
-    // Basic form validation can go here
-    // console.log("Registering with:", username, password, email);
-    //try {
-    //  const response = await registerUser(username, email, password);
-    //  if (response.success) {
-    //    alert('Registration Successful');
-    //    navigation.navigate('Login'); // Redirect to login screen
-    //  }
-    //}  catch (error) {
-    //  alert('Registration Failed', error.message);
-    //}
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
-      <Pressable 
-        onPress={handleRegister}
-        style={({ pressed }) => [
-          styles.button,
-          pressed && { backgroundColor: '#555' } // Change background color when pressed
-        ]}
-      >
-        <Text style={styles.buttonText}>Register</Text>
-      </Pressable>
+      <View style={styles.formContainer}>
+        <Text style={styles.title}>Register</Text>
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          placeholderTextColor={colors.textSecondary}
+          value={username}
+          onChangeText={setUsername}
+        />
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor={colors.textSecondary}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor={colors.textSecondary}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoCapitalize="none"
+        />
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          placeholderTextColor={colors.textSecondary}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+          autoCapitalize="none"
+        />
+
+        <GradientButton 
+          onPress={handleRegister}
+          title={"Register"}
+          outerstyle={styles.button}
+          innerstyle={styles.buttonInner}
+        />
+        <GradientButton 
+          onPress={cancelRegister}
+          title={"Cancel"}
+          outerstyle={styles.button}
+          innerstyle={styles.buttonInner}
+        />
+      </View>
     </View>
   );
-}
+};
 
+const styles = StyleSheet.create({
+  container: {
+    ...commonStyles.container,
+    justifyContent: 'center',
+  },
+  formContainer: {
+    padding: spacing.xl,
+    width: '100%',
+    maxWidth: 400,
+    alignSelf: 'center',
+  },
+  title: {
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    color: colors.primary,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+  },
+  input: {
+    ...commonStyles.input,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    width: '100%',
+  },
+  button: {
+    marginTop: spacing.xs,
+    width: '100%',
+  },
+  buttonInner: {
+    padding: spacing.md,
+  }
+});
+
+export default RegistrationScreen;

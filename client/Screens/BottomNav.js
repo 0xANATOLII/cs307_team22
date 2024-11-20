@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import React from 'react';
+import { View, Text, Pressable, Platform } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import styles from '../styles';
+import { colors, spacing, typography } from './theme';
 
-const BottomNav = ({ navigation, route, closestMarkers, userLocation, currentScreen}) => {
-  // Track the active screen to style it
+const BottomNav = ({ navigation, route, closestMarkers, userLocation, currentScreen }) => {
   const { username } = route.params;
   const navigateToScreen = (screenName) => {
     navigation.navigate(screenName, { 
@@ -14,7 +13,6 @@ const BottomNav = ({ navigation, route, closestMarkers, userLocation, currentScr
     });
   };
 
-  // Array of navigation items
   const navItems = [
     { screen: 'CameraRoll', label: 'Camera', icon: 'camera' },
     { screen: 'BadgeFeed', label: 'Badges', icon: 'chat' },
@@ -25,19 +23,50 @@ const BottomNav = ({ navigation, route, closestMarkers, userLocation, currentScr
   ];
 
   return (
-    <View style={[styles.bottomNav, { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }]}>
+    <View style={{
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 80,
+      backgroundColor: colors.background,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      paddingBottom: Platform.OS === 'ios' ? 20 : 0,
+      elevation: 8,
+      shadowColor: colors.primary,
+      shadowOffset: {
+        width: 0,
+        height: -2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+    }}>
       {navItems.map((item, index) => (
         <Pressable 
           key={index} 
-          style={[styles.navItem, { alignItems: 'center' }]} 
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingTop: spacing.sm,
+          }}
           onPress={() => navigateToScreen(item.screen)}
         >
           <MaterialIcons 
             name={item.icon} 
             size={28} 
-            color={currentScreen === item.screen ? '#007AFF' : '#666'} 
+            color={currentScreen === item.screen ? colors.primary : colors.inactive} 
           />
-          <Text style={[styles.navText, currentScreen === item.screen && styles.navTextActive]}>
+          <Text style={{
+            fontSize: typography.sizes.xs,
+            marginTop: spacing.xs,
+            color: currentScreen === item.screen ? colors.primary : colors.inactive,
+            fontWeight: currentScreen === item.screen ? typography.weights.semibold : typography.weights.regular,
+          }}>
             {item.label}
           </Text>
         </Pressable>

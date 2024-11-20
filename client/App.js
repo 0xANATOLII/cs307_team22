@@ -16,7 +16,7 @@ import { LocationContext, LocationProvider } from './Screens/Components/location
 import BadgePage from './Screens/BadgePage';
 
 const prefix = Linking.createURL('/');
-
+import ViewProfile from './Screens/Profile/ViewProfile';
 const Stack = createStackNavigator(); 
 
 export default function App() {
@@ -25,6 +25,7 @@ export default function App() {
     console.log("PREFFFFFIIIIXXX ::::::::::::::::::::"+prefix)
     console.log(Linking.getLinkingURL())
   },[])
+  
   // Deep Linking Configuration
   const linking = {
     prefixes: [prefix],
@@ -40,9 +41,13 @@ export default function App() {
         Monument: 'monument',
         CameraRoll: 'camera-roll',
         Map: 'map',
-        BadgePage:'badge/:acusername/:acbadgeId'
+        BadgePage:'badge/:acusername/:acbadgeId',
+        BeBoiler: 'navigation',
+        BadgeFeed: 'badge-feed',
+        FriendsScreen: 'friends',
+        ViewProfile: 'ViewProfile'
       },
-    },
+    }
   };
 
   return (
@@ -67,6 +72,7 @@ export default function App() {
           <Stack.Screen name="Friends" component={FriendsScreen} />
           <Stack.Screen name="CameraRoll" component={CameraPage} />
           <Stack.Screen name="BadgePage" component={BadgePage} />
+          <Stack.Screen name="ViewProfile" component={ViewProfile} options={{title: 'Viewing Profile'}}/>
         </Stack.Navigator>
       </NavigationContainer>
     </LocationProvider>
