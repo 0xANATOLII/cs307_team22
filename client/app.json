@@ -1,5 +1,7 @@
 {
   "expo": {
+    "scheme": "myapp",
+    "platforms": ["ios", "android"],
     "name": "BeBoiler",
     "slug": "BeBoiler",
     "version": "1.0.0",
@@ -15,10 +17,15 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show your position on the map."
-      }
+      },
+      "bundleIdentifier": "com.anonymous.BeBoiler"
     },
     "android": {
-      "permissions": ["ACCESS_FINE_LOCATION"],
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -38,4 +45,3 @@
     ]
   }
 }
-
