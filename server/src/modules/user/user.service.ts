@@ -366,6 +366,27 @@ export class UserService {
     }
   }
 
+  async getProfile(userId: string): Promise<{ username: string; pfp: string; followers: string[]; following: string[]; description: string; badgeIds: string[]  }> {
+
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new NotFoundException('Invalid user ID format');
+    }
+
+    try {
+      const user = await this.userModel
+        .findById(userId, 'username pfp followers following description badgeIds') // Select only the fields you need
+        .exec();
+
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+
+      return { username: user.username, pfp: user.pfp, followers: user.followers, following: user.following, description: user.description, badgeIds: user.badgeIds };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async addToWishlistByUsername(username: string, monument: { _id: string; [key: string]: any }): Promise<string[]> {
     const userId = await this.getUserIdByUsername(username);
   
