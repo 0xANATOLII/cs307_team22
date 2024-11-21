@@ -1,7 +1,10 @@
 {
   "expo": {
     "scheme": "myapp",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "name": "BeBoiler",
     "slug": "BeBoiler",
     "version": "1.0.0",
@@ -41,7 +44,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
-      ]
+      ],
+      "expo-video"
     ]
   }
 }

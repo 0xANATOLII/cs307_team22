@@ -14,6 +14,7 @@ import CameraPage from './Screens/BadgeCreate';
 import FriendsScreen from './Screens/FriendsScreen';
 import { LocationContext, LocationProvider } from './Screens/Components/locationContext';
 import BadgePage from './Screens/BadgePage';
+import { ThemeProvider } from './context/ThemeContext';
 
 const prefix = Linking.createURL('/');
 import ViewProfile from './Screens/Profile/ViewProfile';
@@ -51,30 +52,32 @@ export default function App() {
   };
 
   return (
-    <LocationProvider >
-      <NavigationContainer linking={linking}>
-        <Stack.Navigator
-          initialRouteName="Home"
-          screenOptions={{
-            headerShown: false,
-            animationEnabled: false,
-            gestureEnabled: false,
-          }}
-        >
-          <Stack.Screen name="Home" component={HomePage} />
-          <Stack.Screen name="Registration" component={RegistrationScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-          <Stack.Screen name="Monument" component={NearbyMonumentScreen} />
-          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-          <Stack.Screen name="BadgeFeed" component={BadgeFeedScreen} />
-          <Stack.Screen name="Map" component={MapPage} />
-          <Stack.Screen name="Friends" component={FriendsScreen} />
-          <Stack.Screen name="CameraRoll" component={CameraPage} />
-          <Stack.Screen name="BadgePage" component={BadgePage} />
-          <Stack.Screen name="ViewProfile" component={ViewProfile} options={{title: 'Viewing Profile'}}/>
-        </Stack.Navigator>
-      </NavigationContainer>
-    </LocationProvider>
+    <ThemeProvider>
+      <LocationProvider >
+        <NavigationContainer linking={linking}>
+          <Stack.Navigator
+            initialRouteName="Home"
+            screenOptions={{
+              headerShown: false,
+              animationEnabled: false,
+              gestureEnabled: false,
+            }}
+          >
+            <Stack.Screen name="Home" component={HomePage} />
+            <Stack.Screen name="Registration" component={RegistrationScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="Monument" component={NearbyMonumentScreen} />
+            <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+            <Stack.Screen name="BadgeFeed" component={BadgeFeedScreen} />
+            <Stack.Screen name="Map" component={MapPage} />
+            <Stack.Screen name="Friends" component={FriendsScreen} />
+            <Stack.Screen name="CameraRoll" component={CameraPage} />
+            <Stack.Screen name="BadgePage" component={BadgePage} />
+            <Stack.Screen name="ViewProfile" component={ViewProfile} options={{title: 'Viewing Profile'}}/>
+          </Stack.Navigator>
+        </NavigationContainer>
+      </LocationProvider>
+    </ThemeProvider>
   );
 }
