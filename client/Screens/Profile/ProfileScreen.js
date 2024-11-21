@@ -346,14 +346,7 @@ export default function ProfileScreen({ route, navigation }) {
 
           {/* Theme Toggle Button */}
           <Pressable onPress={toggleTheme} style={[localStyles.themeToggleButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}>
-            <MaterialCommunityIcons 
-              name={isDarkMode ? "weather-sunny" : "weather-night"} 
-              size={24} 
-              color={isDarkMode ? "#FFD700" : "#000"} 
-            />
-            <Text style={[localStyles.themeToggleText, { color: isDarkMode ? '#fff' : '#000' }]}>
-              {isDarkMode ? "Light Mode" : "Dark Mode"}
-            </Text>
+            <Text style={localStyles.themeToggleText}>{isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</Text>
           </Pressable>
 
           {/* Followers and Following Section */}
