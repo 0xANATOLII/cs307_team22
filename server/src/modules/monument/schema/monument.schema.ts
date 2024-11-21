@@ -8,13 +8,22 @@ export type MonumentDocument = Monument & Document
 export class Monument {
     
     @Prop()
-    name:string
+    title:string
+
+    @Prop()
+    icon:string
 
     @Prop()
     description:string
 
-    @Prop()
-    location:string
+    @Prop({
+        type: { type: String, enum: ['Point'], required: true },
+        coordinates: { type: [Number], required: true },
+      })
+      location: {
+        type: string;
+        coordinates: [number, number];
+      };
 
     @Prop({ type: Number})
     radius:number

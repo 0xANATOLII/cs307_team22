@@ -414,6 +414,40 @@ export default StyleSheet.create({
     fontSize: 14,
     color: '#888',
   },
+  wishlistButton: {
+    backgroundColor: '#007AFF', // Similar to the follow button
+    paddingVertical: 6, // Same padding as followButton
+    paddingHorizontal: 15, // Same horizontal padding as followButton
+    borderRadius: 5, // Rounded edges
+    alignItems: 'center', // Center text horizontally
+    justifyContent: 'center', // Center text vertically
+    marginLeft: 10, // Slight margin for separation
+    marginRight: 16, // Align neatly to the right within the card
+  },
+  wishlistButtonText: {
+    color: '#FFFFFF', // White text for contrast
+    fontWeight: 'bold', // Bold text for emphasis
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  icon: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 16,
+  },
+  infoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   
   
 });

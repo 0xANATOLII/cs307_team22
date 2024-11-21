@@ -6,7 +6,7 @@ const { height, width } = Dimensions.get('window');
 export default function ListPopup({ title, visible, data, onClose, navigation, route }) {
   const defaultImageUri = Image.resolveAssetSource(require('./default.png')).uri;
   const handleUserPress = (user) => {
-    console.log(user);
+    console.log("da user" + user);
     navigation.navigate("ViewProfile", { user });
   };
   return (

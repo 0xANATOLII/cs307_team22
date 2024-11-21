@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform, SafeAreaView, TextInput } from 'react-native';
+import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform, SafeAreaView, TextInput, FlatList, StyleSheet } from 'react-native';
 import ModalPopup from './Popup';
 import styles from '../../styles';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -10,7 +10,8 @@ import ListPopup from './ListPopup';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
-
+import { useTheme } from '../../context/ThemeContext'; // Import the theme context
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; // Import icons
 
 export default function ProfileScreen({ route, navigation }) {
   const defaultImageUri = Image.resolveAssetSource(require('./default.png')).uri;
@@ -21,6 +22,8 @@ export default function ProfileScreen({ route, navigation }) {
   const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [wishlist, setWishlist] = useState([]);
+  const [monuments, setMonuments] = useState([]);
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
   const [isUploadModalVisible, setIsUploadModalVisible] = useState(false);
   const [isFollowersModalVisible, setIsFollowersModalVisible] = useState(false);
@@ -38,6 +41,7 @@ export default function ProfileScreen({ route, navigation }) {
   const [password, setPassword] = useState('');  // New state variable for password input
   const [isPasswordConfirmVisible, setIsPasswordConfirmVisible] = useState(false);  // Controls visibility of password input
   const [recentBadges, setRecentBadges] = useState([]);
+  const { isDarkMode, toggleTheme } = useTheme(); // Use the theme context
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -81,6 +85,14 @@ export default function ProfileScreen({ route, navigation }) {
             profileHistory: data.profileHistory || [],
           });
           //console.log('Profile data fetched:', data);
+          const wishlistResponse = await fetch(`${Config.API_URL}/user/${username}/wishlist`);
+          if (wishlistResponse.ok) {
+            const wishlistData = await wishlistResponse.json();
+            console.log("wishlist loaded:", wishlistData);
+            setWishlist(wishlistData.slice(0, 3)); // Only take the first three items
+          } else {
+            console.error('Failed to fetch wishlist');
+          }
 
           // Fetch recent badges after profile data is loaded
           fetchRecentBadges(userId);
@@ -191,9 +203,8 @@ export default function ProfileScreen({ route, navigation }) {
       for (const userId of userIds) {
         
         try {
-          const response = await fetch(`${Config.API_URL}/user/details/${userId}`);
+          const response = await fetch(`${Config.API_URL}/user/allDetails/${userId}`);
           const data = await response.json();
-  
           if (response.ok) {
             userDetails.push(data); // Add user details to the array
           } else {
@@ -283,6 +294,7 @@ export default function ProfileScreen({ route, navigation }) {
   });
 
 
+
   
     const compressedImage = await ImageManipulator.manipulateAsync(
       result.assets[0].uri,
@@ -311,19 +323,62 @@ export default function ProfileScreen({ route, navigation }) {
     } else {
       Alert.alert('Errorr', `Failed to update profile pic: ${responseText}`);
     }
-
-
-  
     
   };
 
+  const getImageSource = (iconPath) => {
+    switch (iconPath) {
+      case '../assets/belltower.jpg':
+        return require('../../assets/belltower.jpg');
+      case '../assets/walk.png':
+        return require('../../assets/walk.png');
+      case '../assets/efountain.jpg':
+        return require('../../assets/efountain.jpg');
+      case '../assets/purduepete.png':
+        return require('../../assets/purduepete.png');
+      case '../assets/neil.png':
+        return require('../../assets/neil.png');
+      case '../assets/pmu.png':
+        return require('../../assets/pmu.png');
+    }
+  };
+
+  useEffect(() => {
+    if (wishlist.length === 0) {
+      setLoading(false); // Stop loading if wishlist is empty
+      return;
+    }
+    const fetchMonumentDetails = async () => {
+      try {
+        const monumentDetails = await Promise.all(
+          wishlist.map(async (monumentId) => {
+            const response = await fetch(`${Config.API_URL}/monument/${monumentId}`);
+            if (response.ok) {
+              return response.json(); // Return the monument details
+            } else {
+              console.error(`Failed to fetch monument with ID: ${monumentId}`);
+              return null;
+            }
+          })
+        );
+
+        setMonuments(monumentDetails.filter(Boolean)); // Filter out null values
+        setLoading(false); // Stop loading once details are fetched
+      } catch (error) {
+        console.error('Error fetching monument details:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchMonumentDetails();
+  }, [wishlist]);
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#121212' : '#FFFFFF' }]}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.profileContainer}>
           {/* Profile Picture Upload */}
-          <Pressable onPress={() => imageFromPhone()}
-            >
+          <Pressable onPress={() => imageFromPhone()}>
             <Image
               source={
                 profileInfo.pfp
@@ -333,14 +388,19 @@ export default function ProfileScreen({ route, navigation }) {
               style={styles.profilePhoto}
             />
           </Pressable>
-  
-         {/* Username */}
-         <Text style={styles.title}>{profileInfo.username}</Text>
+
+          {/* Username */}
+          <Text style={styles.title}>{profileInfo.username}</Text>
           <Pressable
-              style={[styles.button, { marginTop: 10 }]}
-              onPress={() => setIsUsernameModalVisible(true)}
-            >
-              <Text style={styles.buttonText}>Edit Username</Text>
+            style={[styles.button, { marginTop: 10 }]}
+            onPress={() => setIsUsernameModalVisible(true)}
+          >
+            <Text style={styles.buttonText}>Edit Username</Text>
+          </Pressable>
+
+          {/* Theme Toggle Button */}
+          <Pressable onPress={toggleTheme} style={[localStyles.themeToggleButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}>
+            <Text style={localStyles.themeToggleText}>{isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</Text>
           </Pressable>
 
           {/* Followers and Following Section */}
@@ -431,16 +491,30 @@ export default function ProfileScreen({ route, navigation }) {
             )}
           </View>
   
-          {/* Profile History Section */}
+          {/* Wishlist Section */}
           <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Profile History</Text>
-              <View style={styles.achievementList}>
-                {profileInfo.profileHistory.map((historyItem, index) => (
-                  <View key={index} style={styles.achievement}>
-                    <Text style={styles.achievementTitle}>{historyItem}</Text>
+            <Text style={styles.sectionTitle}>Wishlist</Text>
+            {wishlist.length > 0 ? (
+              <FlatList
+              data={monuments}
+              keyExtractor={(item) => item._id.toString()}
+              renderItem={({ item }) => (
+                <View>
+                  <Image source={getImageSource(item.icon)} style={styles.icon} />
+                  <View style={styles.infoContainer}>
+                    <Text style={styles.title}>{item.title}</Text>
+                    <Text style={styles.badgeDescription}>
+                      {item.description}
+                    </Text>
                   </View>
-                ))}
-              </View>
+                </View>
+              )}
+              ListEmptyComponent={<Text style={styles.emptyText}>Your wishlist is empty.</Text>}
+              scrollEnabled={false}
+              />
+            ) : (
+              <Text style={styles.sectionText}>No items in wishlist</Text>
+            )}
           </View>
   
   
@@ -584,3 +658,19 @@ export default function ProfileScreen({ route, navigation }) {
     </SafeAreaView>
   );
 }
+
+// Add styles for the theme toggle button
+const localStyles = StyleSheet.create({
+  themeToggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    margin: 10,
+    borderRadius: 5,
+  },
+  themeToggleText: {
+    marginLeft: 10,
+  },
+  // ... existing styles ...
+});
