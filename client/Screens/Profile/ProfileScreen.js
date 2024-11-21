@@ -191,9 +191,8 @@ export default function ProfileScreen({ route, navigation }) {
       for (const userId of userIds) {
         
         try {
-          const response = await fetch(`${Config.API_URL}/user/details/${userId}`);
+          const response = await fetch(`${Config.API_URL}/user/allDetails/${userId}`);
           const data = await response.json();
-  
           if (response.ok) {
             userDetails.push(data); // Add user details to the array
           } else {

@@ -13,7 +13,11 @@ import * as ImageManipulator from 'expo-image-manipulator';
 
 export default function ViewProfile({ route, navigation }) {
     const { user } = route.params;
-    console.log("User name is" + user.username);
+    const [isFollowersModalVisible, setIsFollowersModalVisible] = useState(false);
+    const [isFollowingModalVisible, setIsFollowingModalVisible] = useState(false);
+    console.log("user issss" + user)
+    console.log("User name iss" + user.username);
+    console.log("user desc is " + user.description)
     const defaultImageUri = Image.resolveAssetSource(require('./default.png')).uri;
 
 
@@ -21,14 +25,7 @@ export default function ViewProfile({ route, navigation }) {
     return (
         <SafeAreaView style={styles.safeArea}>
           <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            {/* Close Button */}
-        <Pressable 
-          onPress={() => navigation.goBack()} 
-          style={styles.closeButton}
-        >
-          <MaterialIcons name="close" size={24} color="black" />
-          <Text style={styles.closeButtonText}>Close</Text>
-        </Pressable>
+
             <View style={styles.profileContainer}>
             <Image
               source={
@@ -42,11 +39,62 @@ export default function ViewProfile({ route, navigation }) {
               {/* Username */}
               <Text style={styles.title}>{user.username}</Text>
 
-      
- 
+                           {/* Followers and Following Section */}
+             <View style={styles.followContainer}>
+             <View style={styles.followCount}>
+               <Text style={styles.followCountLabel}>Followers</Text>
+               {user.followers.length > 0 ? (
+                   <Text style={styles.followCountNumber}>{user.followers.length}</Text>
+               ) : (
+                 <Text style={styles.followCountNumber}>0</Text>
+               )}
+             </View>
+   
+             <View style={styles.followCount}>
+               <Text style={styles.followCountLabel}>Following</Text>
+               {user.following.length > 0 ? (
+                   <Text style={styles.followCountNumber}>{user.following.length}</Text>
+               ) : (
+                 <Text style={styles.followCountNumber}>0</Text>
+               )}
+             </View>
+           </View>
+   
+           {/* Followers List Popup */}
+           <ListPopup
+             title="Followers"
+             visible={isFollowersModalVisible}
+             data={user.followers}
+             navigation={navigation}
+             onClose={() => setIsFollowersModalVisible(false)}
+           />
+   
+           {/* Following List Popup */}
+           <ListPopup
+             title="Following"
+             visible={isFollowingModalVisible}
+             data={user.following}
+             navigation={navigation}
+             onClose={() => setIsFollowingModalVisible(false)}
+           />
+   
+           {/* Description Section */}
+           <View style={styles.section}>
+             <Text style={styles.sectionTitle}>Description</Text>
+             <Text style={styles.sectionText}>{user.description}</Text>
+           </View>
+   
+            {/* Close Button */}
+            <Pressable 
+            onPress={() => navigation.goBack()} 
+            style={styles.button}
+            >
+            <MaterialIcons name="close"/>
+            <Text style={styles.buttonText}>Close</Text>
+            </Pressable>
             </View>
-          </ScrollView>
-        </SafeAreaView>
+        </ScrollView>
+    </SafeAreaView>
       );
     }      
   
