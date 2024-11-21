@@ -8,18 +8,35 @@ import GradientButton from './Components/GradientButton';
 import Config from '../config';
 import BottomNav from './BottomNav';
 import { colors, commonStyles, spacing, borderRadius, typography } from './theme';
+import { useTheme } from '../context/ThemeContext';
 
-const SecondaryButton = ({ onPress, title, style }) => (
-  <TouchableOpacity 
-    style={[commonStyles.buttonBase, commonStyles.secondaryButton, {padding: spacing.md}]} 
-    onPress={onPress}
-  >
-    <Text style={commonStyles.secondaryButtonText}>{title}</Text>
-  </TouchableOpacity>
-);
-
+const SecondaryButton = ({ onPress, title, style }) => {
+  const { isDarkMode } = useTheme();
+  return (
+    <TouchableOpacity 
+      style={[
+        commonStyles.buttonBase, 
+        commonStyles.secondaryButton, 
+        {
+          padding: spacing.md,
+          backgroundColor: isDarkMode ? '#333' : '#f0f0f0',
+        },
+        style
+      ]} 
+      onPress={onPress}
+    >
+      <Text style={[
+        commonStyles.secondaryButtonText,
+        { color: isDarkMode ? '#fff' : '#000' }
+      ]}>
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 export default function BadgeFeedScreen({ route, navigation }) {
+  const { isDarkMode } = useTheme();
   const { username } = route.params;
 
   // State to track badges, comments, and new badge form
@@ -165,20 +182,34 @@ export default function BadgeFeedScreen({ route, navigation }) {
     const isLiked = item.likes && item.likes.some((like) => like.userId === userId);
   
     return (
-      <View style={styles.badgeCard}>
-        <Text style={styles.badgeTitle}>{item.name}</Text>
-        <Text style={styles.badgeCreator}>
+      <View style={[
+        styles.badgeCard,
+        { backgroundColor: isDarkMode ? '#333' : '#fff' }
+      ]}>
+        <Text style={[
+          styles.badgeTitle,
+          { color: isDarkMode ? '#fff' : '#000' }
+        ]}>
+          {item.name}
+        </Text>
+        <Text style={[
+          styles.badgeCreator,
+          { color: isDarkMode ? '#ccc' : '#666' }
+        ]}>
           Created by: {item.username || 'Unknown'}
         </Text>
 
         <View style={styles.likeView}>
-          <Text style={styles.likeCount}>
-              {item.likes ? item.likes.length : 0}
+          <Text style={[
+            styles.likeCount,
+            { color: isDarkMode ? '#fff' : '#000' }
+          ]}>
+            {item.likes ? item.likes.length : 0}
           </Text>
           <MaterialIcons 
-                name={isLiked ? 'favorite': 'favorite-border'} 
-                size={30} 
-                color={isLiked ? colors.primary : colors.inactive} 
+            name={isLiked ? 'favorite': 'favorite-border'} 
+            size={30} 
+            color={isLiked ? colors.primary : isDarkMode ? '#fff' : '#666'} 
           />
         </View>
   
@@ -218,29 +249,54 @@ export default function BadgeFeedScreen({ route, navigation }) {
   };
   
   return (
-    <SafeAreaView style={commonStyles.safeArea}>
-      <View style={commonStyles.container}>
+    <SafeAreaView style={[
+      commonStyles.safeArea,
+      { backgroundColor: isDarkMode ? '#121212' : '#fff' }
+    ]}>
+      <View style={[
+        commonStyles.container,
+        { backgroundColor: isDarkMode ? '#121212' : '#fff' }
+      ]}>
         {/* Badge Creation Form */}
-        <View style={styles.createBadgeForm}>
-          <Text style={commonStyles.label}>Create New Badge</Text>
+        <View style={[
+          styles.createBadgeForm,
+          { 
+            backgroundColor: isDarkMode ? '#333' : '#fff',
+            borderColor: isDarkMode ? '#666' : colors.border 
+          }
+        ]}>
+          <Text style={[
+            commonStyles.label,
+            { color: isDarkMode ? '#fff' : '#000' }
+          ]}>
+            Create New Badge
+          </Text>
           <TextInput
-            style={[commonStyles.input, styles.formInput]}
+            style={[
+              commonStyles.input,
+              styles.formInput,
+              { 
+                backgroundColor: isDarkMode ? '#444' : '#f0f0f0',
+                color: isDarkMode ? '#fff' : '#000',
+                borderColor: isDarkMode ? '#666' : colors.border
+              }
+            ]}
             placeholder="Badge Name"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={isDarkMode ? '#999' : '#666'}
             value={newBadge.name}
             onChangeText={(text) => setNewBadge({ ...newBadge, name: text })}
           />
           <TextInput
             style={[commonStyles.input, styles.formInput]}
             placeholder="Picture URL"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={isDarkMode ? '#999' : '#666'}
             value={newBadge.picture}
             onChangeText={(text) => setNewBadge({ ...newBadge, picture: text })}
           />
           <TextInput
             style={[commonStyles.input, styles.formInput]}
             placeholder="Location"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={isDarkMode ? '#999' : '#666'}
             value={newBadge.location}
             onChangeText={(text) => setNewBadge({ ...newBadge, location: text })}
           />
