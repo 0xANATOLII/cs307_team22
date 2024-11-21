@@ -2,21 +2,21 @@ import React, { useRef, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Video } from 'expo-av';
 
-const LoadingVideo = ({ isLoading, onLoadingComplete }) => {
+const LoadingVideo = ({ isLoading, onLoadingComplete, enabled }) => {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    // Preload the video
-    if (videoRef.current) {
+    // Preload the video only if animations are enabled
+    if (videoRef.current && enabled) {
       videoRef.current.loadAsync(
         require('../assets/Be (Your Story) (2).mp4'),
         { shouldPlay: false },
         false
       );
     }
-  }, []);
+  }, [enabled]);
 
-  if (!isLoading) return null;
+  if (!isLoading || !enabled) return null;
 
   return (
     <View style={styles.container}>

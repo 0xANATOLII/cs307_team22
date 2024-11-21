@@ -1,6 +1,6 @@
 // screens/HomePage.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, Image } from 'react-native';
+import { View, Text, TextInput, Pressable, Image, Switch } from 'react-native';
 import styles from '../styles'; 
 import Config from "../config.js";
 import LoadingVideo from '../components/LoadingVideo';
@@ -9,6 +9,7 @@ export default function HomePage({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -16,7 +17,11 @@ export default function HomePage({ navigation }) {
       return;
     }
 
-    setIsLoading(true);
+    if (animationsEnabled) {
+      setIsLoading(true);
+    } else {
+      handleVideoComplete();
+    }
   };
 
   const handleVideoComplete = async () => {
@@ -48,6 +53,7 @@ export default function HomePage({ navigation }) {
       <LoadingVideo 
         isLoading={isLoading} 
         onLoadingComplete={handleVideoComplete}
+        enabled={animationsEnabled}
       />
       {!isLoading && (
         <>
@@ -112,6 +118,15 @@ export default function HomePage({ navigation }) {
             >
               <Text style={styles.buttonText}>BadgePage</Text>
             </Pressable>
+          </View>
+          <View style={styles.toggleContainer}>
+            <Text style={styles.toggleLabel}>Enable Animations</Text>
+            <Switch
+              value={animationsEnabled}
+              onValueChange={setAnimationsEnabled}
+              trackColor={{ false: "#767577", true: "#81b0ff" }}
+              thumbColor={animationsEnabled ? "#f5dd4b" : "#f4f3f4"}
+            />
           </View>
         </>
       )}
