@@ -265,7 +265,27 @@ export class UserController {
       throw error;
     }
   }
+  @Get('/allDetails/:userId')
+  async getAllUserDetails(@Param('userId') userId: string) {
+    this.logger.log(`Received request for all user details with userId: ${userId}`);
 
+    if (!userId) {
+      this.logger.error(`Missing 'userId' `);
+      throw new BadRequestException('User ID is required');
+    }
+
+    try {
+      this.logger.log(`Parsed user IDs: ${JSON.stringify(userId)}`);
+
+      // Fetch user details if IDs are valid
+      const user = await this.userService.getProfile(userId);
+
+      return { user };
+    } catch (error) {
+      this.logger.error(`Failed to fetch user details: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
   @Post('wishlist')
   async addToWishlist(
     @Body('username') username: string,

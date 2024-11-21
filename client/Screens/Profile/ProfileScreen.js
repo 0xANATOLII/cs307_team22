@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform, SafeAreaView, TextInput, FlatList } from 'react-native';
+import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform, SafeAreaView, TextInput, FlatList, StyleSheet } from 'react-native';
 import ModalPopup from './Popup';
 import styles from '../../styles';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -10,7 +10,8 @@ import ListPopup from './ListPopup';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
-
+import { useTheme } from '../../context/ThemeContext'; // Import the theme context
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; // Import icons
 
 export default function ProfileScreen({ route, navigation }) {
   const defaultImageUri = Image.resolveAssetSource(require('./default.png')).uri;
@@ -40,6 +41,7 @@ export default function ProfileScreen({ route, navigation }) {
   const [password, setPassword] = useState('');  // New state variable for password input
   const [isPasswordConfirmVisible, setIsPasswordConfirmVisible] = useState(false);  // Controls visibility of password input
   const [recentBadges, setRecentBadges] = useState([]);
+  const { isDarkMode, toggleTheme } = useTheme(); // Use the theme context
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -201,9 +203,8 @@ export default function ProfileScreen({ route, navigation }) {
       for (const userId of userIds) {
         
         try {
-          const response = await fetch(`${Config.API_URL}/user/details/${userId}`);
+          const response = await fetch(`${Config.API_URL}/user/allDetails/${userId}`);
           const data = await response.json();
-  
           if (response.ok) {
             userDetails.push(data); // Add user details to the array
           } else {
@@ -373,12 +374,11 @@ export default function ProfileScreen({ route, navigation }) {
   }, [wishlist]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#121212' : '#FFFFFF' }]}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.profileContainer}>
           {/* Profile Picture Upload */}
-          <Pressable onPress={() => imageFromPhone()}
-            >
+          <Pressable onPress={() => imageFromPhone()}>
             <Image
               source={
                 profileInfo.pfp
@@ -388,14 +388,19 @@ export default function ProfileScreen({ route, navigation }) {
               style={styles.profilePhoto}
             />
           </Pressable>
-  
-         {/* Username */}
-         <Text style={styles.title}>{profileInfo.username}</Text>
+
+          {/* Username */}
+          <Text style={styles.title}>{profileInfo.username}</Text>
           <Pressable
-              style={[styles.button, { marginTop: 10 }]}
-              onPress={() => setIsUsernameModalVisible(true)}
-            >
-              <Text style={styles.buttonText}>Edit Username</Text>
+            style={[styles.button, { marginTop: 10 }]}
+            onPress={() => setIsUsernameModalVisible(true)}
+          >
+            <Text style={styles.buttonText}>Edit Username</Text>
+          </Pressable>
+
+          {/* Theme Toggle Button */}
+          <Pressable onPress={toggleTheme} style={[localStyles.themeToggleButton, { backgroundColor: isDarkMode ? '#333' : '#ddd' }]}>
+            <Text style={localStyles.themeToggleText}>{isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</Text>
           </Pressable>
 
           {/* Followers and Following Section */}
@@ -653,3 +658,19 @@ export default function ProfileScreen({ route, navigation }) {
     </SafeAreaView>
   );
 }
+
+// Add styles for the theme toggle button
+const localStyles = StyleSheet.create({
+  themeToggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    margin: 10,
+    borderRadius: 5,
+  },
+  themeToggleText: {
+    marginLeft: 10,
+  },
+  // ... existing styles ...
+});

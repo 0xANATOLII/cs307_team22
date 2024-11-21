@@ -1,12 +1,15 @@
 // screens/HomePage.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, Image, ScrollView } from 'react-native';
+import { View, Text, TextInput, Pressable, Image, Switch } from 'react-native';
 import styles from '../styles'; 
 import Config from "../config.js";
+import LoadingVideo from '../components/LoadingVideo';
 
 export default function HomePage({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -14,6 +17,14 @@ export default function HomePage({ navigation }) {
       return;
     }
 
+    if (animationsEnabled) {
+      setIsLoading(true);
+    } else {
+      handleVideoComplete();
+    }
+  };
+
+  const handleVideoComplete = async () => {
     try {
       const response = await fetch(`${Config.API_URL}/user/login`, {
         method: 'POST',
@@ -26,84 +37,99 @@ export default function HomePage({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Login Successful');
-        // Proceed to next screen or store user session, etc.
         navigation.navigate('Map', { username });
       } else {
         alert(data.message || 'Login failed');
       }
     } catch (error) {
       alert('Login Failed: ' + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>BeBoiler</Text>
-      <Image 
-        source={require('../assets/purduepete.png')}
-        style={styles.logo}
+      <LoadingVideo 
+        isLoading={isLoading} 
+        onLoadingComplete={handleVideoComplete}
+        enabled={animationsEnabled}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <View style={styles.button}>
-      <Pressable 
-        onPress={handleLogin}
-        style={({ pressed }) => [
-          styles.button,
-          pressed && { backgroundColor: '#555' }
-        ]}
-      >
-        <Text style={styles.buttonText}>Login</Text>
-      </Pressable>
-      </View>
-      <View style={styles.button}>
-        <Pressable
-          onPress={() => navigation.navigate('Registration')}
-          style={({ pressed }) => [
-            styles.button,
-            pressed && { backgroundColor: '#555' }
-          ]}
-        >
-          <Text style={styles.buttonText}>Register</Text>
-        </Pressable>
-      </View>
-      <View style={styles.button}>
-        <Pressable
-          onPress={() => navigation.navigate('ForgotPassword')}
-          style={({ pressed }) => [
-            styles.button,
-            pressed && { backgroundColor: '#555' }
-          ]}
-        >
-          <Text style={styles.buttonText}>Forgot Password?</Text>
-        </Pressable>
-      </View>
-      <View style={styles.button}>
-        <Pressable
-          onPress={() => navigation.navigate('BadgePage',{acusername:"tolik",acbadgeId:"6733d11184a3595f9b53efec"})}
-          style={({ pressed }) => [
-            styles.button,
-            pressed && { backgroundColor: '#555' }
-          ]}
-        >
-          <Text style={styles.buttonText}>BadgePage</Text>
-        </Pressable>
-      </View>
-
-     
-
+      {!isLoading && (
+        <>
+          <Text style={styles.title}>BeBoiler</Text>
+          <Image 
+            source={require('../assets/purduepete.png')}
+            style={styles.logo}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+          <View style={styles.button}>
+            <Pressable 
+              onPress={handleLogin}
+              style={({ pressed }) => [
+                styles.button,
+                pressed && { backgroundColor: '#555' }
+              ]}
+            >
+              <Text style={styles.buttonText}>Login</Text>
+            </Pressable>
+          </View>
+          <View style={styles.button}>
+            <Pressable
+              onPress={() => navigation.navigate('Registration')}
+              style={({ pressed }) => [
+                styles.button,
+                pressed && { backgroundColor: '#555' }
+              ]}
+            >
+              <Text style={styles.buttonText}>Register</Text>
+            </Pressable>
+          </View>
+          <View style={styles.button}>
+            <Pressable
+              onPress={() => navigation.navigate('ForgotPassword')}
+              style={({ pressed }) => [
+                styles.button,
+                pressed && { backgroundColor: '#555' }
+              ]}
+            >
+              <Text style={styles.buttonText}>Forgot Password?</Text>
+            </Pressable>
+          </View>
+          <View style={styles.button}>
+            <Pressable
+              onPress={() => navigation.navigate('BadgePage',{acusername:"tolik",acbadgeId:"6733d11184a3595f9b53efec"})}
+              style={({ pressed }) => [
+                styles.button,
+                pressed && { backgroundColor: '#555' }
+              ]}
+            >
+              <Text style={styles.buttonText}>BadgePage</Text>
+            </Pressable>
+          </View>
+          <View style={styles.toggleContainer}>
+            <Text style={styles.toggleLabel}>Enable Animations</Text>
+            <Switch
+              value={animationsEnabled}
+              onValueChange={setAnimationsEnabled}
+              trackColor={{ false: "#767577", true: "#81b0ff" }}
+              thumbColor={animationsEnabled ? "#f5dd4b" : "#f4f3f4"}
+            />
+          </View>
+        </>
+      )}
     </View>
   );
 }
