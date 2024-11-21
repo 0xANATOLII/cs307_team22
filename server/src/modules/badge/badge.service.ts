@@ -179,6 +179,21 @@ export class BadgeService {
     }
   }
 
+  async isLike(badgeId:string,userId:string){
+     // Check if the user has already liked the badge
+     const badge = await this.badgeModel.findById(badgeId);
+     if (!badge) {
+       throw new NotFoundException(`Badge with ID ${badgeId} not found`);
+     }
+   
+     const existingLike = badge.likes.find((like) => like.userId.toString() === userId);
+     if (existingLike) {
+       return {ans:true}
+     }
+     return {ans:false}
+  
+  }
+
   async addLikeToBadge(badgeId: string, userId: string) {
     // Check if the user has already liked the badge
     const badge = await this.badgeModel.findById(badgeId);

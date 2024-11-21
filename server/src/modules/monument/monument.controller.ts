@@ -19,7 +19,7 @@ export class MonumentController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.monumentService.findOne(+id);
+    return this.monumentService.findOne(id);
   }
   @Get(':name')
   findOneByName(@Param('name') name: string) {
@@ -34,5 +34,10 @@ export class MonumentController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.monumentService.remove(+id);
+  }
+  @Get('/byname/:name')
+  findOneByNamen(@Param('name') name: string) {
+    console.log(name)
+    return this.monumentService.findByName(name);
   }
 }

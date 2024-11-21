@@ -10,7 +10,6 @@ import { AuthModule } from './modules/auth/auth.module'; // Import AuthModule
 import { MailService } from './modules/mail/mail.service';
 import { MailModule } from './modules/mail/mail.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
@@ -18,6 +17,7 @@ import { MailModule } from './modules/mail/mail.module';
     UserModule,
     MailModule,
     BadgeModule,
+
     MonumentModule,
     AuthModule, // Import AuthModule for authentication
   ],

@@ -5,7 +5,7 @@ import { ActivityIndicator, View,Text ,StyleSheet,Image, Dimensions,ScrollView,T
 import { SafeAreaView } from "react-native-safe-area-context";
 import styles from '../styles';
 import { Icon } from 'react-native-elements';
-import TestPage from "./Components/TestPage.js";
+import CommentsSection from "./Components/CommentsSection";
 import { useRoute } from "@react-navigation/native";
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
@@ -16,11 +16,15 @@ import * as  Linking  from 'expo-linking';
 export default function BadgePage({route,navigation}){
     
 
-    //const {username} = route.params;
+    const {com_username,com_userId} = route.params;
+   
     const [curLink,setCurLink] = useState("")
     const route_ = useRoute();
     const { acusername, acbadgeId } = route_.params;
     const [badge,setBadge] = useState(null)
+    const [badgeComment,setbadgeComments] = useState([])
+
+
     const [loading,setLoading] = useState(null)
     const [error,setError] = useState(null)
     const [userData,setUserData] = useState(null)
@@ -32,26 +36,28 @@ export default function BadgePage({route,navigation}){
     const [isCommentsVisible, setCommentsVisible] = useState(false);
     const [isNotFound,setIsNotFound] = useState(false)
 
+    const [amLikes,setAmlikes] = useState(0)
+    const [isLiked,setIsLiked] = useState(false)
     const fetchBadge = async ()=>{
         try{
         
             const response = await axios.get(`${Config.API_URL}/user/badge/${acusername}/${acbadgeId}`)///user/badge/tolik/672477d217b9a8b6d39596ca`)
-            console.log(response.data)
+            //console.log(response.data)
             if(response){
-                console.log("RESPONS")
-                console.log(response.data.userId)
-
+                //console.log("RESPONS")
+                //console.log(response.data.userId)
                 const userresp = await axios.get(`${Config.API_URL}/user/${response.data.userId}`)
-                console.log(userresp.data)
-                if(userresp.pfp==null)
-                    console.log("No pic")
+                //console.log(userresp.data)
+                //if(userresp.pfp==null)
+                    //console.log("No pic")
+                
 
                 //http://localhost:6000/monument/6724670419ef3c7b77d3ab34
                 let monumentN = ""
                 if(response.data.monumentId){
-                    const monresp = await axios.get(`${Config.API_URL}/monument/${response.data.monumentId}`)
-                    if(monresp.data.name){
-                        monumentN = monresp.data.name
+                    const monresp = await axios.get(`${Config.API_URL}/monument/673e29c376f694ed124bf823`)//${response.data.monumentId}`)
+                    if(monresp.data.title){
+                        monumentN = monresp.data.title
                     }
                 }
                 if(monumentN=="")
@@ -60,6 +66,14 @@ export default function BadgePage({route,navigation}){
                 setMonumentName(monumentN)
                 setUserData(userresp.data)
                 setBadge(response.data)
+                setbadgeComments(response.data.comments)
+
+                
+
+                const isLike_ = await axios.get(`${Config.API_URL}/badge/${acbadgeId}/${com_userId}/islike`).catch(setIsLiked(false))
+                //console.log("ANS : "+isLike_.data.ans)
+                setIsLiked(isLike_.data.ans)
+                setAmlikes(response.data.likes.length)
                 
             }
 
@@ -92,8 +106,12 @@ export default function BadgePage({route,navigation}){
         fetchBadge()
 
     },[])
+
+
+    //TODO:: BACKE 
     if(isNotFound)
         return(
+
             <View style={{height:screenHeight,backgroundColor:'black',justifyContent:"center",alignContent:'center',alignItems:'center'}}>
                 <Text style={{color:'red'}}>
                     This page is not found !
@@ -129,9 +147,10 @@ export default function BadgePage({route,navigation}){
             if(curLink==""&&acusername&&acbadgeId)
                 return
 
-        const shareLink = curLink.toString()+'badge/'+acusername+'/'+acbadgeId;
+        const shareLink = curLink.toString()+'/--/badge/'+acusername+'/'+acbadgeId;
+        //console.log(shareLink)
           const result = await Share.share({
-            message: '',
+            message: 'shr',
             url:shareLink
             // If you're sharing an URL:
             // url: 'https://your-post-url.com', // Or add a dynamic URL
@@ -140,19 +159,65 @@ export default function BadgePage({route,navigation}){
           if (result.action === Share.sharedAction) {
             if (result.activityType) {
               // Share completed with activity type
-              console.log('Shared with activity type: ', result.activityType);
+              //console.log('Shared with activity type: ', result.activityType);
             } else {
               // Share completed
-              console.log('Post shared!');
+              //console.log('Post shared!');
             }
           } else if (result.action === Share.dismissedAction) {
             // Share dismissed
-            console.log('Share dismissed');
+            //console.log('Share dismissed');
           }
         } catch (error) {
           console.error('Error sharing:', error.message);
         }
       };
+
+    const handleLike = async () =>{
+//console.log("This is a like function")
+
+
+      
+      try{
+      if(isLiked){
+        //console.log("Unlike")
+         //unlike
+
+        const response = await axios.delete(`${Config.API_URL}/badge/${acbadgeId}/unlike`, { data: { userId: com_userId } })
+          .then(response => {
+            //console.log('Successfully deleted:');
+          })
+          .catch(error => {
+            console.error('Error deleting like:', error);
+          });
+
+         setAmlikes(amLikes-1)
+          //[{"_id": "673f81c5f3e08d6c8b65d698", "likedAt": "2024-11-21T18:53:57.715Z", "userId": "67155e33be3aaa938a64b997"}]
+      }
+      else
+      {
+        //console.log(badge.likes)
+        //console.log("like")
+
+
+        //like
+          const url = `${Config.API_URL}/badge/${acbadgeId}/like`;
+         const payload = { userId: com_userId };
+         const response = await axios.post(url, payload);
+        setAmlikes(amLikes+1)
+
+      
+      }
+    
+
+     
+
+      setIsLiked(!isLiked)
+      
+      }catch(e){
+        console.log(e)
+      }
+    }
       
 
     if (loading) {
@@ -281,8 +346,22 @@ export default function BadgePage({route,navigation}){
         )}
           {/* Action Bar */}
           <View style={styless.actionBar}>
-            <Icon name="heart-outline" type="ionicon" color="#fff" size={25} />
+          <TouchableOpacity onPress={handleLike} >
+
+
+            {isLiked&&(
+              <Icon name="heart-outline" type="ionicon" color="red" size={25} />
+            )}
+            {!isLiked&&(
+              <Icon name="heart-outline" type="ionicon" color="#fff" size={25} />
+            )}
+            
+
+            </TouchableOpacity>
+
+
             <TouchableOpacity onPress={() => setCommentsVisible(true)} >
+
             <Icon name="chatbubble-outline" type="ionicon" color="#fff" size={25} />
             </TouchableOpacity>
            
@@ -293,7 +372,7 @@ export default function BadgePage({route,navigation}){
           </View>
           {isCommentsVisible==true&&(
             <View style={{ flex: 1 }}>
-                        <TestPage visible={isCommentsVisible} setVisible={setCommentsVisible} onClose={() => setCommentsVisible(false)} />
+                        <CommentsSection visible={isCommentsVisible} setVisible={setCommentsVisible} comments={badgeComment} setcomments={setbadgeComments} badgeid={badge._id} userId={com_userId} username={com_username} onClose={() => setCommentsVisible(false)} />
                         </View>
 
           )}
@@ -302,7 +381,7 @@ export default function BadgePage({route,navigation}){
           {/* Post Info */}
           {badge&&(
           <View style={styless.postInfo}>
-            <Text style={styless.likesText}>Likes :0</Text>
+            <Text style={styless.likesText}>Likes: {amLikes}</Text>
             <Text style={styless.caption}>{badge.name}</Text>
             <Text style={styless.dateText}>{badge.location}</Text>
           </View>

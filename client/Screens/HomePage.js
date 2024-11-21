@@ -92,7 +92,11 @@ export default function HomePage({ navigation }) {
       </View>
       <View style={styles.button}>
         <Pressable
-          onPress={() => navigation.navigate('BadgePage',{acusername:"tolik",acbadgeId:"6733d11184a3595f9b53efec"})}
+          //onPress={() => navigation.navigate('BadgePage',{acusername:"tolik",acbadgeId:"67350a19d6f4fd220b54eadf",com_username:"vencia",com_userId:"672506b1e52c56a2d04a2160"})}
+
+          //acIs a data for badge // com is data for current user
+          onPress={() => navigation.navigate('BadgePage',{acusername:"tolik",acbadgeId:"67350a19d6f4fd220b54eadf",com_username:"PassisBbbbbb1!",com_userId:"67155e33be3aaa938a64b997"})}
+          
           style={({ pressed }) => [
             styles.button,
             pressed && { backgroundColor: '#555' }

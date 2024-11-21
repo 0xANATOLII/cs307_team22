@@ -39,9 +39,12 @@ export class MonumentService {
     return this.monumentModule.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} monument`;
+
+  async findOne(id: string) {
+    return await this.monumentModule.findById(id)
+   
   }
+
 
   async findByName(name:string){
     const searchValue = name.toLowerCase().trim();
