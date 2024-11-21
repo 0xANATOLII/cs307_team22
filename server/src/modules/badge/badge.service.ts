@@ -23,7 +23,7 @@ export class BadgeService {
     if(!user_)
       throw new BadRequestException("This user doesnt exist !"); 
 
-    console.log(createBadgeDto)
+
     const newBadge =  new this.badgeModel({
 
       name: createBadgeDto.name,
@@ -31,7 +31,8 @@ export class BadgeService {
       picturef:createBadgeDto.picturef,
       location:createBadgeDto.location,
       userId: createBadgeDto.userId,
-      monumentId:null,
+      monumentId:createBadgeDto.monumentId,
+      username:createBadgeDto.username,
       comments: [],
       likes:[]
 
@@ -43,9 +44,10 @@ export class BadgeService {
 
 
   }catch(e){
+    console.log(e)
     throw new BadRequestException(e);
   }
-
+}
 
 
     // Find the user by their username instead of by _id
@@ -67,7 +69,7 @@ export class BadgeService {
     });
 
     return await newBadge.save();*/
-  }
+  
 
   // Fetch all badges
   async findAll(): Promise<Badge[]> {

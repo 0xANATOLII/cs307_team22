@@ -39,10 +39,9 @@ export class BadgeController {
 
 ))
   uploadFile(@UploadedFiles() files, @Body() createBadgeDto:CreateBadgeDto ) {
-    console.log("CONTROLER")
-    console.log(files)
-    const image1Path = files.picture[0].path;
-    const image2Path = files.picturef[0].path;
+  
+    const image1Path = files.picture[0].filename;
+    const image2Path = files.picturef[0].filename;
 
     console.log("Path "+image1Path)
     console.log("Path "+image2Path)
@@ -52,8 +51,7 @@ export class BadgeController {
       picturef:image2Path,
     }
 
-    console.log("CONTROLLER : "+createBadgeDto)
-
+ 
     
     return this.badgeService.create(createBadgeDto) ;
 

@@ -51,10 +51,15 @@ export class MonumentService {
 
 
   async findByName(name:string){
+
+    console.log("Find MONUM")
     const searchValue = name.toLowerCase().trim();
     const result = await this.monumentModule.findOne({
-      name: { $regex: `^${searchValue}$`, $options: 'i' },
+      title: { $regex: `^${searchValue}$`, $options: 'i' },
     });
+    console.log(result)
+
+
     return result
   }
 

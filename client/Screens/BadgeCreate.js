@@ -5,8 +5,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import MapPage from './MapPage';
 import { LocationContext } from './Components/locationContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import GradientButton from './Components/GradientButton';
-import { colors, gradients, commonStyles, spacing, borderRadius, typography } from './theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { postAbadge } from '../api/badges';
 
 export default function CameraPage({ route, navigation }) {
   const { closestMon, location, setClosestMon, setLocation } = useContext(LocationContext);
@@ -21,22 +21,22 @@ export default function CameraPage({ route, navigation }) {
   const cameraRef_f = useRef(null);
 
   if (!permission) {
-    return <SafeAreaView style={commonStyles.safeArea}></SafeAreaView>;
+    return <SafeAreaView style={styles.safeArea}></SafeAreaView>;
   }
 
   if (!permission.granted) {
     return (
-      <SafeAreaView style={commonStyles.safeArea}>
-        <View style={styles.permissionContainer}>
-          <Text style={styles.permissionText}>We need your permission to show the camera</Text>
-          <TouchableOpacity 
-            style={styles.permissionButton}
-            onPress={requestPermission}
-          >
-            <Text style={styles.permissionButtonText}>Grant Permission</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.permissionContainer}>
+            <Text style={styles.permissionText}>We need your permission to show the camera</Text>
+            <TouchableOpacity
+                style={styles.permissionButton}
+                onPress={requestPermission}
+            >
+              <Text style={styles.permissionButtonText}>Grant Permission</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
     );
   }
 
@@ -66,115 +66,164 @@ export default function CameraPage({ route, navigation }) {
     navigation.navigate('Map', { username: route.params.username });
   };
 
+  const postBadge = async ()=>{
+  console.log("This is a post")
+
+    const resp = await postAbadge(route.params.username ,description,photo,photof,location,closestMon)
+    console.log("RESP : "+resp.substring(0,2))
+    if(resp.substring(0,3)=="200"){
+      alert("Your badge has been posted !")
+      console.log("status"+resp.status)
+
+    }
+    else{
+      alert(resp.substring(3))
+      return
+    }
+
+    navigation.navigate('Map', { username: route.params.username });
+
+  }
+
+
+
+
   if (photo && photof) {
     return (
-      <View style={commonStyles.container}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          bounces={false}
-        >
-          <View style={styles.carouselContainer}>
-            <ScrollView
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              scrollEventThrottle={16}
+        <View style={styles.container}>
+          <ScrollView
+              contentContainerStyle={styles.scrollContent}
               bounces={false}
-            >
-              <View style={styles.slideContainer}>
-                <Image 
-                  source={{ uri: photo.uri }}
-                  style={commonStyles.image}
-                  resizeMode="cover"
-                />
-              </View>
-              <View style={styles.slideContainer}>
-                <Image 
-                  source={{ uri: photof.uri }}
-                  style={commonStyles.image}
-                  resizeMode="cover"
-                />
-              </View>
-            </ScrollView>
-            <View style={styles.indicatorContainer}>
-              <View style={[styles.indicator, activePhoto === 0 && styles.activeIndicator]} />
-              <View style={[styles.indicator, activePhoto === 1 && styles.activeIndicator]} />
-            </View>
-          </View>
+          >
+            <View style={styles.carouselContainer}>
+              <ScrollView
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  scrollEventThrottle={16}
+                  bounces={false}
+              >
+                <View style={styles.slideContainer}>
+                  <Image
+                      source={{ uri: photo.uri }}
+                      style={styles.image}
+                      resizeMode="cover"
+                  />
+                </View>
+                <View style={styles.slideContainer}>
+                  <Image
+                      source={{ uri: photof.uri }}
+                      style={styles.image}
+                      resizeMode="cover"
+                  />
+                </View>
+              </ScrollView>
 
-          <View style={styles.contentContainer}>
-            <Text style={commonStyles.label}>Description</Text>
-            <TextInput
-              style={[commonStyles.input, styles.descriptionInput]}
-              placeholder="Write your description here..."
-              placeholderTextColor={colors.textSecondary}
-              value={description}
-              onChangeText={setDescription}
-              multiline
-            />
+              <View style={styles.indicatorContainer}>
+                <View style={[styles.indicator, activePhoto === 0 && styles.activeIndicator]} />
+                <View style={[styles.indicator, activePhoto === 1 && styles.activeIndicator]} />
+              </View>
 
-            <Text style={commonStyles.label}>Location</Text>
-            <View style={styles.mapContainer}>
-              <MapPage route={route} navigation={navigation} isMiniMap={true} />
             </View>
 
-            <View style={styles.buttonContainer}>
-              <GradientButton 
-                title="Post"
-                onPress={() => alert("POST")}
-                innerstyle={{padding: spacing.lg}}
+            <View style={styles.contentContainer}>
+              <Text style={styles.label}>Description</Text>
+              <TextInput
+                  style={styles.descriptionInput}
+                  placeholder="Write your description here..."
+                  placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
               />
 
-              <View style={styles.secondaryButtons}>
+              <Text style={styles.label}>Location</Text>
+              <View style={styles.mapContainer}>
+                <MapPage route={route} navigation={navigation} isMiniMap={true} />
+              </View>
+              <Text style={styles.label}>MON : {closestMon}</Text>
+
+              <View style={styles.buttonContainer}>
                 <TouchableOpacity
-                  style={[commonStyles.buttonBase, commonStyles.secondaryButton, { flex: 1, padding: spacing.lg}]}
-                  onPress={() => { setPhoto(null); setPhotof(null); }}
+                    style={[styles.button, styles.postButton]}
+                    onPress={postBadge}
                 >
-                  <Text style={commonStyles.secondaryButtonText}>Retake</Text>
+                  <LinearGradient
+                      colors={['#FFD700', '#FFA500']}
+                      style={styles.gradientButton}
+                  >
+                    <Text style={styles.postButtonText}>Post</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[commonStyles.buttonBase, commonStyles.secondaryButton, { flex: 1, padding: spacing.lg,}]}
-                  onPress={back_n}
-                >
-                  <Text style={commonStyles.secondaryButtonText}>Cancel</Text>
-                </TouchableOpacity>
+                <View style={styles.secondaryButtons}>
+                  <TouchableOpacity
+                      style={[styles.button, styles.secondaryButton]}
+                      onPress={() => { setPhoto(null); setPhotof(null); }}
+                  >
+                    <Text style={styles.secondaryButtonText}>Retake</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                      style={[styles.button, styles.secondaryButton]}
+                      onPress={back_n}
+                  >
+                    <Text style={styles.secondaryButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </ScrollView>
-      </View>
+          </ScrollView>
+        </View>
     );
   }
 
-  // Camera views remain largely the same but with updated styles
   else if (photo) {
     return (
-      <View style={commonStyles.container}>
-        <CameraView style={styles.camera} facing={facing_f} ref={cameraRef_f}>
-          <View style={styles.cameraOverlay}>
-            <View style={styles.cameraControls}>
-              <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacingf}>
-                <MaterialIcons name="flip-camera-ios" size={40} color={colors.primary} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.captureButton} onPress={takePicturef}>
-                <View style={styles.captureButtonInner} />
-              </TouchableOpacity>
+        <View style={styles.container}>
+          <CameraView style={styles.camera} facing={facing_f} ref={cameraRef_f}>
+            <View style={styles.cameraOverlay}>
+              <View style={styles.cameraControls}>
+                <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacingf}>
+                  <MaterialIcons name="flip-camera-ios" size={40} color="#FFD700" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.captureButton} onPress={takePicturef}>
+                  <View style={styles.captureButtonInner} />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </CameraView>
-      </View>
+          </CameraView>
+        </View>
     );
   }
 
   else if (photof) {
     return (
-      <View style={commonStyles.container}>
+        <View style={styles.container}>
+          <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+            <View style={styles.cameraOverlay}>
+              <View style={styles.cameraControls}>
+                <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacingf}>
+                  <MaterialIcons name="flip-camera-ios" size={40} color="#FFD700" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.captureButton} onPress={takePicturef}>
+                  <View style={styles.captureButtonInner} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </CameraView>
+        </View>
+    );
+  }
+
+  else(!photo && !photof)
+  return (
+      <View style={styles.container}>
         <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
           <View style={styles.cameraOverlay}>
             <View style={styles.cameraControls}>
               <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
-                <MaterialIcons name="flip-camera-ios" size={40} color={colors.primary} />
+                <MaterialIcons name="flip-camera-ios" size={40} color="#FFD700" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
                 <View style={styles.captureButtonInner} />
@@ -183,37 +232,49 @@ export default function CameraPage({ route, navigation }) {
           </View>
         </CameraView>
       </View>
-    );
-  }
-
-  else(!photo && !photof)
-  return (
-    <View style={commonStyles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-        <View style={styles.cameraOverlay}>
-          <View style={styles.cameraControls}>
-            <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
-              <MaterialIcons name="flip-camera-ios" size={40} color={colors.primary} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
-              <View style={styles.captureButtonInner} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </CameraView>
-    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+    backgroundColor: '#121212',
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#121212',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  permissionContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  permissionText: {
+    color: 'white',
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  permissionButton: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+  },
+  permissionButtonText: {
+    color: '#121212',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   scrollContent: {
     flexGrow: 1,
   },
   carouselContainer: {
-    paddingTop: 50,
     height: Dimensions.get('window').height * 0.9,
     position: 'relative',
-    marginBottom: spacing.lg,
+    marginBottom: 20,
   },
   slideContainer: {
     width: Dimensions.get('window').width,
@@ -221,72 +282,133 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  imageContainer: {
+    width: '100%',
+    height: '100%',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 215, 0, 0.5)',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  activeImage: {
+    borderColor: '#FFD700',
+    borderWidth: 3,
+  },
+  image: {
+    width: '95%',
+    height: '100%',
+    borderRadius: 12,
+  },
   indicatorContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     position: 'absolute',
-    bottom: spacing.xl,
+    bottom: 30,
     width: '100%',
   },
   indicator: {
     width: 8,
     height: 8,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.inactive,
-    marginHorizontal: spacing.xs,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    marginHorizontal: 4,
   },
   activeIndicator: {
-    backgroundColor: colors.active,
+    backgroundColor: '#FFD700',
   },
   contentContainer: {
-    padding: spacing.lg,
+    padding: 20,
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFD700',
+    marginBottom: 10,
   },
   descriptionInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    padding: 15,
+    color: 'white',
+    marginBottom: 20,
     height: 100,
     textAlignVertical: 'top',
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
   },
   mapContainer: {
     height: 200,
     overflow: 'hidden',
-    marginBottom: spacing.lg,
+    marginBottom: 20,
   },
   buttonContainer: {
-    gap: spacing.md,
+    gap: 15,
+  },
+  button: {
+    borderRadius: 25,
+    overflow: 'hidden',
+  },
+  postButton: {
+    marginBottom: 10,
+  },
+  gradientButton: {
+    padding: 15,
+    alignItems: 'center',
+  },
+  postButtonText: {
+    color: '#121212',
+    fontSize: 18,
+    fontWeight: '600',
   },
   secondaryButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: spacing.sm,
+    gap: 10,
+  },
+  secondaryButton: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 15,
+    alignItems: 'center',
+    borderRadius: 25,
+  },
+  secondaryButtonText: {
+    color: 'white',
+    fontSize: 16,
   },
   camera: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#121212',
   },
   cameraOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'space-between',
-    padding: spacing.lg,
+    padding: 20,
+  },
+  cameraText: {
+    color: '#FFD700',
+    fontSize: 24,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 40,
   },
   cameraControls: {
     position: 'absolute',
-    bottom: spacing.xl,
+    bottom: 30,
     alignSelf: 'center',
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: 30,
   },
   flipButton: {
-    padding: spacing.sm,
+    padding: 10,
   },
   captureButton: {
     width: 70,
     height: 70,
-    borderRadius: borderRadius.full,
+    borderRadius: 35,
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -294,28 +416,7 @@ const styles = StyleSheet.create({
   captureButtonInner: {
     width: 60,
     height: 60,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.primary,
-  },
-  permissionContainer: {
-    padding: spacing.lg,
-    alignItems: 'center',
-  },
-  permissionText: {
-    color: colors.textPrimary,
-    fontSize: typography.sizes.md,
-    marginBottom: spacing.lg,
-    textAlign: 'center',
-  },
-  permissionButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.lg,
-  },
-  permissionButtonText: {
-    color: colors.background,
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.semibold,
+    borderRadius: 30,
+    backgroundColor: '#FFD700',
   },
 });
