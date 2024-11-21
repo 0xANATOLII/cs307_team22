@@ -308,4 +308,24 @@ export class UserController {
     return await this.userService.removeFromWishlistByUsername(username, monumentId);
   }
 
+
+  @Get("/badges/:username")
+  async getbadgesByUser(@Param('username') username: string){
+
+    return this.userService.getBadgesByUser(username)
+ 
+  }
+  @Get("/badge/:username/:badgeId")
+  async getBadgeByLink(@Param('username') username: string,@Param('badgeId') badgeId: string){
+   
+    return this.userService.getBadgeByLink(username,badgeId)
+ 
+  }
+
+  @Get("pfp/:username")
+  async getUserProfilePic(@Param('username') username: string){
+   
+    return this.userService.getPfp(username)
+ 
+  }
 }

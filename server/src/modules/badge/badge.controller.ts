@@ -13,6 +13,9 @@ import { extname } from 'path';
 import { Response } from 'express';
 
 
+import { join } from 'path';
+import { existsSync } from 'fs';
+
 
 @Controller('badge')
 export class BadgeController {
@@ -82,6 +85,19 @@ export class BadgeController {
     return { message: 'Files uploaded successfully!', image1Path, image2Path, description };
   }*/
   
+  @Get('/pic/:imageName')
+    getImage(@Param('imageName') imageName: string, @Res() res: Response) {
+      const imagePath = join(process.cwd(), 'uploads', imageName);
+  
+      
+      if (!existsSync(imagePath)) {
+        throw new NotFoundException('Image not found');
+      }
+  
+      
+      return res.sendFile(imagePath);
+  }
+
   @Post()
 async create(@Body() createBadgeDto: CreateBadgeDto) {
   const badge = await this.badgeService.create(createBadgeDto);
@@ -179,6 +195,14 @@ async create(@Body() createBadgeDto: CreateBadgeDto) {
       this.logger.error(`Error adding comment to badge ID ${badgeId}: ${error.message}`, error.stack);
       throw error;
     }
+  }
+
+  @Get(':badgeId/:userid/islike')
+  async islikeBadge(
+    @Param('badgeId') badgeId: string,
+    @Param('userid') userId: string,
+  ) {
+    return this.badgeService.isLike(badgeId, userId);
   }
 
   @Post(':badgeId/like')
