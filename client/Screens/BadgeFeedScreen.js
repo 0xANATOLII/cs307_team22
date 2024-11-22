@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TextInput, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TextInput, Image, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import BadgeCommentSection from './BadgeCommentSection';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -45,13 +45,16 @@ export default function BadgeFeedScreen({ route, navigation }) {
   const [newBadge, setNewBadge] = useState({ name: '', picture: '', location: '' });
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isFlipped, setIsFlipped] = useState(false);
 
   // Fetch all badges from the server
 
   const fetchBadges = async () => {
     try {
       const response = await axios.get(`${Config.API_URL}/badge`); // Adjust API URL
-      setBadges(response.data);
+      const latestBadges = response.data.reverse();
+
+      setBadges(latestBadges);
     } catch (error) {
       console.error('Error fetching badges:', error);
     } finally {
@@ -180,7 +183,7 @@ export default function BadgeFeedScreen({ route, navigation }) {
   // Render each badge with its name and the username of the creator
   const renderBadge = ({ item }) => {
     const isLiked = item.likes && item.likes.some((like) => like.userId === userId);
-  
+    console.log(item);
     return (
       <View style={[
         styles.badgeCard,
@@ -212,6 +215,17 @@ export default function BadgeFeedScreen({ route, navigation }) {
             color={isLiked ? colors.primary : isDarkMode ? '#fff' : '#666'} 
           />
         </View>
+
+        {item.picture && item.picturef && (
+        <TouchableOpacity onPress={() => setIsFlipped(!isFlipped)}>
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: isFlipped ? item.picturefUri : item.pictureUri }}
+              style={styles.badgeImage}
+            />
+          </View>
+        </TouchableOpacity>
+      )}
   
         <View style={styles.badgeActions}>
           <GradientButton
@@ -257,7 +271,7 @@ export default function BadgeFeedScreen({ route, navigation }) {
         commonStyles.container,
         { backgroundColor: isDarkMode ? '#121212' : '#fff' }
       ]}>
-        {/* Badge Creation Form */}
+        {/* Badge Creation Form
         <View style={[
           styles.createBadgeForm,
           { 
@@ -306,7 +320,7 @@ export default function BadgeFeedScreen({ route, navigation }) {
             outerstyle={styles.createButton}
             innerstyle={styles.actionButtonInner}
           />
-        </View>
+        </View> */}
 
         {/* Badge List */}
         {loading ? (
@@ -316,7 +330,11 @@ export default function BadgeFeedScreen({ route, navigation }) {
         ) : (
           <FlatList
             data={badges}
-            keyExtractor={(item, index) => item._id ? item._id : index.toString()}
+            keyExtractor={(item) => item._id.toString()} // Ensure unique key for each item
+            initialNumToRender={10} // Number of items to render initially
+            maxToRenderPerBatch={5} // Number of items to render in each batch
+            windowSize={5} // Number of items to keep in the render window (default is 21)
+            removeClippedSubviews={true} // Improve performance by unmounting off-screen components
             renderItem={renderBadge}
             contentContainerStyle={styles.badgeList}
           />
@@ -402,5 +420,17 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     padding: spacing.xl,
+  },
+  badgeImage: {
+    width: 240,
+    height: 240,
+    borderRadius: 10,
+    resizeMode: 'cover', // Adjust the image to cover the container
+    marginVertical: 10, // Add spacing around the image
+  },
+  imageContainer: {
+    alignItems: 'center', // Center the image horizontally
+    justifyContent: 'center', // Center the image vertically
+    marginBottom: 20, // Add spacing below the image
   },
 });

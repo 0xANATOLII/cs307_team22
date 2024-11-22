@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, NotFoundException, Query, UseInterceptors,Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, NotFoundException, Query, UseInterceptors,Logger, Req } from '@nestjs/common';
 
 import { BadgeService } from './badge.service';
 import { CreateBadgeDto } from './dto/create-badge.dto';
@@ -105,11 +105,11 @@ async create(@Body() createBadgeDto: CreateBadgeDto) {
 
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @Req() req): Promise<any> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid ID format');
     }
-    const badge = await this.badgeService.findOne(id);
+    const badge = await this.badgeService.findOne(id, req);
     if (!badge) {
       throw new NotFoundException('Badge not found');
     }
@@ -117,10 +117,10 @@ async create(@Body() createBadgeDto: CreateBadgeDto) {
   }
 
   @Get()
-  async findAll() {
-    const badges = await this.badgeService.findAll();
-    return badges;
-  }
+async findAll(@Req() req): Promise<any[]> {
+  const badges = await this.badgeService.findAll(req);
+  return badges;
+}
 
   @Patch('update/:id')
   async update(@Param('id') id: string, @Body() updateBadgeDto: UpdateBadgeDto) {
@@ -245,11 +245,12 @@ async create(@Body() createBadgeDto: CreateBadgeDto) {
   }
 
   @Get('recent/:userId')
-async getRecentBadges(@Param('userId') userId: string) {
+  async getRecentBadges(@Param('userId') userId: string, @Req() req) {
   this.logger.log(`Received request to fetch recent badges for user ID: ${userId}`);
 
   try {
-    const recentBadges = await this.badgeService.findRecentBadgesByUserId(userId);
+    const recentBadges = await this.badgeService.findRecentBadgesByUserId(userId, req);
+    console.log(recentBadges);
     this.logger.log(`Successfully fetched ${recentBadges.length} recent badge(s) for user ID: ${userId}`);
     return { recentBadges };
   } catch (error) {

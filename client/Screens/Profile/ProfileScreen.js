@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Platform, SafeAreaView, TextInput, FlatList, StyleSheet } from 'react-native';
+import { Modal, View, Text, Image, ScrollView, Pressable, Switch, ActivityIndicator, TouchableOpacity, Alert, Platform, SafeAreaView, TextInput, FlatList, StyleSheet } from 'react-native';
 import ModalPopup from './Popup';
 import styles from '../../styles';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -28,6 +28,7 @@ export default function ProfileScreen({ route, navigation }) {
   const [isUploadModalVisible, setIsUploadModalVisible] = useState(false);
   const [isFollowersModalVisible, setIsFollowersModalVisible] = useState(false);
   const [isFollowingModalVisible, setIsFollowingModalVisible] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
   const [profileInfo, setProfileInfo] = useState({
     username: username,
     pfp: defaultImageUri,
@@ -479,12 +480,19 @@ export default function ProfileScreen({ route, navigation }) {
             <Text style={styles.sectionTitle}>Recent Badges</Text>
             {recentBadges.length > 0 ? (
               <View style={styles.badgesContainer}>
-                {recentBadges.map((badge, index) => (
-                  <View key={index} style={styles.badge}>
-                    <Text style={styles.badgeTitle}>{badge.title}</Text>
-                    <Text style={styles.badgeDescription}>{badge.description}</Text>
-                  </View>
-                ))}
+                {recentBadges.map((badge, index) => {
+                  return (
+                    <View key={index} style={styles.badge}>
+                      <Text style={styles.badgeTitle}>{badge.name}</Text>
+                      <TouchableOpacity onPress={() => setIsFlipped(!isFlipped)}>
+                        <Image
+                          source={{ uri: isFlipped ? badge.picturefUri : badge.pictureUri }}
+                          style={localStyles.image}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
               </View>
             ) : (
               <Text style={styles.sectionText}>No recent badges</Text>
@@ -671,6 +679,12 @@ const localStyles = StyleSheet.create({
   },
   themeToggleText: {
     marginLeft: 10,
+  },
+  image: {
+    width: 120, // Define the width of the image
+    height: 120, // Define the height of the image
+    borderRadius: 10, // Optional: round the corners
+    resizeMode: 'cover', // Optional: control how the image scales
   },
   // ... existing styles ...
 });

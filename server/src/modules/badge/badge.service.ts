@@ -70,30 +70,36 @@ export class BadgeService {
 
     return await newBadge.save();*/
   
-
-  // Fetch all badges
-  async findAll(): Promise<Badge[]> {
-    const badges = await this.badgeModel.find().populate('userId').exec();
-  
-    // Map each badge to ensure `_id` is included in the final object
-    return badges.map(badge => {
+    private constructImageUris(badge: BadgeDocument, baseUrl: string): any {
       const badgeObj = badge.toObject(); // Convert Mongoose document to plain JS object
-      return { ...badgeObj, _id: badgeObj._id }; // Explicitly include `_id`
-    });
+      return {
+        ...badgeObj,
+        pictureUri: `${baseUrl}/uploads/${badgeObj.picture}`,
+        picturefUri: `${baseUrl}/uploads/${badgeObj.picturef}`,
+      };
+    }
+  // Fetch all badges
+  async findAll(req: any): Promise<any[]> {
+    const badges = await this.badgeModel.find().exec();
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+  
+    return badges.map((badge) => this.constructImageUris(badge, baseUrl));
   }
   
 
   // Fetch a single badge by its ID
-  async findOne(id: string): Promise<Omit<Badge, '_id'>> {
+  async findOne(id: string, req: any): Promise<any> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid badge ID format');
     }
-
+  
     const badge = await this.badgeModel.findById(id).exec();
     if (!badge) {
       throw new NotFoundException(`Badge with ID ${id} not found`);
     }
-    return this._getBadgeDataWithoutId(badge);
+  
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    return this.constructImageUris(badge, baseUrl);
   }
 
   // Update a badge by its ID
@@ -257,7 +263,7 @@ export class BadgeService {
     return updatedBadge;
   }
 
-  async findRecentBadgesByUserId(userId: string): Promise<Badge[]> {
+  async findRecentBadgesByUserId(userId: string, req: any): Promise<any[]> {
     if (!Types.ObjectId.isValid(userId)) {
       this.logger.warn(`Invalid user ID format: ${userId}`);
       throw new BadRequestException('Invalid user ID format');
@@ -266,17 +272,25 @@ export class BadgeService {
     try {
       this.logger.log(`Fetching recent badges for user ID: ${userId}`);
       const recentBadges = await this.badgeModel
-        .find({ userId: new Types.ObjectId(userId) })
-        .sort({ dateCreated: -1 }) // Sort by most recent first
+        .find({ userId: userId })
+        .sort({ dateCreated: -1 }) // Sort by most recent
         .limit(2) // Limit to 2 badges
         .exec();
   
-      return recentBadges;
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+  
+      // Add full URIs for picture and picturef
+      return recentBadges.map((badge) => ({
+        ...badge.toObject(),
+        pictureUri: `${baseUrl}/uploads/${badge.picture}`,
+        picturefUri: `${baseUrl}/uploads/${badge.picturef}`,
+      }));
     } catch (error) {
       this.logger.error(`Error fetching recent badges for user ${userId}: ${error.message}`, error.stack);
       throw new BadRequestException('Failed to fetch recent badges');
     }
   }
+  
   
   
 }
