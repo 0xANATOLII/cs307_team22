@@ -38,7 +38,7 @@ const TutorialCarousel = ({ onComplete }) => {
       description: "Create your own badge for a monument and explain what you saw!"
     },
     {
-      image: require('../assets/BadgeFeed.jpg'),
+      image: require('../assets/BadgeFeed.jpeg'),
       title: "Like and Comment",
       description: "Share your thoughts on a friends badge and show some support!"
     }
