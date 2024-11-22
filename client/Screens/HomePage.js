@@ -40,11 +40,18 @@ export default function HomePage({ navigation }) {
 
       if (response.ok) {
         //Add the TutorialComponent right here if the person has not gone through it before
-        //const tutorialResponse = await fetch(`${Config.API_URL}/user/tutorial-status/${data.userId}`...);
-        //const tutorialData = await tutorialResponse.json();
-        
-        setShowTutorial(true);
-        //navigation.navigate('Map', { username });
+        const tutorialresponse = await fetch(`${Config.API_URL}/user/profile/${username}`);
+        if (tutorialresponse.ok) {
+          const tutorialdata = await tutorialresponse.json();
+          console.log('Profile data fetched:', tutorialdata);
+          setShowTutorial(!tutorialdata.tutorial);
+        } else {
+          console.error('Failed to load profile data');
+        }
+
+        if (!showTutorial) {
+          navigation.navigate('Map', { username });
+        }
       } else {
         alert(data.message || 'Login failed');
       }
@@ -56,30 +63,30 @@ export default function HomePage({ navigation }) {
   };
 
   const handleTutorialComplete = async () => {
-    /* try {
-      // Update user's tutorial status in the backend
-      await fetch(`${Config.API_URL}/user/tutorial-status/update`, {
-        method: 'POST',
+    try {
+      const response = await fetch(`${Config.API_URL}/user/updateTutorial`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          username,
-          hasSeenTutorial: true 
-        }),
+        body: JSON.stringify({ username, tutorial: true }), // Done with first tutorial
       });
-
-      // Navigate to Map screen after tutorial
       setShowTutorial(false);
-      navigation.navigate('Map', { username });
+      const data = await response.json();
+  
+      console.log('Response status:', response.status); // Log status
+      console.log('Response data:', data); // Log data
+  
+      if (response.ok) {
+        console.log('Tutorial updated:', data.message);
+      } else {
+        Alert.alert('Error', data.message || 'Failed to update tutorial setting.');
+      }
     } catch (error) {
-      console.error('Error updating tutorial status:', error);
-      // Navigate anyway even if status update fails
-      setShowTutorial(false);
-      navigation.navigate('Map', { username });
-    }*/
+      console.error('Fetch error:', error); // Log fetch errors
+      Alert.alert('Error', 'Could not update tutorial setting.');
+    }
 
-    setShowTutorial(false);
     navigation.navigate('Map', { username });
   };
 
