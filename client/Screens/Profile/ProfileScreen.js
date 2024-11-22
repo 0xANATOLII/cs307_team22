@@ -502,7 +502,23 @@ export default function ProfileScreen({ route, navigation }) {
                 })}
               </View>
             ) : (
-              <Text style={styles.sectionText}>No recent badges</Text>
+              <View style={styles.badgesContainer}>
+                <View style={styles.badge}>
+                  <Image
+                    source={require('../../assets/icon.png')}
+                    style={localStyles.image}
+                  />
+                  <Image
+                    source={require('../../assets/icon.png')}
+                    style={localStyles.image}
+                  />
+                  <Image
+                    source={require('../../assets/icon.png')}
+                    style={localStyles.image}
+                  />
+                  <Text style={styles.sectionText}>No badges :(</Text>
+                </View>
+              </View>
             )}
           </View>
   
