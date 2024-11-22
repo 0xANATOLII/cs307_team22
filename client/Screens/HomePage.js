@@ -4,11 +4,13 @@ import { View, Text, TextInput, Pressable, Image, Switch } from 'react-native';
 import styles from '../styles'; 
 import Config from "../config.js";
 import LoadingVideo from '../components/LoadingVideo';
+import TutorialCarousel from './TutorialComponent';
 
 export default function HomePage({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
   const handleLogin = async () => {
@@ -37,7 +39,12 @@ export default function HomePage({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        navigation.navigate('Map', { username });
+        //Add the TutorialComponent right here if the person has not gone through it before
+        //const tutorialResponse = await fetch(`${Config.API_URL}/user/tutorial-status/${data.userId}`...);
+        //const tutorialData = await tutorialResponse.json();
+        
+        setShowTutorial(true);
+        //navigation.navigate('Map', { username });
       } else {
         alert(data.message || 'Login failed');
       }
@@ -47,6 +54,38 @@ export default function HomePage({ navigation }) {
       setIsLoading(false);
     }
   };
+
+  const handleTutorialComplete = async () => {
+    /* try {
+      // Update user's tutorial status in the backend
+      await fetch(`${Config.API_URL}/user/tutorial-status/update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          username,
+          hasSeenTutorial: true 
+        }),
+      });
+
+      // Navigate to Map screen after tutorial
+      setShowTutorial(false);
+      navigation.navigate('Map', { username });
+    } catch (error) {
+      console.error('Error updating tutorial status:', error);
+      // Navigate anyway even if status update fails
+      setShowTutorial(false);
+      navigation.navigate('Map', { username });
+    }*/
+
+    setShowTutorial(false);
+    navigation.navigate('Map', { username });
+  };
+
+  if (showTutorial) {
+    return <TutorialCarousel onComplete={handleTutorialComplete} />;
+  }
 
   return (
     <View style={styles.container}>

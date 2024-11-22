@@ -46,7 +46,7 @@ export default function App() {
         BeBoiler: 'navigation',
         BadgeFeed: 'badge-feed',
         FriendsScreen: 'friends',
-        ViewProfile: 'ViewProfile'
+        ViewProfile: 'ViewProfile',
       },
     }
   };
