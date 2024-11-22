@@ -45,12 +45,11 @@ export default function HomePage({ navigation }) {
           const tutorialdata = await tutorialresponse.json();
           console.log('Profile data fetched:', tutorialdata);
           setShowTutorial(!tutorialdata.tutorial);
+          if (tutorialdata.tutorial) {
+            navigation.navigate('Map', { username });
+          }
         } else {
           console.error('Failed to load profile data');
-        }
-
-        if (!showTutorial) {
-          navigation.navigate('Map', { username });
         }
       } else {
         alert(data.message || 'Login failed');
