@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import BottomNav from './BottomNav';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors, commonStyles, spacing, typography, borderRadius } from './theme';
+import GradientButton from './Components/GradientButton';
 import axios from 'axios';
 import Config from '../config';
 
@@ -121,15 +122,28 @@ export default function MonumentScreen({ route, navigation }) {
     }, [])
   );
 
-    const fetchWishlist = async (username) => {
-      try {
-        const response = await axios.get(`${Config.API_URL}/user/${username}/wishlist`);
-        console.log('Wishlist:', response.data);
-        setWishlist(response.data);
-      } catch (error) {
-        console.error('Error fetching wishlist:', error.response?.data || error.message);
-      }
-    };
+  const fetchWishlist = async (username) => {
+    try {
+      const response = await axios.get(`${Config.API_URL}/user/${username}/wishlist`);
+      console.log('Wishlist:', response.data);
+      setWishlist(response.data);
+    } catch (error) {
+      console.error('Error fetching wishlist:', error.response?.data || error.message);
+    }
+  };
+
+  const initializeData = async () => {
+    setLoading(true);
+    const location = await fetchUserLocation();
+    if (location) {
+      setUserLocation(location);
+      await fetchMonuments(location);
+    } else {
+      await fetchMonuments(null); // Fetch monuments without distance if location is unavailable
+    }
+    fetchWishlist(username);
+    setLoading(false);
+  };
 
   const addToWishlist = async (monument) => {
     try {
@@ -173,37 +187,45 @@ export default function MonumentScreen({ route, navigation }) {
   return (
     <SafeAreaView style={commonStyles.safeArea}>
       <Text style={styles.header}>Nearby Monuments</Text>
-      <FlatList
-        data={monuments}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => {
-          const isInWishlist = wishlist.includes(item._id);
-          return (
-            <View style={styles.card}>
-              <Image source={ getImageSource(item.icon) } style={styles.icon} />
-              <View style={styles.infoContainer}>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.distance}>
-                  Distance: {item.distance ? `${(item.distance * 1000).toFixed(0)}m away` : 'Unknown'}
-                </Text>
+      <View style={commonStyles.container}>
+        <FlatList
+          data={monuments}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => {
+            const isInWishlist = wishlist.includes(item._id);
+            return (
+              <View style={styles.card}>
+                <Image source={ getImageSource(item.icon) } style={styles.icon} />
+                <View style={styles.infoContainer}>
+                  <Text style={styles.title}>{item.title}</Text>
+                  <Text style={styles.distance}>
+                    Distance: {item.distance ? `${(item.distance * 1000).toFixed(0)}m away` : 'Unknown'}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={isInWishlist ? styles.inWishlistButton : styles.wishlistButton}
+                  onPress={() => {
+                    if (isInWishlist) {
+                      removeFromWishlist(item); // Remove if already in wishlist
+                    } else {
+                      addToWishlist(item); // Add if not in wishlist
+                    }
+                  }}
+                >
+                  <Text style={styles.wishlistButtonText}>
+                    {isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}
+                  </Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={isInWishlist ? styles.inWishlistButton : styles.wishlistButton}
-                onPress={() => {
-                  if (isInWishlist) {
-                    removeFromWishlist(item); // Remove if already in wishlist
-                  } else {
-                    addToWishlist(item); // Add if not in wishlist
-                  }
-                }}
-              >
-                <Text style={styles.wishlistButtonText}>
-                  {isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          );
-        }}
+            );
+          }}
+        />
+      </View>
+      <GradientButton 
+        onPress={initializeData}
+        title={"Refresh Location"}
+        outerstyle={styles.button}
+        innerstyle={styles.buttonInner}
       />
       <BottomNav route={route} navigation={navigation} username={username} currentScreen={"Monument"} />
     </SafeAreaView>
@@ -277,4 +299,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF', // White text for contrast
     fontWeight: 'bold', // Bold text for emphasis
   },
+  button: {
+    marginTop: spacing.xs,
+    width: '100%',
+    bottom: 55,
+  },
+  buttonInner: {
+    padding: spacing.md,
+  }
 });
