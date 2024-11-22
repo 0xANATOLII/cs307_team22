@@ -107,6 +107,20 @@ export class UserService {
     return user;
   }
 
+  async updateTutorial(username: string, tutorial: boolean): Promise<Omit<User, 'password'>> {
+    const user = await this.userModel.findOne({ username }).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Update the tutorial field
+    user.tutorial = tutorial;
+    await user.save();
+
+    // Return the updated user without the password field
+    return user;
+  }
+
   async updateDescription(username: string, description: string): Promise<User> {
     const user = await this.userModel.findOneAndUpdate(
       { username },

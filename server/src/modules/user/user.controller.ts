@@ -53,6 +53,7 @@ export class UserController {
       privacy: user.privacy,
       followers: user.followers,
       following: user.following,
+      tutorial: user.tutorial,
     };
   }
 
@@ -108,6 +109,22 @@ export class UserController {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     return { message: 'Privacy setting updated successfully' };
+  }
+
+  @Patch('updateTutorial')
+  async updateTutorial(
+    @Body() body: { username: string; tutorial: boolean },
+  ) {
+    const { username, tutorial } = body;
+    this.logger.log(`Updating tutorial status for user: ${username} to: ${tutorial}`);
+    if (username === undefined || tutorial === undefined) {
+      throw new BadRequestException('Username and tutorial status are required');
+    }
+    const updatedUser = await this.userService.updateTutorial(username, tutorial);
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
+    }
+    return { message: 'Tutorial status updated successfully', tutorial: updatedUser.tutorial };
   }
 
   @Post('requestPasswordReset')

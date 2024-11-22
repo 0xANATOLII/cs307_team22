@@ -12,6 +12,9 @@ import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { useTheme } from '../../context/ThemeContext'; // Import the theme context
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; // Import icons
+import TutorialCarousel from '../TutorialComponent';
+import GradientButton from '../Components/GradientButton';
+import { spacing } from '../theme';
 
 export default function ProfileScreen({ route, navigation }) {
   const defaultImageUri = Image.resolveAssetSource(require('./default.png')).uri;
@@ -25,7 +28,7 @@ export default function ProfileScreen({ route, navigation }) {
   const [wishlist, setWishlist] = useState([]);
   const [monuments, setMonuments] = useState([]);
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
-  const [isUploadModalVisible, setIsUploadModalVisible] = useState(false);
+  const [showCarousel, setShowCarousel] = useState(false);
   const [isFollowersModalVisible, setIsFollowersModalVisible] = useState(false);
   const [isFollowingModalVisible, setIsFollowingModalVisible] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -374,6 +377,10 @@ export default function ProfileScreen({ route, navigation }) {
     fetchMonumentDetails();
   }, [wishlist]);
 
+  const handleTutorialComplete = async () => {
+    setShowCarousel(false);
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#121212' : '#FFFFFF' }]}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -524,6 +531,13 @@ export default function ProfileScreen({ route, navigation }) {
               <Text style={styles.sectionText}>No items in wishlist</Text>
             )}
           </View>
+
+          <GradientButton 
+            onPress={() => setShowCarousel(true)}
+            title={"View Tutorial"}
+            outerstyle={localStyles.button}
+            innerstyle={localStyles.buttonInner}
+          />
   
   
           {/* Sign Out Button */}
@@ -551,8 +565,8 @@ export default function ProfileScreen({ route, navigation }) {
         currentScreen={"Profile"}
       />
 
-  {/* Keep all Modal components here */}
-  <ModalPopup
+      {/* Keep all Modal components here */}
+      <ModalPopup
           editable={profileInfo.username}
               visible={isUsernameModalVisible}
               onClose={() => setIsUsernameModalVisible(false)}
@@ -595,6 +609,16 @@ export default function ProfileScreen({ route, navigation }) {
             </View>
       </Modal>
 
+      
+      {/* Modal for the tutorial carousel */}
+      <Modal
+        visible={showCarousel}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={handleTutorialComplete} // Close on hardware back press
+      >
+        <TutorialCarousel onComplete={handleTutorialComplete} />
+      </Modal>
    
       {/* Delete Account Confirmation Modal */}
       <Modal
@@ -679,6 +703,13 @@ const localStyles = StyleSheet.create({
   },
   themeToggleText: {
     marginLeft: 10,
+  },
+  button: {
+    marginTop: spacing.xs,
+    width: '90%',
+  },
+  buttonInner: {
+    padding: spacing.md,
   },
   image: {
     width: 120, // Define the width of the image

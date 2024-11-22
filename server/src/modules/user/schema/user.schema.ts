@@ -52,6 +52,10 @@ wishlist: string[];
 @Prop({ type: [String], default: [] })
 badgeIds: string[];
 
+//Has this user seen the tutorial?
+@Prop({ default: false })
+tutorial?: boolean;
+
 }
 
 
