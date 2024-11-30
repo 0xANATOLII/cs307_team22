@@ -226,7 +226,6 @@ export default function ProfileScreen({ route, navigation }) {
     }
   };
   
-
   const togglePrivacy = async () => {
     const newPrivacySetting = !isPrivate;
   
@@ -255,7 +254,6 @@ export default function ProfileScreen({ route, navigation }) {
     }
   };
   
-
   const handleDeleteAccount = async () => {
     try {
       const response = await fetch(`${Config.API_URL}/user/deleteAccount`, {
@@ -733,5 +731,4 @@ const localStyles = StyleSheet.create({
     borderRadius: 10, // Optional: round the corners
     resizeMode: 'cover', // Optional: control how the image scales
   },
-  // ... existing styles ...
 });
